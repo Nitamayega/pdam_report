@@ -2,4 +2,9 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="cognac">#FF96391C</color>
+    <color name="funblue">#FF1C6996</color>
+    <color name="palecerulean">#FF9FC3D8</color>
+    <color name="palegold">#FFD8B980</color>
 </resources>

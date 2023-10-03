@@ -2,8 +2,20 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.PDAMReport" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/funblue</item>
+        <item name="colorPrimaryVariant">@color/palegold</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondaryVariant">@color/palecerulean</item>
     </style>
 
     <style name="Theme.PDAMReport" parent="Base.Theme.PDAMReport" />
+
+    <style name="button">
+        <item name="android:background">@drawable/button</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+    </style>
 </resources>
