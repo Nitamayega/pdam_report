@@ -28,7 +28,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/report">
+            android:theme="@style/Theme.PDAMReport.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
