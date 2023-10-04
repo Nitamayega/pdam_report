@@ -7,4 +7,18 @@
 
     <string name="empty_field">Isian tidak boleh kosong</string>
     <string name="login_failed">Gagal masuk, cek data kembali</string>
+
+    <string name="name">Dev-G</string>
+    <string name="petugas">Kepala Suku</string>
+    <string name="report">Laporan</string>
+    <string name="presence">Presensi</string>
+    <string name="logout">Keluar</string>
+
+    <string name="empty_list">Belum Ada Data Pelanggan.</string>
+
+    <string name="open">Open</string>
+    <string name="close">Close</string>
+
+    <string name="take_photo">Ambil Foto</string>
+    <string name="upload">Unggah</string>
 </resources>
