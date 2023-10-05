@@ -6,9 +6,11 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.drawerlayout.widget.DrawerLayout
 import com.pdam.report.databinding.ActivityMainBinding
 import com.pdam.report.ui.common.LoginActivity
+import com.pdam.report.ui.officer.AddFirstDataActivity
 import com.pdam.report.ui.officer.OfficerPresenceActivity
 
 class MainActivity : AppCompatActivity() {
@@ -18,11 +20,17 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installSplashScreen()
         setContentView(binding.root)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         setupDrawerLayout()
         setupNavigationMenu()
+
+        binding.buttonAdd.setOnClickListener {
+            val moveIntent = Intent(this@MainActivity, AddFirstDataActivity::class.java)
+            startActivity(moveIntent)
+        }
     }
 
     private fun setupDrawerLayout() {

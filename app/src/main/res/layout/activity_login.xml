@@ -17,7 +17,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/ed_login_password"
         app:layout_constraintEnd_toEndOf="@id/button_login"
         app:layout_constraintStart_toStartOf="@id/button_login"
-        app:layout_constraintTop_toTopOf="@+id/ed_login_email"
+        app:layout_constraintTop_toTopOf="@+id/ed_username"
         tools:visibility="visible" />
 
     <ImageView
@@ -30,7 +30,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/ed_login_email"
+        android:id="@+id/ed_username"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         app:boxStrokeColor="@color/funblue"
         app:boxStrokeWidth="2dp"
@@ -42,12 +42,11 @@
         app:layout_constraintTop_toBottomOf="@+id/logo1">
 
         <EditText
-            android:id="@+id/emailEditText"
+            android:id="@+id/edt_username"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:paddingEnd="40dp"
-            android:inputType="textEmailAddress"
+            android:inputType="text"
             android:hint="@string/uname"
             tools:ignore="SpeakableTextPresentCheck" />
     </com.google.android.material.textfield.TextInputLayout>
@@ -63,7 +62,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ed_login_email">
+        app:layout_constraintTop_toBottomOf="@+id/ed_username">
 
         <EditText
             android:id="@+id/passwordEditText"

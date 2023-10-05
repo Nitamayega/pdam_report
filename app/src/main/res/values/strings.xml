@@ -21,4 +21,16 @@
 
     <string name="take_photo">Ambil Foto</string>
     <string name="upload">Unggah</string>
+    <string name="kosong">null</string>
+    <string name="rafi_irfansyah">Rafi Irfansyah</string>
+    <string name="jenis_pekerjaan">Jenis Pekerjaan</string>
+    <string name="pw">PW</string>
+    <string name="nomor_registrasi">Nomor Registrasi</string>
+    <string name="nama_pelanggan">Nama</string>
+    <string name="alamat_pelanggan">Alamat</string>
+    <string name="keterangan">Keterangan</string>
+    <string name="dokumentasi">Dokumentasi</string>
+    <string name="ambil_foto">Ambil Foto</string>
+    <string name="hapus">Hapus</string>
+    <string name="simpan">Simpan</string>
 </resources>

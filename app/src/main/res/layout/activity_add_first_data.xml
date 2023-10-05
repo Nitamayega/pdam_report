@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.officer.AddFirstDataActivity">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/ed_jenis_pekerjaan"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        app:boxStrokeColor="@color/funblue"
+        app:boxStrokeWidth="2dp"
+        app:layout_constraintEnd_toStartOf="@+id/ed_pw"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <EditText
+            android:id="@+id/edt_jenis_pekerjaan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:gravity="center"
+            android:hint="@string/jenis_pekerjaan"
+            android:inputType="textPersonName"
+            tools:ignore="SpeakableTextPresentCheck" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/ed_pw"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="70dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        app:boxStrokeColor="@color/funblue"
+        app:boxStrokeWidth="2dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <EditText
+            android:id="@+id/edt_pw"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:maxLength="1"
+            android:hint="@string/pw"
+            android:gravity="center"
+            android:inputType="number"
+            tools:ignore="SpeakableTextPresentCheck" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/ed_nomor_registrasi"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:boxStrokeColor="@color/funblue"
+        app:boxStrokeWidth="2dp"
+        app:layout_constraintEnd_toEndOf="@+id/ed_pw"
+        app:layout_constraintStart_toStartOf="@+id/ed_jenis_pekerjaan"
+        app:layout_constraintTop_toBottomOf="@+id/ed_jenis_pekerjaan">
+
+        <EditText
+            android:id="@+id/edt_nomor_registrasi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/nomor_registrasi"
+            android:inputType="text"
+            tools:ignore="SpeakableTextPresentCheck" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/ed_nama_pelanggan"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:boxStrokeColor="@color/funblue"
+        app:boxStrokeWidth="2dp"
+        app:layout_constraintEnd_toEndOf="@+id/ed_pw"
+        app:layout_constraintStart_toStartOf="@+id/ed_jenis_pekerjaan"
+        app:layout_constraintTop_toBottomOf="@+id/ed_nomor_registrasi">
+
+        <EditText
+            android:id="@+id/edt_nama_pelanggan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/nama_pelanggan"
+            android:inputType="textPersonName"
+            tools:ignore="SpeakableTextPresentCheck" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/ed_alamat_pelanggan"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:boxStrokeColor="@color/funblue"
+        app:boxStrokeWidth="2dp"
+        app:boxBackgroundMode="outline"
+        app:layout_constraintEnd_toEndOf="@+id/ed_pw"
+        app:layout_constraintStart_toStartOf="@+id/ed_jenis_pekerjaan"
+        app:layout_constraintTop_toBottomOf="@+id/ed_nama_pelanggan">
+
+        <EditText
+            android:id="@+id/edt_alamat_pelanggan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/alamat_pelanggan"
+            android:inputType="textMultiLine"
+            tools:ignore="SpeakableTextPresentCheck" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/ed_keterangan"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:boxBackgroundMode="outline"
+        app:boxStrokeColor="@color/funblue"
+        app:boxStrokeWidth="2dp"
+        app:layout_constraintEnd_toEndOf="@+id/ed_pw"
+        app:layout_constraintStart_toStartOf="@+id/ed_jenis_pekerjaan"
+        app:layout_constraintTop_toBottomOf="@+id/ed_alamat_pelanggan">
+
+        <EditText
+            android:id="@+id/edt_keterangan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/keterangan"
+            android:inputType="textMultiLine"
+            tools:ignore="SpeakableTextPresentCheck" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/dokumentasi"
+        app:layout_constraintStart_toStartOf="@+id/ed_keterangan"
+        app:layout_constraintTop_toBottomOf="@+id/ed_keterangan" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/item_image_1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:drawableStart="@drawable/ic_galery"
+        android:textCursorDrawable="@null"
+        android:drawablePadding="5dp"
+        android:text="@string/ambil_foto"
+        android:clickable="true"
+        android:padding="5dp"
+        android:background="@drawable/field"
+        android:gravity="center"
+        app:layout_constraintEnd_toEndOf="@+id/ed_keterangan"
+        app:layout_constraintStart_toStartOf="@+id/ed_keterangan"
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        android:focusable="true" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/item_image_2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/field"
+        android:clickable="true"
+        android:drawableStart="@drawable/ic_galery"
+        android:drawablePadding="5dp"
+        android:focusable="true"
+        android:gravity="center"
+        android:padding="5dp"
+        android:text="@string/ambil_foto"
+        android:textCursorDrawable="@null"
+        app:layout_constraintEnd_toEndOf="@+id/ed_keterangan"
+        app:layout_constraintStart_toStartOf="@+id/ed_keterangan"
+        app:layout_constraintTop_toBottomOf="@+id/item_image_1" />
+
+    <Button
+        android:id="@+id/btn_hapus"
+        style="@style/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="32dp"
+        android:text="@string/hapus"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btn_simpan"
+        style="@style/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="32dp"
+        android:text="@string/simpan"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

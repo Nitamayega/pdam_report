@@ -13,6 +13,9 @@
         android:theme="@style/Theme.PDAMReport"
         tools:targetApi="31">
         <activity
+            android:name=".ui.officer.AddFirstDataActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.admin.DetailPresenceActivity"
             android:exported="false" />
         <activity

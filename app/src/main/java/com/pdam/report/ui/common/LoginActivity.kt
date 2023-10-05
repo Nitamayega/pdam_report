@@ -27,12 +27,12 @@ class LoginActivity : AppCompatActivity() {
 
     private fun setupAction() {
         binding.buttonLogin.setOnClickListener {
-            val email = binding.emailEditText.text.toString()
+            val email = binding.edtUsername.text.toString()
             val isEmailEmpty = email.isEmpty()
             val password = binding.passwordEditText.text.toString()
             val isPasswordEmpty = password.isEmpty()
 
-            binding.emailEditText.error = if (isEmailEmpty) getString(R.string.empty_field) else null
+            binding.edtUsername.error = if (isEmailEmpty) getString(R.string.empty_field) else null
             binding.passwordEditText.error = if (isPasswordEmpty) getString(R.string.empty_field) else null
 
             if (!isEmailEmpty && !isPasswordEmpty) {
