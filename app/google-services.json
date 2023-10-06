@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "874458061144",
+    "project_id": "pdam-report-2023",
+    "storage_bucket": "pdam-report-2023.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:874458061144:android:555f9dc54418fc01df6d2d",
+        "android_client_info": {
+          "package_name": "com.pdam.report"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxBRAYt9upcAqJtuUfa6loAUGZLU2ZL-M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

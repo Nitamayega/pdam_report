@@ -11,7 +11,7 @@
         android:id="@+id/profile_image"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        tools:src="@tools:sample/avatars" />
+        android:src="@mipmap/ic_launcher_round" />
 
     <TextView
         android:id="@+id/username"
