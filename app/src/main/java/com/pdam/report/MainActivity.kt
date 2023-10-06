@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
         setupNavigationMenu()
 
         binding.buttonAdd.setOnClickListener {
-            val moveIntent = Intent(this@MainActivity, UpdateCustomerInstallationActivity::class.java)
+            val moveIntent = Intent(this@MainActivity, AddFirstDataActivity::class.java)
             startActivity(moveIntent)
         }
     }

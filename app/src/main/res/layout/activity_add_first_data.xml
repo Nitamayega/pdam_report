@@ -4,68 +4,78 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingTop="16dp"
+    android:paddingHorizontal="16dp"
     tools:context=".ui.officer.AddFirstDataActivity">
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/ed_jenis_pekerjaan"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="0dp"
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        app:boxStrokeColor="@color/funblue"
-        app:boxStrokeWidth="2dp"
-        app:layout_constraintEnd_toStartOf="@+id/ed_pw"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <EditText
-            android:id="@+id/edt_jenis_pekerjaan"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:gravity="center"
-            android:hint="@string/jenis_pekerjaan"
-            android:inputType="textPersonName"
-            tools:ignore="SpeakableTextPresentCheck" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/ed_pw"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="70dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        app:boxStrokeColor="@color/funblue"
-        app:boxStrokeWidth="2dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:baselineAligned="false">
 
-        <EditText
-            android:id="@+id/edt_pw"
-            android:layout_width="match_parent"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/ed_jenis_pekerjaan"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:ems="10"
-            android:maxLength="1"
-            android:hint="@string/pw"
-            android:gravity="center"
-            android:inputType="number"
-            tools:ignore="SpeakableTextPresentCheck" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:layout_marginEnd="8dp"
+            app:boxStrokeColor="@color/funblue"
+            app:boxStrokeWidth="2dp"
+            android:layout_weight="4"
+            app:layout_constraintEnd_toStartOf="@+id/ed_pw"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <EditText
+                android:id="@+id/edt_jenis_pekerjaan"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:gravity="center"
+                android:hint="@string/jenis_pekerjaan"
+                android:inputType="textPersonName"
+                tools:ignore="SpeakableTextPresentCheck" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/ed_pw"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:boxStrokeColor="@color/funblue"
+            app:boxStrokeWidth="2dp"
+            android:layout_weight="1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <EditText
+                android:id="@+id/edt_pw"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:gravity="center"
+                android:hint="@string/pw"
+                android:inputType="number"
+                android:maxLength="1"
+                tools:ignore="SpeakableTextPresentCheck" />
+        </com.google.android.material.textfield.TextInputLayout>
+    </LinearLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/ed_nomor_registrasi"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
         app:boxStrokeColor="@color/funblue"
         app:boxStrokeWidth="2dp"
-        app:layout_constraintEnd_toEndOf="@+id/ed_pw"
-        app:layout_constraintStart_toStartOf="@+id/ed_jenis_pekerjaan"
-        app:layout_constraintTop_toBottomOf="@+id/ed_jenis_pekerjaan">
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2">
 
         <EditText
             android:id="@+id/edt_nomor_registrasi"
@@ -85,8 +95,8 @@
         android:layout_marginTop="16dp"
         app:boxStrokeColor="@color/funblue"
         app:boxStrokeWidth="2dp"
-        app:layout_constraintEnd_toEndOf="@+id/ed_pw"
-        app:layout_constraintStart_toStartOf="@+id/ed_jenis_pekerjaan"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/ed_nomor_registrasi">
 
         <EditText
@@ -105,11 +115,11 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        app:boxBackgroundMode="outline"
         app:boxStrokeColor="@color/funblue"
         app:boxStrokeWidth="2dp"
-        app:boxBackgroundMode="outline"
-        app:layout_constraintEnd_toEndOf="@+id/ed_pw"
-        app:layout_constraintStart_toStartOf="@+id/ed_jenis_pekerjaan"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/ed_nama_pelanggan">
 
         <EditText
@@ -131,8 +141,8 @@
         app:boxBackgroundMode="outline"
         app:boxStrokeColor="@color/funblue"
         app:boxStrokeWidth="2dp"
-        app:layout_constraintEnd_toEndOf="@+id/ed_pw"
-        app:layout_constraintStart_toStartOf="@+id/ed_jenis_pekerjaan"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/ed_alamat_pelanggan">
 
         <EditText

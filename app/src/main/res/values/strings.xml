@@ -40,4 +40,10 @@
     <string name="stand">Stand</string>
     <string name="nomor_meter">Nomor Meter</string>
     <string name="nomor_segel">Nomor Segel</string>
+    <string name="pemasangan_sambungan_baru">Pemasangan Sambungan Baru</string>
+    <string name="verifikasi_pemasangan">Verifikasi Pemasangan</string>
+    <string name="koordinat">Koordinat</string>
+    <string name="x">X</string>
+    <string name="y">Y</string>
+    <string name="z">Z</string>
 </resources>

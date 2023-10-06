@@ -25,7 +25,7 @@
             android:baselineAligned="false">
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/ed_pemasangan_sambungan"
+                android:id="@+id/ed_verifikasi_pemasangan"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -38,12 +38,12 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <EditText
-                    android:id="@+id/edt_pemasangan_sambungan"
+                    android:id="@+id/edt_verifikasi_pemasangan"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ems="10"
                     android:gravity="center"
-                    android:hint="@string/pemasangan_sambungan_baru"
+                    android:hint="@string/verifikasi_pemasangan"
                     android:inputType="textPersonName"
                     tools:ignore="SpeakableTextPresentCheck" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -153,7 +153,7 @@
             app:layout_constraintTop_toBottomOf="@+id/tv_meter">
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/ed_merk"
+                android:id="@+id/ed_x"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -167,18 +167,18 @@
                 app:layout_constraintTop_toBottomOf="@+id/tv_meter">
 
                 <EditText
-                    android:id="@+id/edt_merk"
+                    android:id="@+id/edt_x"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ems="10"
                     android:gravity="center"
-                    android:hint="@string/merk"
+                    android:hint="@string/x"
                     android:inputType="text"
                     tools:ignore="SpeakableTextPresentCheck" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/ed_diameter"
+                android:id="@+id/ed_y"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -191,18 +191,18 @@
                 app:layout_constraintTop_toBottomOf="@+id/tv_meter">
 
                 <EditText
-                    android:id="@+id/edt_diameter"
+                    android:id="@+id/edt_y"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ems="10"
                     android:gravity="center"
-                    android:hint="@string/diameter"
+                    android:hint="@string/y"
                     android:inputType="text"
                     tools:ignore="SpeakableTextPresentCheck" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/ed_stand"
+                android:id="@+id/ed_z"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -216,12 +216,12 @@
                 app:layout_constraintTop_toBottomOf="@+id/tv_meter">
 
                 <EditText
-                    android:id="@+id/edt_stand"
+                    android:id="@+id/edt_z"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ems="10"
                     android:gravity="center"
-                    android:hint="@string/stand"
+                    android:hint="@string/z"
                     android:inputType="text"
                     tools:ignore="SpeakableTextPresentCheck" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -304,7 +304,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
-            android:text="@string/meter"
+            android:text="@string/koordinat"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="@+id/ed_alamat_pelanggan"
             app:layout_constraintTop_toBottomOf="@+id/ed_alamat_pelanggan" />
@@ -367,4 +367,3 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </ScrollView>
-
