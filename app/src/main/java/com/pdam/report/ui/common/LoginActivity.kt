@@ -1,32 +1,37 @@
 package com.pdam.report.ui.common
 
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
-import android.util.Log
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
-import com.google.firebase.auth.FirebaseAuth
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.lifecycleScope
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.pdam.report.MainActivity
 import com.pdam.report.R
 import com.pdam.report.data.UserData
+import com.pdam.report.data.UserPreference
 import com.pdam.report.databinding.ActivityLoginBinding
+import kotlinx.coroutines.launch
 
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user")
 class LoginActivity : AppCompatActivity() {
 
     private val firebaseDatabase by lazy { FirebaseDatabase.getInstance() }
     private val databaseReference by lazy { firebaseDatabase.reference.child("users/officer") }
     private val binding by lazy { ActivityLoginBinding.inflate(layoutInflater) }
+    private val userPreference by lazy { UserPreference.getInstance(dataStore) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,6 +72,11 @@ class LoginActivity : AppCompatActivity() {
                                 R.string.login_success,
                                 Toast.LENGTH_SHORT
                             ).show()
+
+                            lifecycleScope.launch {
+                                userPreference.loginUser(user.username, user.id, user.team)
+                            }
+
                             startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                             finish()
                             showLoading(false)
