@@ -12,6 +12,7 @@ import com.pdam.report.databinding.ActivityMainBinding
 import com.pdam.report.ui.common.LoginActivity
 import com.pdam.report.ui.officer.AddFirstDataActivity
 import com.pdam.report.ui.officer.OfficerPresenceActivity
+import com.pdam.report.ui.officer.UpdateCustomerInstallationActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -28,7 +29,7 @@ class MainActivity : AppCompatActivity() {
         setupNavigationMenu()
 
         binding.buttonAdd.setOnClickListener {
-            val moveIntent = Intent(this@MainActivity, AddFirstDataActivity::class.java)
+            val moveIntent = Intent(this@MainActivity, UpdateCustomerInstallationActivity::class.java)
             startActivity(moveIntent)
         }
     }

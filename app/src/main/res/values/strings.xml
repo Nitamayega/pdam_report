@@ -33,4 +33,11 @@
     <string name="ambil_foto">Ambil Foto</string>
     <string name="hapus">Hapus</string>
     <string name="simpan">Simpan</string>
+    <string name="nomor_k_l">Nomor K/L</string>
+    <string name="meter">Meter</string>
+    <string name="merk">Merk</string>
+    <string name="diameter">Diameter</string>
+    <string name="stand">Stand</string>
+    <string name="nomor_meter">Nomor Meter</string>
+    <string name="nomor_segel">Nomor Segel</string>
 </resources>
