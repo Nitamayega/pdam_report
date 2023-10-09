@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">PDAM Report</string>
 
+    <string name="permission_denied">Permission Denied</string>
+
     <string name="uname">Nama Pengguna</string>
     <string name="password">Kata Sandi</string>
     <string name="login">Masuk</string>
@@ -10,7 +12,11 @@
     <string name="login_success">Berhasil Masuk!</string>
 
     <string name="name">Dev-G</string>
-    <string name="petugas">Kepala Suku</string>
+    <string name="role">Kepala Suku</string>
+    <string-array name="roles">
+        <item>Petugas</item>
+        <item>Admin</item>
+    </string-array>
     <string name="report">Laporan</string>
     <string name="presence">Presensi</string>
     <string name="logout">Keluar</string>
@@ -22,31 +28,41 @@
 
     <string name="take_photo">Ambil Foto</string>
     <string name="upload">Unggah</string>
-    <string name="kosong">null</string>
-    <string name="rafi_irfansyah">Rafi Irfansyah</string>
+
     <string name="jenis_pekerjaan">Jenis Pekerjaan</string>
     <string name="pw">PW</string>
     <string name="nomor_registrasi">Nomor Registrasi</string>
+    <string name="nomor_k_l">Nomor K/L</string>
     <string name="nama_pelanggan">Nama</string>
     <string name="alamat_pelanggan">Alamat</string>
     <string name="keterangan">Keterangan</string>
     <string name="dokumentasi">Dokumentasi</string>
-    <string name="ambil_foto">Ambil Foto</string>
-    <string name="hapus">Hapus</string>
-    <string name="simpan">Simpan</string>
-    <string name="nomor_k_l">Nomor K/L</string>
+
     <string name="meter">Meter</string>
     <string name="merk">Merk</string>
     <string name="diameter">Diameter</string>
     <string name="stand">Stand</string>
     <string name="nomor_meter">Nomor Meter</string>
     <string name="nomor_segel">Nomor Segel</string>
-    <string name="pemasangan_sambungan_baru">Pemasangan Sambungan Baru</string>
-    <string name="verifikasi_pemasangan">Verifikasi Pemasangan</string>
+
     <string name="koordinat">Koordinat</string>
     <string name="x">X</string>
     <string name="y">Y</string>
     <string name="z">Z</string>
 
+    <string name="hapus">Hapus</string>
+    <string name="simpan">Simpan</string>
+
     <string name="select_image">Ambil foto terlebih dahulu!</string>
+    <string name="upload_success">Foto berhasil diunggah</string>
+    <string name="upload_failed">Gagal mengunggah foto</string>
+
+    <string-array name="type_of_work">
+        <item>Pemasangan baru</item>
+        <item>Pemasangan kembali</item>
+    </string-array>
+    <string name="pemasangan_sambungan_baru">Pemasangan Sambungan Baru</string>
+    <string name="verifikasi_pemasangan">Verifikasi Pemasangan</string>
+    <string name="location_not_found">Lokasi tidak dapat ditemukan</string>
+
 </resources>

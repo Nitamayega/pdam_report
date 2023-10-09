@@ -19,26 +19,25 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/ed_jenis_pekerjaan"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:focusableInTouchMode="true"
             android:layout_marginEnd="8dp"
+            android:hint="@string/jenis_pekerjaan"
             app:boxStrokeColor="@color/funblue"
             app:boxStrokeWidth="2dp"
-            android:layout_weight="4"
-            app:layout_constraintEnd_toStartOf="@+id/ed_pw"
+            android:layout_weight="3"
+            app:layout_constraintEnd_toStartOf="@id/ed_pw"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <EditText
-                android:id="@+id/edt_jenis_pekerjaan"
+            <AutoCompleteTextView
+                android:id="@+id/dropdown_jenis_pekerjaan"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ems="10"
-                android:gravity="center"
-                android:hint="@string/jenis_pekerjaan"
-                android:inputType="textPersonName"
-                tools:ignore="SpeakableTextPresentCheck" />
+                android:layout_weight="1"
+                android:inputType="none" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -171,10 +170,10 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:drawableStart="@drawable/ic_galery"
+        android:drawableStart="@drawable/preview_upload_photo"
         android:textCursorDrawable="@null"
         android:drawablePadding="5dp"
-        android:text="@string/ambil_foto"
+        android:text="@string/take_photo"
         android:clickable="true"
         android:padding="5dp"
         android:background="@drawable/field"
@@ -191,12 +190,12 @@
         android:layout_marginTop="8dp"
         android:background="@drawable/field"
         android:clickable="true"
-        android:drawableStart="@drawable/ic_galery"
+        android:drawableStart="@drawable/preview_upload_photo"
         android:drawablePadding="5dp"
         android:focusable="true"
         android:gravity="center"
         android:padding="5dp"
-        android:text="@string/ambil_foto"
+        android:text="@string/take_photo"
         android:textCursorDrawable="@null"
         app:layout_constraintEnd_toEndOf="@+id/ed_keterangan"
         app:layout_constraintStart_toStartOf="@+id/ed_keterangan"

@@ -11,13 +11,13 @@
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:elevation="3dp"
         android:layerType="hardware"
         android:visibility="gone"
-        android:elevation="3dp"
-        app:layout_constraintBottom_toBottomOf="@id/previewImageView"
+        app:layout_constraintBottom_toBottomOf="@+id/uploadButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/previewImageView"
+        app:layout_constraintTop_toTopOf="@+id/cameraButton"
         tools:visibility="visible" />
 
     <ImageView
@@ -27,7 +27,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/presence_upload_photo" />
+        app:srcCompat="@drawable/preview_upload_photo" />
 
     <Button
         android:id="@+id/cameraButton"

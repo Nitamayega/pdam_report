@@ -15,7 +15,6 @@ class UserPreference private constructor(private val dataStore: DataStore<Prefer
     fun getUser(): Flow<UserDataLogin> {
         return dataStore.data.map {
             UserDataLogin(
-                it[ID_KEY] ?: 0,
                 it[USERNAME_KEY] ?: "",
                 it[TEAM_KEY] ?: 0,
                 it[IS_LOGIN_KEY] ?: false
@@ -23,10 +22,9 @@ class UserPreference private constructor(private val dataStore: DataStore<Prefer
         }
     }
 
-    suspend fun loginUser(username: String, id: Long, team: Int) {
+    suspend fun loginUser(username: String, team: Int) {
         dataStore.edit { preferences ->
             preferences[USERNAME_KEY] = username
-            preferences[ID_KEY] = id
             preferences[TEAM_KEY] = team
             preferences[IS_LOGIN_KEY] = true
         }
@@ -42,7 +40,6 @@ class UserPreference private constructor(private val dataStore: DataStore<Prefer
     }
 
     companion object {
-        private val ID_KEY = longPreferencesKey("id")
         private val USERNAME_KEY = stringPreferencesKey("username")
         private val TEAM_KEY = intPreferencesKey("team")
         private val IS_LOGIN_KEY = booleanPreferencesKey("is_login")
