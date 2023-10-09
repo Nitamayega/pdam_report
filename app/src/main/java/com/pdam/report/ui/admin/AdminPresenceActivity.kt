@@ -2,6 +2,7 @@ package com.pdam.report.ui.admin
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.MenuItem
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.database.DataSnapshot
@@ -17,9 +18,21 @@ class AdminPresenceActivity : AppCompatActivity() {
     private val binding by lazy { ActivityAdminPresenceBinding.inflate(layoutInflater) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
         setContentView(binding.root)
         setContent()
     }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            onBackPressed()
+            return true
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
 
     private fun setContent() {
         val userRef = FirebaseDatabase.getInstance().getReference("listPresence")

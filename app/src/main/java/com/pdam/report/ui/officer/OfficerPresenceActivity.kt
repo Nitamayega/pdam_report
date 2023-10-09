@@ -18,6 +18,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.auth.FirebaseAuth
@@ -47,17 +50,26 @@ class OfficerPresenceActivity : AppCompatActivity() {
     private val fuse: FusedLocationProviderClient by lazy { LocationServices.getFusedLocationProviderClient(this) }
     private var latLng: LatLng? = null
     private val geocoderHelper = GeocoderHelper(this)
+    private lateinit var locationRequest: LocationRequest
 
     private val auth by lazy { FirebaseAuth.getInstance() }
     private val currentUser = auth.currentUser
 
     private val binding: ActivityOfficerPresenceBinding by lazy { ActivityOfficerPresenceBinding.inflate(layoutInflater) }
 
+    @Suppress("DEPRECATION")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        // Inisialisasi locationRequest di sini
+        locationRequest = LocationRequest.create().apply {
+            interval = 10000 // Interval pembaruan lokasi dalam milidetik (10 detik)
+            fastestInterval = 5000 // Interval tercepat pembaruan lokasi dalam milidetik (5 detik)
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY // Prioritas akurasi tinggi
+        }
 
         checkPermissions()
         setupButtons()
@@ -76,6 +88,9 @@ class OfficerPresenceActivity : AppCompatActivity() {
     private fun navigateToMainActivity() {
         val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+        if (hasLocationPermissions()) {
+            fuse.removeLocationUpdates(locationCallback)
+        }
         startActivity(intent)
         finish()
     }
@@ -191,16 +206,19 @@ class OfficerPresenceActivity : AppCompatActivity() {
         }
     }
 
+    private val locationCallback = object : LocationCallback() {
+        override fun onLocationResult(locationResult: LocationResult) {
+            locationResult.lastLocation?.let { location ->
+                latLng = LatLng(location.latitude, location.longitude)
+                Log.d("LatLong", latLng.toString())
+            }
+        }
+    }
+
     private fun getLocation() {
         if (hasLocationPermissions()) {
             try {
-                fuse.lastLocation.addOnSuccessListener { location: Location? ->
-                    if (location != null) {
-                        latLng = LatLng(location.latitude, location.longitude)
-                    } else {
-                        showToast(getString(R.string.location_not_found))
-                    }
-                }
+                fuse.requestLocationUpdates(locationRequest, locationCallback, null)
             } catch (e: SecurityException) {
                 showToast(getString(R.string.permission_denied))
             }

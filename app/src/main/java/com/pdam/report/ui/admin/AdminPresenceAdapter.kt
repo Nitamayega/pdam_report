@@ -51,7 +51,16 @@ class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>) : 
                 tvName.text = presence.username
                 tvLocation.text = presence.location
                 tvTimestampe.text = presence.currentDate
+
+                // Mengecek apakah tanggal sama dengan tanggal entri sebelumnya
+                if (adapterPosition > 0 && presence.currentDate == presenceList[adapterPosition - 1].currentDate) {
+                    tvDate.visibility = View.GONE
+                } else {
+                    tvDate.visibility = View.VISIBLE
+                    tvDate.text = presence.currentDate
+                }
             }
         }
     }
+
 }
