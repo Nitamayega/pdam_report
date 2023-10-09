@@ -10,10 +10,12 @@ import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.lifecycleScope
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -25,13 +27,10 @@ import com.pdam.report.data.UserPreference
 import com.pdam.report.databinding.ActivityLoginBinding
 import kotlinx.coroutines.launch
 
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user")
 class LoginActivity : AppCompatActivity() {
 
-    private val firebaseDatabase by lazy { FirebaseDatabase.getInstance() }
-    private val databaseReference by lazy { firebaseDatabase.reference.child("users/officer") }
+    private val firebaseAuth by lazy { FirebaseAuth.getInstance() }
     private val binding by lazy { ActivityLoginBinding.inflate(layoutInflater) }
-    private val userPreference by lazy { UserPreference.getInstance(dataStore) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,46 +52,18 @@ class LoginActivity : AppCompatActivity() {
 
             if (!isUnameEmpty && !isPasswordEmpty) {
                 showLoading(true)
-                loginUser(uname, password)
-            }
-        }
-    }
+                val email = "$uname@pdam.com"
+                firebaseAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+                    showLoading(false)
 
-    private fun loginUser(username: String, password: String) {
-        databaseReference.orderByChild("username").equalTo(username).addListenerForSingleValueEvent(object :
-            ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.exists()) {
-                    for (userSnapshot in snapshot.children) {
-                        val user = userSnapshot.getValue(UserData::class.java)
-
-                        if (user != null && TextUtils.equals(user.password, password)) {
-                            Toast.makeText(
-                                this@LoginActivity,
-                                R.string.login_success,
-                                Toast.LENGTH_SHORT
-                            ).show()
-
-                            lifecycleScope.launch {
-                                userPreference.loginUser(user.username, user.id, user.team)
-                            }
-
-                            startActivity(Intent(this@LoginActivity, MainActivity::class.java))
-                            finish()
-                            showLoading(false)
-                            return
-                        }
+                    if (task.isSuccessful) {
+                        onLoginSuccess()
+                    } else {
+                        onLoginFailed()
                     }
                 }
-                showLoading(false)
-                Toast.makeText(this@LoginActivity, R.string.login_failed, Toast.LENGTH_SHORT).show()
             }
-
-            override fun onCancelled(error: DatabaseError) {
-                showLoading(false)
-                Toast.makeText(this@LoginActivity, "Database Error: ${error.message}", Toast.LENGTH_SHORT).show()
-            }
-        })
+        }
     }
 
     private fun setupView() {
@@ -110,5 +81,18 @@ class LoginActivity : AppCompatActivity() {
 
     private fun showLoading(isLoading: Boolean) {
         binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+    }
+
+    private fun onLoginSuccess() {
+        Toast.makeText(this, R.string.login_success, Toast.LENGTH_SHORT).show()
+
+        val intent = Intent(this, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(intent)
+        finish()
+    }
+
+    private fun onLoginFailed() {
+        Toast.makeText(this, R.string.login_failed, Toast.LENGTH_SHORT).show()
     }
 }

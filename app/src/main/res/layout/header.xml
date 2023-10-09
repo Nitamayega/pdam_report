@@ -26,7 +26,7 @@
         android:id="@+id/role"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/petugas"
+        android:text="@string/role"
         android:textSize="16sp" />
 
     <View
