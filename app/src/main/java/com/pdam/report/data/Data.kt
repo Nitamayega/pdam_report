@@ -3,8 +3,7 @@ package com.pdam.report.data
 data class UserData (
     val username: String = "",
     val team: Int = 0,
-    val listCustomer: HashMap<String, DataCustomer> = hashMapOf(),
-    val listPresence: HashMap<String, DataPresence> = hashMapOf()
+    val listCustomer: HashMap<String, DataCustomer> = hashMapOf()
 )
 
 data class DataCustomer(
@@ -13,8 +12,9 @@ data class DataCustomer(
     val address: String = "",
 )
 
-data class DataPresence(
+data class PresenceData(
     val currentDate: String = "",
+    val username: String = "",
     val location: String = "",
     val photoUrl: String = "",
 )

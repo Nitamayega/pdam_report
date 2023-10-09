@@ -7,6 +7,7 @@
     tools:context=".ui.admin.AdminPresenceActivity">
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_presence"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="16dp"

@@ -1,12 +1,10 @@
 package com.pdam.report.ui.officer
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.location.Location
-import android.location.LocationManager
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -23,12 +21,15 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.pdam.report.MainActivity
 import com.pdam.report.R
-import com.pdam.report.data.DataCustomer
-import com.pdam.report.data.DataPresence
+import com.pdam.report.data.PresenceData
+import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ActivityOfficerPresenceBinding
 import com.pdam.report.utils.GeocoderHelper
 import com.pdam.report.utils.createCustomTempFile
@@ -47,6 +48,9 @@ class OfficerPresenceActivity : AppCompatActivity() {
     private var latLng: LatLng? = null
     private val geocoderHelper = GeocoderHelper(this)
 
+    private val auth by lazy { FirebaseAuth.getInstance() }
+    private val currentUser = auth.currentUser
+
     private val binding: ActivityOfficerPresenceBinding by lazy { ActivityOfficerPresenceBinding.inflate(layoutInflater) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,7 +62,6 @@ class OfficerPresenceActivity : AppCompatActivity() {
         checkPermissions()
         setupButtons()
         getLocation()
-        Toast.makeText(this, "LatLong: $latLng", Toast.LENGTH_SHORT).show()
     }
 
     private fun setupButtons() {
@@ -123,33 +126,56 @@ class OfficerPresenceActivity : AppCompatActivity() {
         if (getFile != null) {
             val file = Uri.fromFile(getFile)
 
-            showLoading(true)
-                val photoRef = storageReference.child("images/presence/${System.currentTimeMillis()}.jpg")
-                photoRef.putFile(file).addOnSuccessListener { uploadTask ->
-                    uploadTask.storage.downloadUrl.addOnSuccessListener {downloadUri ->
-                        showLoading(false)
-                        val data = DataPresence(
-                            SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date()),
-                            latLng?.let { geocoderHelper.getAddressFromLatLng(it).toString() } ?: "",
-                            downloadUri.toString(),
-                        )
+            val uid = currentUser?.uid
 
-                        databaseReference.child("users")
-                            .child(FirebaseAuth.getInstance().currentUser?.uid ?: "")
-                            .child("listPresence").push().setValue(data)
-                            .addOnCompleteListener { task ->
-                                if (task.isSuccessful) {
-                                    showToast(getString(R.string.upload_success))
-                                    navigateToMainActivity()
-                                } else {
-                                    showToast(getString(R.string.upload_failed))
+            if (uid != null) {
+                val userRef = FirebaseDatabase.getInstance().getReference("users").child(uid)
+                userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (snapshot.exists()) {
+                            val userData = snapshot.getValue(UserData::class.java)
+                            if (userData != null) {
+                                val username = userData.username
+
+                                showLoading(true)
+                                val photoRef = storageReference.child("images/presence/${System.currentTimeMillis()}.jpg")
+                                photoRef.putFile(file).addOnSuccessListener { uploadTask ->
+                                    uploadTask.storage.downloadUrl.addOnSuccessListener { downloadUri ->
+                                        showLoading(false)
+                                        val data = PresenceData(
+                                            SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date()),
+                                            username ?: "", // Menggunakan username dari Realtime Database
+                                            latLng?.let { geocoderHelper.getAddressFromLatLng(it).toString() } ?: "",
+                                            downloadUri.toString(),
+                                        )
+
+                                        databaseReference.child("listPresence")
+                                            .child(uid).push().setValue(data)
+                                            .addOnCompleteListener { task ->
+                                                if (task.isSuccessful) {
+                                                    showToast(getString(R.string.upload_success))
+                                                    navigateToMainActivity()
+                                                } else {
+                                                    showToast(getString(R.string.upload_failed))
+                                                }
+                                            }
+                                    }.addOnFailureListener {
+                                        showLoading(false)
+                                        showToast(it.message.toString())
+                                    }
                                 }
                             }
-                    }.addOnFailureListener {
-                        showLoading(false)
-                        showToast(it.message.toString())
+                        }
                     }
-                }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        showLoading(false)
+                        showToast("Error: ${error.message}")
+                    }
+                })
+            } else {
+                showToast("User not authenticated.")
+            }
         } else {
             showToast(getString(R.string.select_image))
         }

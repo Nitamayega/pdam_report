@@ -10,24 +10,27 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.pdam.report.R
-import com.pdam.report.data.DataPresence
+import com.pdam.report.data.PresenceData
+import com.pdam.report.databinding.PresenceItemRowBinding
 import com.pdam.report.ui.officer.AddFirstDataActivity
 import java.util.ArrayList
 
-class AdminPresenceAdapter(private val presenceList: ArrayList<DataPresence>) : RecyclerView.Adapter<AdminPresenceAdapter.PresenceViewHolder>() {
+class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>) : RecyclerView.Adapter<AdminPresenceAdapter.PresenceViewHolder>() {
 
     private val auth by lazy { FirebaseAuth.getInstance() }
     private val currentUser = auth.currentUser
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PresenceViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.presence_item_row, parent, false)
-        return PresenceViewHolder(view)
+        return PresenceViewHolder(
+            PresenceItemRowBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        )
     }
 
     override fun onBindViewHolder(holder: PresenceViewHolder, position: Int) {
         val presence = presenceList[position]
         holder.bind(presence)
         holder.itemView.setOnClickListener {
-            val intent = Intent(holder.itemView.context, AddFirstDataActivity::class.java)
+            val intent = Intent(holder.itemView.context, DetailPresenceActivity::class.java)
             intent.putExtra(DetailPresenceActivity.EXTRA_DATE, presence.currentDate)
             intent.putExtra(DetailPresenceActivity.EXTRA_LOCATION, presence.location)
             intent.putExtra(DetailPresenceActivity.EXTRA_PHOTOURL, presence.photoUrl)
@@ -39,20 +42,16 @@ class AdminPresenceAdapter(private val presenceList: ArrayList<DataPresence>) : 
         return presenceList.size
     }
 
-    inner class PresenceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val tvName: TextView = itemView.findViewById(R.id.tv_name)
-        private val tvLocation: TextView = itemView.findViewById(R.id.tv_location)
-        private val tvTimeStampe: TextView = itemView.findViewById(R.id.tv_timestampe)
-        private val imgPhoto: ImageView = itemView.findViewById(R.id.img_photo)
-
-        fun bind(presence: DataPresence) {
-            Glide.with(itemView)
-                .load(presence.photoUrl)
-                .into(imgPhoto)
-            tvName.text = currentUser?.displayName
-            tvLocation.text = presence.location
-            tvTimeStampe.text = presence.currentDate
-
+    inner class PresenceViewHolder(private var binding: PresenceItemRowBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(presence: PresenceData) {
+            binding.apply {
+                Glide.with(itemView)
+                    .load(presence.photoUrl)
+                    .into(imgPhoto)
+                tvName.text = presence.username
+                tvLocation.text = presence.location
+                tvTimestampe.text = presence.currentDate
+            }
         }
     }
 }
