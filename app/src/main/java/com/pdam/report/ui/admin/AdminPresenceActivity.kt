@@ -33,13 +33,13 @@ class AdminPresenceActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-
     private fun setContent() {
         val userRef = FirebaseDatabase.getInstance().getReference("listPresence")
 
         userRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.hasChildren()) {
+                    binding.tvEmptyItems.visibility = View.GONE
                     binding.rvPresence.apply {
                         visibility = View.VISIBLE
                         layoutManager = LinearLayoutManager(this@AdminPresenceActivity)
@@ -49,7 +49,6 @@ class AdminPresenceActivity : AppCompatActivity() {
                     val presenceList = ArrayList<PresenceData>()
                     for (presenceSnapshot in snapshot.children) {
                         for (presenceDataSnapshot in presenceSnapshot.children) {
-                            // Mengambil data dari setiap item dalam listPresence
                             val presenceData = presenceDataSnapshot.getValue(PresenceData::class.java)
                             presenceData?.let {
                                 presenceList.add(it)
@@ -61,6 +60,7 @@ class AdminPresenceActivity : AppCompatActivity() {
                     val adapter = AdminPresenceAdapter(presenceList)
                     binding.rvPresence.adapter = adapter
                 } else {
+                    binding.tvEmptyItems.visibility = View.VISIBLE
                     binding.rvPresence.visibility = View.GONE
                 }
             }

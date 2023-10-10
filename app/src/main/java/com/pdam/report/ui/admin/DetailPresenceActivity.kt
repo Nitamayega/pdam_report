@@ -21,11 +21,13 @@ class DetailPresenceActivity : AppCompatActivity() {
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        val itemUsername = intent.getStringExtra(EXTRA_USERNAME)
         val itemDate = intent.getStringExtra(EXTRA_DATE)
         val itemLocation = intent.getStringExtra(EXTRA_LOCATION)
         val itemPhotoUrl = intent.getStringExtra(EXTRA_PHOTOURL)
 
         binding.apply {
+            tvName.text = itemUsername
             tvTimestampe.text = "Diambil pada $itemDate"
             tvLocation.text = itemLocation
             Glide.with(this@DetailPresenceActivity)
@@ -53,6 +55,7 @@ class DetailPresenceActivity : AppCompatActivity() {
     }
 
     companion object {
+        const val EXTRA_USERNAME = "extra_username"
         const val EXTRA_DATE = "extra_date"
         const val EXTRA_LOCATION = "extra_location"
         const val EXTRA_PHOTOURL = "extra_photourl"

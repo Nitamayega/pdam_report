@@ -36,6 +36,7 @@ import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ActivityOfficerPresenceBinding
 import com.pdam.report.utils.GeocoderHelper
 import com.pdam.report.utils.createCustomTempFile
+import com.pdam.report.utils.reduceFileImage
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -54,6 +55,8 @@ class OfficerPresenceActivity : AppCompatActivity() {
 
     private val auth by lazy { FirebaseAuth.getInstance() }
     private val currentUser = auth.currentUser
+
+    private var isToastShown = false
 
     private val binding: ActivityOfficerPresenceBinding by lazy { ActivityOfficerPresenceBinding.inflate(layoutInflater) }
 
@@ -78,6 +81,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
 
     private fun setupButtons() {
         binding.cameraButton.setOnClickListener { startTakePhoto() }
+        binding.uploadButton.isEnabled = false
         binding.uploadButton.setOnClickListener { uploadImage() }
     }
 
@@ -139,8 +143,6 @@ class OfficerPresenceActivity : AppCompatActivity() {
 
     private fun uploadImage() {
         if (getFile != null) {
-            val file = Uri.fromFile(getFile)
-
             val uid = currentUser?.uid
 
             if (uid != null) {
@@ -153,8 +155,12 @@ class OfficerPresenceActivity : AppCompatActivity() {
                                 val username = userData.username
 
                                 showLoading(true)
+
+                                //Compress size photo
+                                val compressedFile = reduceFileImage(getFile!!)
+
                                 val photoRef = storageReference.child("images/presence/${System.currentTimeMillis()}.jpg")
-                                photoRef.putFile(file).addOnSuccessListener { uploadTask ->
+                                photoRef.putFile(Uri.fromFile(compressedFile)).addOnSuccessListener { uploadTask ->
                                     uploadTask.storage.downloadUrl.addOnSuccessListener { downloadUri ->
                                         showLoading(false)
                                         val data = PresenceData(
@@ -211,11 +217,23 @@ class OfficerPresenceActivity : AppCompatActivity() {
             locationResult.lastLocation?.let { location ->
                 latLng = LatLng(location.latitude, location.longitude)
                 Log.d("LatLong", latLng.toString())
+                if (latLng != null) {
+                    if (!isToastShown) {
+                        showToast(getString(R.string.location_found))
+                        binding.uploadButton.isEnabled = true
+                        isToastShown = true
+                    }
+                } else {
+                    showToast(getString(R.string.location_not_found))
+                }
             }
         }
     }
 
     private fun getLocation() {
+        if (latLng != null){
+            showToast(getString(R.string.initialize_location))
+        }
         if (hasLocationPermissions()) {
             try {
                 fuse.requestLocationUpdates(locationRequest, locationCallback, null)
@@ -271,6 +289,8 @@ class OfficerPresenceActivity : AppCompatActivity() {
 
     private fun showLoading(isLoading: Boolean) {
         binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        binding.cameraButton.isEnabled = !isLoading
+        binding.uploadButton.isEnabled = !isLoading
     }
 
     companion object {

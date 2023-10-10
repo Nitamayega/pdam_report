@@ -34,6 +34,7 @@ class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>) : 
             intent.putExtra(DetailPresenceActivity.EXTRA_DATE, presence.currentDate)
             intent.putExtra(DetailPresenceActivity.EXTRA_LOCATION, presence.location)
             intent.putExtra(DetailPresenceActivity.EXTRA_PHOTOURL, presence.photoUrl)
+            intent.putExtra(DetailPresenceActivity.EXTRA_USERNAME, presence.username)
             holder.itemView.context.startActivity(intent)
         }
     }

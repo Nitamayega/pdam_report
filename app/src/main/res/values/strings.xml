@@ -22,6 +22,7 @@
     <string name="logout">Keluar</string>
 
     <string name="empty_list">Belum Ada Data Pelanggan</string>
+    <string name="empty_list_presence">Belum Ada Data Presensi</string>
 
     <string name="open">Open</string>
     <string name="close">Close</string>
@@ -63,6 +64,8 @@
     </string-array>
     <string name="pemasangan_sambungan_baru">Pemasangan Sambungan Baru</string>
     <string name="verifikasi_pemasangan">Verifikasi Pemasangan</string>
-    <string name="location_not_found">Lokasi tidak dapat ditemukan</string>
 
+    <string name="location_not_found">Lokasi tidak dapat ditemukan</string>
+    <string name="location_found">Lokasi ditemukan</string>
+    <string name="initialize_location">Sedang Mencari Lokasi…</string>
 </resources>

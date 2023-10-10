@@ -9,6 +9,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,6 +24,7 @@ import com.pdam.report.ui.admin.AdminPresenceActivity
 import com.pdam.report.ui.common.LoginActivity
 import com.pdam.report.ui.officer.AddFirstDataActivity
 import com.pdam.report.ui.officer.OfficerPresenceActivity
+import com.pdam.report.utils.UserManager
 import java.util.ArrayList
 
 class MainActivity : AppCompatActivity() {
@@ -33,11 +35,14 @@ class MainActivity : AppCompatActivity() {
     private val auth by lazy { FirebaseAuth.getInstance() }
     private val currentUser = auth.currentUser
 
+    private val userManager by lazy { UserManager(this) }
     private lateinit var user: UserData
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen()
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+
         supportActionBar?.hide()
         setupView()
         setupData()
@@ -48,21 +53,13 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
-
     private fun setupData() {
-        val userRef = FirebaseDatabase.getInstance().getReference("users").child(currentUser?.uid ?: "")
-        userRef.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                user = snapshot.getValue(UserData::class.java)!!
-                setupNavigationHeader()
-                setupNavigationMenu()
-                setContent()
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(this@MainActivity, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
-            }
-        })
+        userManager.fetchUserAndSetupData {
+            user = userManager.getUser()
+            setupNavigationHeader()
+            setupNavigationMenu()
+            setContent()
+        }
     }
 
     private fun setupView() {
