@@ -1,8 +1,7 @@
 package com.pdam.report.ui.officer
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.pdam.report.R
+import androidx.appcompat.app.AppCompatActivity
 import com.pdam.report.databinding.ActivityUpdateCustomerVerificationBinding
 
 class UpdateCustomerVerificationActivity : AppCompatActivity() {

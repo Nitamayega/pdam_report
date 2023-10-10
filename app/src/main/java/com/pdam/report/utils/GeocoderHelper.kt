@@ -6,10 +6,10 @@ import android.location.Geocoder
 import android.util.Log
 import com.google.android.gms.maps.model.LatLng
 import java.io.IOException
-import java.util.*
+import java.util.Locale
 
+@Suppress("DEPRECATION")
 class GeocoderHelper(private val context: Context) {
-
     fun getAddressFromLatLng(latLng: LatLng): String? {
         val geocoder = Geocoder(context, Locale.getDefault())
         try {

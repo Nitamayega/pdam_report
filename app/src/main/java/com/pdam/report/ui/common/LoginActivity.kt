@@ -1,31 +1,17 @@
 package com.pdam.report.ui.common
 
-import android.content.Context
 import android.content.Intent
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.text.TextUtils
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.preferencesDataStore
-import androidx.lifecycle.lifecycleScope
+import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import com.pdam.report.MainActivity
 import com.pdam.report.R
-import com.pdam.report.data.UserData
-import com.pdam.report.data.UserPreference
 import com.pdam.report.databinding.ActivityLoginBinding
-import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
 

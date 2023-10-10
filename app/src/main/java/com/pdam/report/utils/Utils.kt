@@ -1,16 +1,14 @@
 package com.pdam.report.utils
 
-import android.content.ContentResolver
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Environment
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
 
 private const val FILENAME_FORMAT = "dd-MMM-yyyy"
 private const val MAXIMAL_SIZE = 1000000
@@ -27,16 +25,16 @@ fun createCustomTempFile(context: Context): File {
     return File.createTempFile(getCurrentTimeStamp(), ".jpg", storageDir)
 }
 
-fun uriToFile(selectedImg: Uri, context: Context): File {
-    val contentResolver: ContentResolver = context.contentResolver
-    val myFile = createCustomTempFile(context)
-    contentResolver.openInputStream(selectedImg)?.use { inputStream ->
-        FileOutputStream(myFile).use { outputStream ->
-            inputStream.copyTo(outputStream)
-        }
-    }
-    return myFile
-}
+//fun uriToFile(selectedImg: Uri, context: Context): File {
+//    val contentResolver: ContentResolver = context.contentResolver
+//    val myFile = createCustomTempFile(context)
+//    contentResolver.openInputStream(selectedImg)?.use { inputStream ->
+//        FileOutputStream(myFile).use { outputStream ->
+//            inputStream.copyTo(outputStream)
+//        }
+//    }
+//    return myFile
+//}
 
 fun reduceFileImage(file: File): File {
     val bitmap = BitmapFactory.decodeFile(file.path)
