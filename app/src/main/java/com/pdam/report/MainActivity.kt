@@ -9,14 +9,16 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.pdam.report.data.DataCustomer
 import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ActivityMainBinding
@@ -25,7 +27,6 @@ import com.pdam.report.ui.common.LoginActivity
 import com.pdam.report.ui.officer.AddFirstDataActivity
 import com.pdam.report.ui.officer.OfficerPresenceActivity
 import com.pdam.report.utils.UserManager
-import java.util.ArrayList
 
 class MainActivity : AppCompatActivity() {
 
@@ -41,7 +42,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen()
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
         supportActionBar?.hide()
         setupView()

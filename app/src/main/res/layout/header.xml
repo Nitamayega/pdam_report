@@ -18,7 +18,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="@string/name"
+        tools:text="@string/name"
         android:textSize="32sp"
         android:textStyle="bold" />
 
@@ -26,7 +26,7 @@
         android:id="@+id/role"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/role"
+        tools:text="@string/role"
         android:textSize="16sp" />
 
     <View

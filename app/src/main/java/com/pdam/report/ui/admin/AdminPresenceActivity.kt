@@ -1,21 +1,20 @@
 package com.pdam.report.ui.admin
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.pdam.report.data.DataCustomer
 import com.pdam.report.data.PresenceData
 import com.pdam.report.databinding.ActivityAdminPresenceBinding
-import java.util.ArrayList
 
 class AdminPresenceActivity : AppCompatActivity() {
     private val binding by lazy { ActivityAdminPresenceBinding.inflate(layoutInflater) }
+    private val adapter by lazy { AdminPresenceAdapter(ArrayList()) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -23,6 +22,10 @@ class AdminPresenceActivity : AppCompatActivity() {
 
         setContentView(binding.root)
         setContent()
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            setContent()
+            binding.swipeRefreshLayout.isRefreshing = false
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -57,7 +60,7 @@ class AdminPresenceActivity : AppCompatActivity() {
                     }
 
                     presenceList.sortByDescending { it.currentDate }
-                    val adapter = AdminPresenceAdapter(presenceList)
+                    adapter.updateData(presenceList)
                     binding.rvPresence.adapter = adapter
                 } else {
                     binding.tvEmptyItems.visibility = View.VISIBLE

@@ -2,26 +2,27 @@ package com.pdam.report.ui.officer
 
 import android.Manifest
 import android.content.Intent
+import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
-import android.location.Location
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -76,7 +77,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
 
         checkPermissions()
         setupButtons()
-        getLocation()
+        checkLocationSettings()
     }
 
     private fun setupButtons() {
@@ -107,6 +108,19 @@ class OfficerPresenceActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CHECK_SETTINGS) {
+            if (resultCode == RESULT_OK) {
+                getLocation()
+            } else if (resultCode == RESULT_CANCELED) {
+                showToast("Aktifkan lokasi untuk melanjutkan.")
+            }
+        }
+    }
+
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         navigateToMainActivity()
         super.onBackPressed()
@@ -146,7 +160,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
             val uid = currentUser?.uid
 
             if (uid != null) {
-                val userRef = FirebaseDatabase.getInstance().getReference("users").child(uid)
+                val userRef = databaseReference.child("users").child(uid)
                 userRef.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         if (snapshot.exists()) {
@@ -165,7 +179,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
                                         showLoading(false)
                                         val data = PresenceData(
                                             SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date()),
-                                            username ?: "", // Menggunakan username dari Realtime Database
+                                            username, // Menggunakan username dari Realtime Database
                                             latLng?.let { geocoderHelper.getAddressFromLatLng(it).toString() } ?: "",
                                             downloadUri.toString(),
                                         )
@@ -212,18 +226,44 @@ class OfficerPresenceActivity : AppCompatActivity() {
         }
     }
 
+    @Suppress("DEPRECATION")
+    private fun checkLocationSettings() {
+        val locationRequest = LocationRequest.create().apply {
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
+
+        val builder = LocationSettingsRequest.Builder()
+            .addLocationRequest(locationRequest)
+            .setAlwaysShow(true)
+
+        val client = LocationServices.getSettingsClient(this)
+        val task = client.checkLocationSettings(builder.build())
+
+        task.addOnSuccessListener {
+            getLocation()
+        }
+
+        task.addOnFailureListener { exception ->
+            if (exception is ResolvableApiException) {
+                try {
+                    exception.startResolutionForResult(this, REQUEST_CHECK_SETTINGS)
+                } catch (sendEx: IntentSender.SendIntentException) {
+                    sendEx.printStackTrace()
+                }
+            }
+        }
+    }
+
+
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             locationResult.lastLocation?.let { location ->
                 latLng = LatLng(location.latitude, location.longitude)
-                Log.d("LatLong", latLng.toString())
-                if (latLng != null) {
-                    if (!isToastShown) {
-                        showToast(getString(R.string.location_found))
-                        binding.uploadButton.isEnabled = true
-                        isToastShown = true
-                    }
-                } else {
+                if (latLng != null && !isToastShown) {
+                    showToast(getString(R.string.location_found))
+                    binding.uploadButton.isEnabled = true
+                    isToastShown = true
+                } else if (latLng == null) {
                     showToast(getString(R.string.location_not_found))
                 }
             }
@@ -231,7 +271,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
     }
 
     private fun getLocation() {
-        if (latLng != null){
+        if (latLng != null && !isToastShown) {
             showToast(getString(R.string.initialize_location))
         }
         if (hasLocationPermissions()) {
@@ -300,5 +340,6 @@ class OfficerPresenceActivity : AppCompatActivity() {
             Manifest.permission.ACCESS_COARSE_LOCATION
         )
         private const val REQUEST_CODE_PERMISSIONS = 10
+        private const val REQUEST_CHECK_SETTINGS = 123
     }
 }

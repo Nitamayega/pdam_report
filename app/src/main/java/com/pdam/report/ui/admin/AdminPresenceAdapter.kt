@@ -4,21 +4,18 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.DiffUtil.calculateDiff
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
-import com.pdam.report.R
 import com.pdam.report.data.PresenceData
 import com.pdam.report.databinding.PresenceItemRowBinding
-import com.pdam.report.ui.officer.AddFirstDataActivity
-import java.util.ArrayList
 
-class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>) : RecyclerView.Adapter<AdminPresenceAdapter.PresenceViewHolder>() {
+class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>) :
+    RecyclerView.Adapter<AdminPresenceAdapter.PresenceViewHolder>() {
 
     private val auth by lazy { FirebaseAuth.getInstance() }
-    private val currentUser = auth.currentUser
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PresenceViewHolder {
         return PresenceViewHolder(
@@ -39,15 +36,24 @@ class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>) : 
         }
     }
 
-    override fun getItemCount(): Int {
-        return presenceList.size
+    fun updateData(newData: List<PresenceData>) {
+        val diffResult = calculateDiff(
+            PresenceDataDiffCallback(presenceList, newData)
+        )
+        presenceList.clear()
+        presenceList.addAll(newData)
+        diffResult.dispatchUpdatesTo(this)
     }
+
+
+    override fun getItemCount(): Int = presenceList.size
 
     inner class PresenceViewHolder(private var binding: PresenceItemRowBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(presence: PresenceData) {
             binding.apply {
                 Glide.with(itemView)
                     .load(presence.photoUrl)
+                    .sizeMultiplier(0.5f)
                     .into(imgPhoto)
                 tvName.text = presence.username
                 tvLocation.text = presence.location
@@ -63,5 +69,28 @@ class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>) : 
             }
         }
     }
+
+    class PresenceDataDiffCallback(
+        private val oldList: List<PresenceData>,
+        private val newList: List<PresenceData>
+    ) : DiffUtil.Callback() {
+
+        override fun getOldListSize(): Int {
+            return oldList.size
+        }
+
+        override fun getNewListSize(): Int {
+            return newList.size
+        }
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldList[oldItemPosition] == newList[newItemPosition]
+        }
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldList[oldItemPosition] == newList[newItemPosition]
+        }
+    }
+
 
 }

@@ -62,6 +62,7 @@
                 android:layout_width="0dp"
                 android:maxLines="1"
                 android:layout_height="wrap_content"
+                android:ellipsize="end"
                 card_view:layout_constraintBottom_toTopOf="@id/tv_timestampe"
                 card_view:layout_constraintEnd_toEndOf="parent"
                 card_view:layout_constraintStart_toStartOf="@+id/tv_name"

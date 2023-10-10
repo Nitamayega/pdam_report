@@ -1,12 +1,11 @@
 package com.pdam.report.ui.admin
 
+import android.annotation.SuppressLint
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
-import com.pdam.report.MainActivity
-import com.pdam.report.R
 import com.pdam.report.databinding.ActivityDetailPresenceBinding
 
 class DetailPresenceActivity : AppCompatActivity() {
@@ -15,16 +14,17 @@ class DetailPresenceActivity : AppCompatActivity() {
         ActivityDetailPresenceBinding.inflate(layoutInflater)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        val itemUsername = intent.getStringExtra(EXTRA_USERNAME)
         val itemDate = intent.getStringExtra(EXTRA_DATE)
         val itemLocation = intent.getStringExtra(EXTRA_LOCATION)
         val itemPhotoUrl = intent.getStringExtra(EXTRA_PHOTOURL)
+        val itemUsername = intent.getStringExtra(EXTRA_USERNAME)
 
         binding.apply {
             tvName.text = itemUsername
@@ -47,6 +47,7 @@ class DetailPresenceActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         val intent = Intent(this, AdminPresenceActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
@@ -55,8 +56,9 @@ class DetailPresenceActivity : AppCompatActivity() {
     }
 
     companion object {
-        const val EXTRA_USERNAME = "extra_username"
         const val EXTRA_DATE = "extra_date"
         const val EXTRA_LOCATION = "extra_location"
         const val EXTRA_PHOTOURL = "extra_photourl"
-    }}
+        const val EXTRA_USERNAME = "extra_username"
+    }
+}
