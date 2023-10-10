@@ -7,9 +7,27 @@ data class UserData (
 )
 
 data class DataCustomer(
-    val createdAt: Long = 0,
+    val currentDate: String = "",
+    val petugas: String = "",
+    val jenisPekerjaan: String = "",
+    val PW: Int = 0,
+    val nomorRegistrasi: String = "",
+    val nomorKL: String = "",
     val name: String = "",
     val address: String = "",
+    val merkMeter: String = "",
+    val diameterMeter: String = "",
+    val standMeter: String = "",
+    val nomorMeter: String = "",
+    val nomorSegel: String = "",
+    val xKoordinat: String = "",
+    val yKoordinat: String = "",
+    val zKooridnat: String = "",
+    val keterangan: String = "",
+    val dokumentasi1: String = "",
+    val dokumentasi2: String = "",
+    val dokumentasi3: String = "",
+    val dokumentasi4: String = "",
 )
 
 data class PresenceData(
