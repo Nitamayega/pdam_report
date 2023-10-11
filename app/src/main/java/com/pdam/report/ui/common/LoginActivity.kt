@@ -12,6 +12,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.pdam.report.MainActivity
 import com.pdam.report.R
 import com.pdam.report.databinding.ActivityLoginBinding
+import com.pdam.report.utils.navigatePage
+import com.pdam.report.utils.showLoading
+import com.pdam.report.utils.showToast
 
 class LoginActivity : AppCompatActivity() {
 
@@ -29,18 +32,16 @@ class LoginActivity : AppCompatActivity() {
     private fun setupAction() {
         binding.buttonLogin.setOnClickListener {
             val uname = binding.edtUsername.text.toString()
-            val isUnameEmpty = uname.isEmpty()
             val password = binding.passwordEditText.text.toString()
-            val isPasswordEmpty = password.isEmpty()
 
-            binding.edtUsername.error = if (isUnameEmpty) getString(R.string.empty_field) else null
-            binding.passwordEditText.error = if (isPasswordEmpty) getString(R.string.empty_field) else null
+            binding.edtUsername.error = if (uname.isEmpty()) getString(R.string.empty_field) else null
+            binding.passwordEditText.error = if (password.isEmpty()) getString(R.string.empty_field) else null
 
-            if (!isUnameEmpty && !isPasswordEmpty) {
-                showLoading(true)
+            if (uname.isNotEmpty() && password.isNotEmpty()) {
+                showLoading(true, binding.progressBar, binding.buttonLogin)
                 val email = "$uname@pdam.com"
                 firebaseAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
-                    showLoading(false)
+                    showLoading(false, binding.progressBar, binding.buttonLogin)
 
                     if (task.isSuccessful) {
                         onLoginSuccess()
@@ -65,20 +66,12 @@ class LoginActivity : AppCompatActivity() {
         supportActionBar?.hide()
     }
 
-    private fun showLoading(isLoading: Boolean) {
-        binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-    }
-
     private fun onLoginSuccess() {
-        Toast.makeText(this, R.string.login_success, Toast.LENGTH_SHORT).show()
-
-        val intent = Intent(this, MainActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-        startActivity(intent)
-        finish()
+        showToast(this, R.string.login_success)
+        navigatePage(this, MainActivity::class.java, clearTask = true)
     }
 
     private fun onLoginFailed() {
-        Toast.makeText(this, R.string.login_failed, Toast.LENGTH_SHORT).show()
+        showToast(this, R.string.login_failed)
     }
 }

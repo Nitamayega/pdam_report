@@ -28,6 +28,7 @@ data class DataCustomer(
     val dokumentasi2: String = "",
     val dokumentasi3: String = "",
     val dokumentasi4: String = "",
+    val status: Boolean = false,
 )
 
 data class PresenceData(

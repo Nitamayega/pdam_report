@@ -46,12 +46,6 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.hide()
         setupView()
         setupData()
-
-        binding.buttonAdd.setOnClickListener {
-            val moveIntent = Intent(this@MainActivity, AddFirstDataActivity::class.java)
-            startActivity(moveIntent)
-        }
-
     }
     private fun setupData() {
         userManager.fetchUserAndSetupData {
@@ -59,6 +53,16 @@ class MainActivity : AppCompatActivity() {
             setupNavigationHeader()
             setupNavigationMenu()
             setContent()
+
+            if (user.team == 0) {
+                binding.buttonAdd.visibility = View.GONE
+            } else {
+                binding.buttonAdd.visibility = View.VISIBLE
+                binding.buttonAdd.setOnClickListener {
+                    val moveIntent = Intent(this@MainActivity, AddFirstDataActivity::class.java)
+                    startActivity(moveIntent)
+                }
+            }
         }
     }
 
@@ -158,9 +162,9 @@ class MainActivity : AppCompatActivity() {
                             customerList.add(it)
                         }
                     }
-                    customerList.sortByDescending { it.createdAt }
-//                    val adapter = MainAdapter(customerList)
-//                    binding.rvCusts.adapter = adapter
+                    customerList.sortByDescending { it.currentDate }
+                    val adapter = MainAdapter(customerList)
+                    binding.rvCusts.adapter = adapter
                 } else {
                     binding.emptyView.visibility = View.VISIBLE
                     binding.rvCusts.visibility = View.GONE

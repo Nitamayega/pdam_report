@@ -9,8 +9,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.MenuItem
-import android.view.View
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -37,7 +35,10 @@ import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ActivityOfficerPresenceBinding
 import com.pdam.report.utils.GeocoderHelper
 import com.pdam.report.utils.createCustomTempFile
+import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.reduceFileImage
+import com.pdam.report.utils.showLoading
+import com.pdam.report.utils.showToast
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -50,6 +51,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
     private val databaseReference = FirebaseDatabase.getInstance().reference
 
     private val fuse: FusedLocationProviderClient by lazy { LocationServices.getFusedLocationProviderClient(this) }
+
     private var latLng: LatLng? = null
     private val geocoderHelper = GeocoderHelper(this)
     private lateinit var locationRequest: LocationRequest
@@ -61,23 +63,24 @@ class OfficerPresenceActivity : AppCompatActivity() {
 
     private val binding: ActivityOfficerPresenceBinding by lazy { ActivityOfficerPresenceBinding.inflate(layoutInflater) }
 
-    @Suppress("DEPRECATION")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        // Inisialisasi locationRequest di sini
-        locationRequest = LocationRequest.create().apply {
-            interval = 10000 // Interval pembaruan lokasi dalam milidetik (10 detik)
-            fastestInterval = 5000 // Interval tercepat pembaruan lokasi dalam milidetik (5 detik)
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY // Prioritas akurasi tinggi
-        }
-
+        locationRequest = createLocationRequest()
         checkPermissions()
         setupButtons()
         checkLocationSettings()
+    }
+
+    private fun createLocationRequest(): LocationRequest {
+        return LocationRequest.create().apply {
+            interval = 10000
+            fastestInterval = 5000
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
     }
 
     private fun setupButtons() {
@@ -86,17 +89,9 @@ class OfficerPresenceActivity : AppCompatActivity() {
         binding.uploadButton.setOnClickListener { uploadImage() }
     }
 
-    private fun showToast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-    }
-
     private fun navigateToMainActivity() {
-        val intent = Intent(this, MainActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-        if (hasLocationPermissions()) {
-            fuse.removeLocationUpdates(locationCallback)
-        }
-        startActivity(intent)
+        if (hasLocationPermissions()) { fuse.removeLocationUpdates(locationCallback) }
+        navigatePage(this, MainActivity::class.java, true)
         finish()
     }
 
@@ -115,7 +110,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
             if (resultCode == RESULT_OK) {
                 getLocation()
             } else if (resultCode == RESULT_CANCELED) {
-                showToast("Aktifkan lokasi untuk melanjutkan.")
+                showToast(this, R.string.enable_location)
             }
         }
     }
@@ -168,18 +163,17 @@ class OfficerPresenceActivity : AppCompatActivity() {
                             if (userData != null) {
                                 val username = userData.username
 
-                                showLoading(true)
+                                showLoading(true, binding.progressBar, binding.cameraButton, binding.uploadButton)
 
-                                //Compress size photo
                                 val compressedFile = reduceFileImage(getFile!!)
 
                                 val photoRef = storageReference.child("images/presence/${System.currentTimeMillis()}.jpg")
                                 photoRef.putFile(Uri.fromFile(compressedFile)).addOnSuccessListener { uploadTask ->
                                     uploadTask.storage.downloadUrl.addOnSuccessListener { downloadUri ->
-                                        showLoading(false)
+                                        showLoading(false, binding.progressBar, binding.cameraButton, binding.uploadButton)
                                         val data = PresenceData(
                                             SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date()),
-                                            username, // Menggunakan username dari Realtime Database
+                                            username,
                                             latLng?.let { geocoderHelper.getAddressFromLatLng(it).toString() } ?: "",
                                             downloadUri.toString(),
                                         )
@@ -188,15 +182,15 @@ class OfficerPresenceActivity : AppCompatActivity() {
                                             .child(uid).push().setValue(data)
                                             .addOnCompleteListener { task ->
                                                 if (task.isSuccessful) {
-                                                    showToast(getString(R.string.upload_success))
+                                                    showToast(this@OfficerPresenceActivity, R.string.upload_success)
                                                     navigateToMainActivity()
                                                 } else {
-                                                    showToast(getString(R.string.upload_failed))
+                                                    showToast(this@OfficerPresenceActivity, R.string.upload_failed)
                                                 }
                                             }
                                     }.addOnFailureListener {
-                                        showLoading(false)
-                                        showToast(it.message.toString())
+                                        showLoading(false, binding.progressBar, binding.cameraButton, binding.uploadButton)
+                                        showToast(this@OfficerPresenceActivity, it.message.toString().toInt())
                                     }
                                 }
                             }
@@ -204,15 +198,15 @@ class OfficerPresenceActivity : AppCompatActivity() {
                     }
 
                     override fun onCancelled(error: DatabaseError) {
-                        showLoading(false)
-                        showToast("Error: ${error.message}")
+                        showLoading(false, binding.progressBar, binding.cameraButton, binding.uploadButton)
+                        showToast(this@OfficerPresenceActivity, "Error: ${error.message}".toInt())
                     }
                 })
             } else {
-                showToast("User not authenticated.")
+                showToast(this@OfficerPresenceActivity, R.string.invalid_auth)
             }
         } else {
-            showToast(getString(R.string.select_image))
+            showToast(this@OfficerPresenceActivity, R.string.select_image)
         }
     }
 
@@ -260,11 +254,11 @@ class OfficerPresenceActivity : AppCompatActivity() {
             locationResult.lastLocation?.let { location ->
                 latLng = LatLng(location.latitude, location.longitude)
                 if (latLng != null && !isToastShown) {
-                    showToast(getString(R.string.location_found))
+                    showToast(this@OfficerPresenceActivity, R.string.location_found)
                     binding.uploadButton.isEnabled = true
                     isToastShown = true
                 } else if (latLng == null) {
-                    showToast(getString(R.string.location_not_found))
+                    showToast(this@OfficerPresenceActivity, R.string.location_not_found)
                 }
             }
         }
@@ -272,13 +266,13 @@ class OfficerPresenceActivity : AppCompatActivity() {
 
     private fun getLocation() {
         if (latLng != null && !isToastShown) {
-            showToast(getString(R.string.initialize_location))
+            showToast(this@OfficerPresenceActivity, R.string.initialize_location)
         }
         if (hasLocationPermissions()) {
             try {
                 fuse.requestLocationUpdates(locationRequest, locationCallback, null)
             } catch (e: SecurityException) {
-                showToast(getString(R.string.permission_denied))
+                showToast(this@OfficerPresenceActivity, R.string.permission_denied)
             }
         } else {
             requestLocationPermissions()
@@ -317,7 +311,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
                 if (allPermissionsGranted()) {
                     getLocation()
                 } else {
-                    showToast(getString(R.string.permission_denied))
+                    showToast(this@OfficerPresenceActivity, R.string.permission_denied)
                 }
             }
         }
@@ -325,12 +319,6 @@ class OfficerPresenceActivity : AppCompatActivity() {
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
-    }
-
-    private fun showLoading(isLoading: Boolean) {
-        binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-        binding.cameraButton.isEnabled = !isLoading
-        binding.uploadButton.isEnabled = !isLoading
     }
 
     companion object {

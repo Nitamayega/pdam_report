@@ -11,6 +11,9 @@
     <string name="login_failed">Gagal masuk, cek data kembali</string>
     <string name="login_success">Berhasil Masuk!</string>
 
+    <string name="enable_location">Aktifkan lokasi untuk melanjutkan.</string>
+    <string name="invalid_auth">User not authenticated.</string>
+
     <string name="name">Dev-G</string>
     <string name="role">Kepala Suku</string>
     <string-array name="roles">
