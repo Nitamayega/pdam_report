@@ -4,6 +4,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.text.Editable
+import android.text.TextWatcher
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.ArrayAdapter
@@ -34,6 +37,8 @@ class AddFirstDataActivity : AppCompatActivity() {
     private val auth by lazy { FirebaseAuth.getInstance() }
     private val currentUser = auth.currentUser
 
+    private var imageNumber: Int = 0
+
     private var getFile: File? = null
     private val binding by lazy { ActivityAddFirstDataBinding.inflate(layoutInflater) }
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,8 +51,12 @@ class AddFirstDataActivity : AppCompatActivity() {
     }
 
     private fun setupButtons() {
-        binding.itemImage1.setOnClickListener { startTakePhoto(1) }
-        binding.itemImage2.setOnClickListener { startTakePhoto(2) }
+        binding.itemImage1.setOnClickListener {
+            imageNumber = 1
+            startTakePhoto(1) }
+        binding.itemImage2.setOnClickListener {
+            imageNumber = 2
+            startTakePhoto(2) }
         binding.btnSimpan.setOnClickListener { saveData() }
         binding.btnHapus.setOnClickListener { clearData() }
     }
@@ -65,19 +74,51 @@ class AddFirstDataActivity : AppCompatActivity() {
     private fun saveData() {
         val currentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
         val jenisPekerjaan = binding.dropdownJenisPekerjaan.text.toString()
-        val PW = binding.edtPw.text.toString().toInt()
+        val PW = binding.edtPw.text.toString()
         val nomorRegistrasi = binding.edtNomorRegistrasi.text.toString()
         val name = binding.edtNamaPelanggan.text.toString()
         val address = binding.edtAlamatPelanggan.text.toString()
         val keterangan = binding.edtKeterangan.text.toString()
 
-        // Pastikan getFile tidak null
-        if (getFile != null) {
-            val userReference = currentUser?.let { databaseReference.child("users").child(it.uid) }
+        //set if edt is empty
+        binding.apply {
+//            dropdownJenisPekerjaan.addTextChangedListener(object : TextWatcher{
+//                override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+//                    // Nothing
+//                }
+//
+//                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+//                    dropdownJenisPekerjaan.error = if (s.isNullOrEmpty()) getString(R.string.empty_field) else null
+//                }
+//
+//                override fun afterTextChanged(p0: Editable?) {
+//                    // Nothing
+//                }
+//            })
+            dropdownJenisPekerjaan.error =
+                if (jenisPekerjaan.isEmpty()) getString(R.string.empty_field) else null
+            edtPw.error = if (PW.isEmpty()) getString(R.string.empty_field) else null
+            edtNomorRegistrasi.error =
+                if (nomorRegistrasi.isEmpty()) getString(R.string.empty_field) else null
+            edtNamaPelanggan.error = if (name.isEmpty()) getString(R.string.empty_field) else null
+            edtAlamatPelanggan.error =
+                if (address.isEmpty()) getString(R.string.empty_field) else null
+            edtKeterangan.error =
+                if (keterangan.isEmpty()) getString(R.string.empty_field) else null
+        }
+
+        if (jenisPekerjaan.isNotEmpty() && PW
+                .isNotEmpty() && nomorRegistrasi.isNotEmpty() && name.isNotEmpty() && address.isNotEmpty() && keterangan.isNotEmpty() && (getFile != null)
+        ) {
+            Log.d("Jenis Pekerjaan", jenisPekerjaan)
+            val userReference =
+                currentUser?.let { databaseReference.child("users").child(it.uid) }
             val storageReference = FirebaseStorage.getInstance().reference
 
-            val dokumentasi1Ref = storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi1.jpg")
-            val dokumentasi2Ref = storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi2.jpg")
+            val dokumentasi1Ref =
+                storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi1.jpg")
+            val dokumentasi2Ref =
+                storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi2.jpg")
 
             // Upload file ke Firebase Storage
             val uploadTask1 = dokumentasi1Ref.putFile(Uri.fromFile(getFile))
@@ -95,7 +136,7 @@ class AddFirstDataActivity : AppCompatActivity() {
                             val data = DataCustomer(
                                 currentDate = currentDate,
                                 jenisPekerjaan = jenisPekerjaan,
-                                PW = PW,
+                                PW = PW.toInt(),
                                 nomorRegistrasi = nomorRegistrasi,
                                 name = name,
                                 address = address,
@@ -105,23 +146,33 @@ class AddFirstDataActivity : AppCompatActivity() {
                             )
 
                             showLoading(true)
-                            userReference?.child("listCustomer")?.push()?.setValue(data)?.addOnCompleteListener { task ->
-                                if (task.isSuccessful) {
-                                    showLoading(false)
-                                    Toast.makeText(this, "Data berhasil disimpan", Toast.LENGTH_SHORT).show()
-                                    showLoading(false)
-                                    finish()
-                                } else {
-                                    showLoading(true)
-                                    Toast.makeText(this, "Data gagal disimpan", Toast.LENGTH_SHORT).show()
-                                    showLoading(false)
+                            userReference?.child("listCustomer")?.push()?.setValue(data)
+                                ?.addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        Log.d("Jenis Pekerjaan save", jenisPekerjaan)
+                                        showLoading(false)
+                                        Toast.makeText(
+                                            this,
+                                            "Data berhasil disimpan",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        showLoading(false)
+                                        finish()
+                                    } else {
+                                        showLoading(true)
+                                        Toast.makeText(
+                                            this,
+                                            "Data gagal disimpan",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        showLoading(false)
+                                    }
                                 }
-                            }
                         }
                     }
                 }
             }
-        } else {
+        } else if (getFile == null){
             // Handle jika getFile null
             Toast.makeText(this, "Foto belum diambil", Toast.LENGTH_SHORT).show()
         }
@@ -146,11 +197,12 @@ class AddFirstDataActivity : AppCompatActivity() {
             )
             currentPhotoPath = file.absolutePath
             intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
-            launcherIntentCamera(imageNumber).launch(intent)
+            launcherIntentCamera.launch(intent) // Pemindahan ini ke sini
         }
     }
 
-    private fun launcherIntentCamera(imageNumber: Int) = registerForActivityResult(
+
+    private val launcherIntentCamera = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == RESULT_OK) {
@@ -162,8 +214,7 @@ class AddFirstDataActivity : AppCompatActivity() {
                     2 -> binding.itemImage2
                     else -> null
                 }
-                textViewToUpdate?.text =
-                    SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+                textViewToUpdate?.text = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
             }
         }
     }
