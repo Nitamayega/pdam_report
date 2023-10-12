@@ -4,16 +4,12 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Log
 import android.view.MenuItem
-import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import com.google.firebase.auth.FirebaseAuth
@@ -24,7 +20,7 @@ import com.pdam.report.R
 import com.pdam.report.data.DataCustomer
 import com.pdam.report.databinding.ActivityAddFirstDataBinding
 import com.pdam.report.utils.createCustomTempFile
-import com.pdam.report.utils.reduceFileImage
+import com.pdam.report.utils.showLoading
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -39,7 +35,8 @@ class AddFirstDataActivity : AppCompatActivity() {
 
     private var imageNumber: Int = 0
 
-    private var getFile: File? = null
+    private var firstImageFile: File? = null
+    private var secondImageFile: File? = null
     private val binding by lazy { ActivityAddFirstDataBinding.inflate(layoutInflater) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,10 +50,12 @@ class AddFirstDataActivity : AppCompatActivity() {
     private fun setupButtons() {
         binding.itemImage1.setOnClickListener {
             imageNumber = 1
-            startTakePhoto(1) }
+            startTakePhoto()
+        }
         binding.itemImage2.setOnClickListener {
             imageNumber = 2
-            startTakePhoto(2) }
+            startTakePhoto()
+        }
         binding.btnSimpan.setOnClickListener { saveData() }
         binding.btnHapus.setOnClickListener { clearData() }
     }
@@ -107,8 +106,10 @@ class AddFirstDataActivity : AppCompatActivity() {
                 if (keterangan.isEmpty()) getString(R.string.empty_field) else null
         }
 
+        showLoading(true, binding.progressBar, binding.btnSimpan, binding.btnHapus)
+
         if (jenisPekerjaan.isNotEmpty() && PW
-                .isNotEmpty() && nomorRegistrasi.isNotEmpty() && name.isNotEmpty() && address.isNotEmpty() && keterangan.isNotEmpty() && (getFile != null)
+                .isNotEmpty() && nomorRegistrasi.isNotEmpty() && name.isNotEmpty() && address.isNotEmpty() && keterangan.isNotEmpty() && (firstImageFile != null) && (secondImageFile != null)
         ) {
             Log.d("Jenis Pekerjaan", jenisPekerjaan)
             val userReference =
@@ -121,8 +122,8 @@ class AddFirstDataActivity : AppCompatActivity() {
                 storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi2.jpg")
 
             // Upload file ke Firebase Storage
-            val uploadTask1 = dokumentasi1Ref.putFile(Uri.fromFile(getFile))
-            val uploadTask2 = dokumentasi2Ref.putFile(Uri.fromFile(getFile))
+            val uploadTask1 = dokumentasi1Ref.putFile(Uri.fromFile(firstImageFile))
+            val uploadTask2 = dokumentasi2Ref.putFile(Uri.fromFile(secondImageFile))
 
             uploadTask1.addOnSuccessListener { taskSnapshot1 ->
                 dokumentasi1Ref.downloadUrl.addOnSuccessListener { uri1 ->
@@ -145,47 +146,41 @@ class AddFirstDataActivity : AppCompatActivity() {
                                 dokumentasi2 = dokumentasi2
                             )
 
-                            showLoading(true)
                             userReference?.child("listCustomer")?.push()?.setValue(data)
                                 ?.addOnCompleteListener { task ->
                                     if (task.isSuccessful) {
                                         Log.d("Jenis Pekerjaan save", jenisPekerjaan)
-                                        showLoading(false)
+                                        showLoading(false, binding.progressBar, binding.btnSimpan, binding.btnHapus)
                                         Toast.makeText(
                                             this,
                                             "Data berhasil disimpan",
                                             Toast.LENGTH_SHORT
                                         ).show()
-                                        showLoading(false)
+                                        showLoading(false, binding.progressBar, binding.btnSimpan, binding.btnHapus)
                                         finish()
                                     } else {
-                                        showLoading(true)
+                                        showLoading(true, binding.progressBar, binding.btnSimpan, binding.btnHapus)
                                         Toast.makeText(
                                             this,
                                             "Data gagal disimpan",
                                             Toast.LENGTH_SHORT
                                         ).show()
-                                        showLoading(false)
+                                        showLoading(false, binding.progressBar, binding.btnSimpan, binding.btnHapus)
                                     }
                                 }
                         }
                     }
                 }
             }
-        } else if (getFile == null){
-            // Handle jika getFile null
-            Toast.makeText(this, "Foto belum diambil", Toast.LENGTH_SHORT).show()
+        } else {
+            // Handle jika foto belum diambil atau data belum lengkap
+            showLoading(false, binding.progressBar, binding.btnSimpan, binding.btnHapus)
+            Toast.makeText(this, "Harap isi semua data dan ambil kedua foto", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun showLoading(isLoading: Boolean) {
-        binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-        binding.btnSimpan.isEnabled = !isLoading
-        binding.btnHapus.isEnabled = !isLoading
-    }
-
     private lateinit var currentPhotoPath: String
-    private fun startTakePhoto(imageNumber: Int) {
+    private fun startTakePhoto() {
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         intent.resolveActivity(packageManager)
 
@@ -197,10 +192,9 @@ class AddFirstDataActivity : AppCompatActivity() {
             )
             currentPhotoPath = file.absolutePath
             intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
-            launcherIntentCamera.launch(intent) // Pemindahan ini ke sini
+            launcherIntentCamera.launch(intent) // Mengirimkan nomor gambar sebagai request code
         }
     }
-
 
     private val launcherIntentCamera = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -208,13 +202,13 @@ class AddFirstDataActivity : AppCompatActivity() {
         if (result.resultCode == RESULT_OK) {
             val myFile = File(currentPhotoPath)
             myFile.let { file ->
-                getFile = file
-                val textViewToUpdate = when (imageNumber) {
-                    1 -> binding.itemImage1
-                    2 -> binding.itemImage2
-                    else -> null
+                if (imageNumber == 1) {
+                    firstImageFile = file
+                    binding.itemImage1.text = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+                } else if (imageNumber == 2) {
+                    secondImageFile = file
+                    binding.itemImage2.text = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
                 }
-                textViewToUpdate?.text = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
             }
         }
     }
