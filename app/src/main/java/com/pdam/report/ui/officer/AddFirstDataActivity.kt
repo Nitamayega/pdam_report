@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import com.google.firebase.auth.FirebaseAuth
@@ -24,6 +25,7 @@ import com.pdam.report.data.DataCustomer
 import com.pdam.report.databinding.ActivityAddFirstDataBinding
 import com.pdam.report.utils.createCustomTempFile
 import com.pdam.report.utils.showLoading
+import com.pdam.report.utils.showToast
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -61,9 +63,54 @@ class AddFirstDataActivity : AppCompatActivity() {
             imageNumber = 2
             startTakePhoto()
         }
+        if (firebaseKey == null) {
+            binding.btnHapus.setOnClickListener { clearData() }
+        } else {
+            binding.btnHapus.setOnClickListener { deleteData() }
+        }
         binding.btnSimpan.setOnClickListener { saveData() }
-        binding.btnHapus.setOnClickListener { clearData() }
     }
+
+    private fun deleteData() {
+        val userRef = databaseReference.child("users").child(currentUser?.uid ?: "")
+        val listCustomerRef = userRef.child("listCustomer")
+        val customerRef = firebaseKey?.let { listCustomerRef.child(it) }
+
+        customerRef?.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    val alertDialogBuilder = AlertDialog.Builder(this@AddFirstDataActivity)
+                    alertDialogBuilder.setTitle("Konfirmasi Hapus Data")
+                    alertDialogBuilder.setMessage("Apakah Anda yakin ingin menghapus data ini?")
+                    alertDialogBuilder.setPositiveButton("Ya") { _, _ ->
+                        // Hapus data dari Firebase
+                        customerRef.removeValue()
+                            .addOnSuccessListener {
+                                // Data berhasil dihapus
+                                showToast(this@AddFirstDataActivity, "Data berhasil dihapus".toInt())
+                                finish()
+                            }
+                            .addOnFailureListener { error ->
+                                // Terjadi kesalahan saat menghapus data
+                                showToast(this@AddFirstDataActivity, "Gagal menghapus data: ${error.message}".toInt())
+                            }
+                    }
+                    alertDialogBuilder.setNegativeButton("Tidak") { _, _ ->
+                        // Tidak melakukan apa-apa jika pengguna membatalkan penghapusan
+                    }
+                    val alertDialog = alertDialogBuilder.create()
+                    alertDialog.show()
+                } else {
+                    showToast(this@AddFirstDataActivity, "Data tidak ditemukan".toInt())
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                showToast(this@AddFirstDataActivity, "Gagal mengakses data: ${error.message}".toInt())
+            }
+        })
+    }
+
 
     private fun clearData() {
         binding.edtPw.text.clear()
@@ -200,8 +247,9 @@ class AddFirstDataActivity : AppCompatActivity() {
                     if (dataCustomer != null) {
                         binding.dropdownJenisPekerjaan.apply {
                             setText(dataCustomer.jenisPekerjaan, false)
-                            isEnabled = false
                             isFocusable = false
+                            isClickable = true
+                            keyListener = null
                         }
 
                         binding.edtPw.apply {
@@ -234,6 +282,16 @@ class AddFirstDataActivity : AppCompatActivity() {
                             setText(dataCustomer.keterangan)
                             isEnabled = false
                             isFocusable = false
+                        }
+
+                        binding.itemImage1.apply {
+                            text = dataCustomer.dokumentasi1
+                            isEnabled = false
+                        }
+
+                        binding.itemImage2.apply {
+                            text = dataCustomer.dokumentasi2
+                            isEnabled = false
                         }
 
                         val typeOfWorkArray = resources.getStringArray(R.array.type_of_work)
@@ -300,10 +358,10 @@ class AddFirstDataActivity : AppCompatActivity() {
             myFile.let { file ->
                 if (imageNumber == 1) {
                     firstImageFile = file
-                    binding.itemImage1.text = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+                    binding.itemImage1.text = System.currentTimeMillis().toString()
                 } else if (imageNumber == 2) {
                     secondImageFile = file
-                    binding.itemImage2.text = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+                    binding.itemImage2.text = System.currentTimeMillis().toString()
                 }
             }
         }
