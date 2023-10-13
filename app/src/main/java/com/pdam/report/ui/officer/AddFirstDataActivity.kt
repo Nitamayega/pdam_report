@@ -76,7 +76,7 @@ class AddFirstDataActivity : AppCompatActivity() {
     }
 
     private fun saveData() {
-        val currentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+        val currentDate = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date())
         val jenisPekerjaan = binding.dropdownJenisPekerjaan.text.toString()
         val PW = binding.edtPw.text.toString()
         val nomorRegistrasi = binding.edtNomorRegistrasi.text.toString()

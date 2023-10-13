@@ -33,7 +33,7 @@ data class DataCustomer(
 )
 
 data class PresenceData(
-    val currentDate: String = "",
+    val currentDate: Long = 0,
     val username: String = "",
     val location: String = "",
     val photoUrl: String = "",

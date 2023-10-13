@@ -172,7 +172,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
                                     uploadTask.storage.downloadUrl.addOnSuccessListener { downloadUri ->
                                         showLoading(false, binding.progressBar, binding.cameraButton, binding.uploadButton)
                                         val data = PresenceData(
-                                            SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date()),
+                                            System.currentTimeMillis(),
                                             username,
                                             latLng?.let { geocoderHelper.getAddressFromLatLng(it).toString() } ?: "",
                                             downloadUri.toString(),

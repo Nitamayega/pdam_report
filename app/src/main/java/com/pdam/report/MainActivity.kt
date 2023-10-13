@@ -1,6 +1,9 @@
 package com.pdam.report
 
+import android.Manifest
 import android.content.Intent
+import android.content.IntentSender
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
@@ -9,10 +12,18 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -26,8 +37,13 @@ import com.pdam.report.ui.admin.AdminPresenceActivity
 import com.pdam.report.ui.common.LoginActivity
 import com.pdam.report.ui.officer.AddFirstDataActivity
 import com.pdam.report.ui.officer.OfficerPresenceActivity
+import com.pdam.report.utils.GeocoderHelper
+import com.pdam.report.utils.PermissionHelper
 import com.pdam.report.utils.UserManager
 import com.pdam.report.utils.setRecyclerViewVisibility
+import com.pdam.report.utils.showToast
+import java.text.SimpleDateFormat
+import java.util.Date
 
 class MainActivity : AppCompatActivity() {
 
@@ -38,6 +54,12 @@ class MainActivity : AppCompatActivity() {
     private val auth by lazy { FirebaseAuth.getInstance() }
     private val currentUser = auth.currentUser
 
+    private val fuse: FusedLocationProviderClient by lazy { LocationServices.getFusedLocationProviderClient(this) }
+
+    private var latLng: LatLng? = null
+    private val geocoderHelper = GeocoderHelper(this)
+    private lateinit var locationRequest: LocationRequest
+
     private val userManager by lazy { UserManager(this) }
     private lateinit var user: UserData
 
@@ -46,6 +68,7 @@ class MainActivity : AppCompatActivity() {
         installSplashScreen()
 
         supportActionBar?.hide()
+
         setupView()
         setupData()
         binding.swipeRefreshLayout.setOnRefreshListener {
@@ -53,6 +76,7 @@ class MainActivity : AppCompatActivity() {
             binding.swipeRefreshLayout.isRefreshing = false
         }
     }
+
     private fun setupData() {
         userManager.fetchUserAndSetupData {
             user = userManager.getUser()
@@ -84,6 +108,23 @@ class MainActivity : AppCompatActivity() {
             setContentView(binding.root)
             setupDrawerLayout()
         }
+
+        // Check and request camera and location permissions
+        if (!PermissionHelper.hasCameraPermission(this)) {
+            PermissionHelper.requestCameraPermission(this)
+        }
+        if (!PermissionHelper.hasLocationPermission(this)) {
+            PermissionHelper.requestLocationPermission(this)
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        PermissionHelper.handlePermissionResult(requestCode, permissions, grantResults)
     }
 
     private fun setupDrawerLayout() {
@@ -102,12 +143,26 @@ class MainActivity : AppCompatActivity() {
                     startActivity(moveIntent)
                 }
                 R.id.nav_presence -> {
-                    val moveIntent = if (user.team == 0) {
-                        Intent(this@MainActivity, AdminPresenceActivity::class.java)
-                    } else {
-                        Intent(this@MainActivity, OfficerPresenceActivity::class.java)
+                    val currentDate = Date().time
+                    val referenceDate = SimpleDateFormat("dd/MM/yyyy").parse("03/10/2023")?.time
+                    val daysDifference = ((currentDate - referenceDate!!) / (1000L * 60 * 60 * 24)).toInt()
+
+                    val moveIntent = when {
+                        user.team == 0 -> {
+                            Intent(this@MainActivity, AdminPresenceActivity::class.java)
+                        }
+                        user.team == daysDifference -> {
+                            Intent(this@MainActivity, OfficerPresenceActivity::class.java)
+                        }
+                        else -> {
+                            showToast(this@MainActivity, R.string.permission_denied)
+                            null
+                        }
                     }
-                    startActivity(moveIntent)
+
+                    moveIntent?.let {
+                        startActivity(it)
+                    }
                 }
                 R.id.nav_logout -> {
                     Toast.makeText(
