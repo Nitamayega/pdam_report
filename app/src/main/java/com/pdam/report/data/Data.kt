@@ -11,7 +11,7 @@ data class DataCustomer(
     val currentDate: String = "",
     val petugas: String = "",
     val jenisPekerjaan: String = "",
-    val PW: Int = 0,
+    val pw: Int = 0,
     val nomorRegistrasi: String = "",
     val nomorKL: String = "",
     val name: String = "",

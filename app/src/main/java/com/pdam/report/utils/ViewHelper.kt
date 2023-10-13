@@ -6,7 +6,6 @@ import android.view.View
 import android.widget.Button
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.database.ValueEventListener
 
 fun showLoading(isLoading: Boolean, view: View, firstButton: Button? = null, secondButton: Button? = null) {
     view.visibility = if (isLoading) View.VISIBLE else View.GONE

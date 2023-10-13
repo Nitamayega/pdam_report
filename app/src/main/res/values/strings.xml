@@ -71,4 +71,5 @@
     <string name="location_not_found">Lokasi tidak dapat ditemukan</string>
     <string name="location_found">Lokasi ditemukan</string>
     <string name="initialize_location">Sedang Mencari Lokasi…</string>
+    <string name="next">Lanjutkan</string>
 </resources>

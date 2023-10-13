@@ -101,7 +101,7 @@ class AddFirstDataActivity : AppCompatActivity() {
 //            })
             dropdownJenisPekerjaan.error =
                 if (jenisPekerjaan.isEmpty()) getString(R.string.empty_field) else null
-            edtPw.error = if (PW.isEmpty()) getString(R.string.empty_field) else null
+            edtPw.error = if (PW == "") getString(R.string.empty_field) else null
             edtNomorRegistrasi.error =
                 if (nomorRegistrasi.isEmpty()) getString(R.string.empty_field) else null
             edtNamaPelanggan.error = if (name.isEmpty()) getString(R.string.empty_field) else null
@@ -113,8 +113,7 @@ class AddFirstDataActivity : AppCompatActivity() {
 
         showLoading(true, binding.progressBar, binding.btnSimpan, binding.btnHapus)
 
-        if (jenisPekerjaan.isNotEmpty() && PW
-                .isNotEmpty() && nomorRegistrasi.isNotEmpty() && name.isNotEmpty() && address.isNotEmpty() && keterangan.isNotEmpty() && (firstImageFile != null) && (secondImageFile != null)
+        if (jenisPekerjaan.isNotEmpty() && PW != "" && nomorRegistrasi.isNotEmpty() && name.isNotEmpty() && address.isNotEmpty() && keterangan.isNotEmpty() && (firstImageFile != null) && (secondImageFile != null)
         ) {
             Log.d("Jenis Pekerjaan", jenisPekerjaan)
             val storageReference = FirebaseStorage.getInstance().reference
@@ -147,7 +146,7 @@ class AddFirstDataActivity : AppCompatActivity() {
                                     firebaseKey = newCustomerId, // Menggunakan ID sebagai firebaseKey
                                     currentDate = currentDate,
                                     jenisPekerjaan = jenisPekerjaan,
-                                    PW = PW.toInt(),
+                                    pw = PW.toInt(),
                                     nomorRegistrasi = nomorRegistrasi,
                                     name = name,
                                     address = address,
@@ -199,19 +198,68 @@ class AddFirstDataActivity : AppCompatActivity() {
                 if (snapshot.exists()) {
                     val dataCustomer = snapshot.getValue(DataCustomer::class.java)
                     if (dataCustomer != null) {
-                        binding.dropdownJenisPekerjaan.setText(dataCustomer.jenisPekerjaan)
-                        if (snapshot.hasChild("PW")) {
-                            val pwValue = snapshot.child("PW").getValue(Int::class.java)
-                            Log.d("PW", pwValue.toString())
-                            if (pwValue != null) {
-                                binding.edtPw.setText(pwValue.toString())
+                        binding.dropdownJenisPekerjaan.apply {
+                            setText(dataCustomer.jenisPekerjaan, false)
+                            isEnabled = false
+                            isFocusable = false
+                        }
+
+                        binding.edtPw.apply {
+                            setText(dataCustomer.pw.toString())
+                            isEnabled = false
+                            isFocusable = false
+                        }
+
+
+                        binding.edtNomorRegistrasi.apply {
+                            setText(dataCustomer.nomorRegistrasi)
+                            isEnabled = false
+                            isFocusable = false
+                        }
+
+                        binding.edtNamaPelanggan.apply {
+                            setText(dataCustomer.name)
+                            isEnabled = false
+                            isFocusable = false
+                        }
+
+
+                        binding.edtAlamatPelanggan.apply {
+                            setText(dataCustomer.address)
+                            isEnabled = false
+                            isFocusable = false
+                        }
+
+                        binding.edtKeterangan.apply {
+                            setText(dataCustomer.keterangan)
+                            isEnabled = false
+                            isFocusable = false
+                        }
+
+                        val typeOfWorkArray = resources.getStringArray(R.array.type_of_work)
+                        binding.btnSimpan.apply {
+                            text = context.getString(R.string.next)
+                            setOnClickListener {
+                                when (dataCustomer.jenisPekerjaan) {
+                                    typeOfWorkArray[0] -> {
+                                        val intent = Intent(context, UpdateCustomerInstallationActivity::class.java)
+                                        intent.putExtra(EXTRA_FIREBASE_KEY, firebaseKey)
+                                        context.startActivity(intent)
+                                    }
+                                    typeOfWorkArray[1] -> {
+                                        val intent = Intent(context, UpdateCustomerVerificationActivity::class.java)
+                                        intent.putExtra(EXTRA_FIREBASE_KEY, firebaseKey)
+                                        context.startActivity(intent)
+                                    }
+                                    else -> {
+                                        Toast.makeText(context, "Jenis pekerjaan tidak ditemukan", Toast.LENGTH_SHORT).show()
+                                        val intent = Intent(context, MainActivity::class.java)
+                                        context.startActivity(intent)
+                                    }
+                                }
                             }
                         }
-                        Log.d("Data Customer", dataCustomer.toString())
-                        binding.edtNomorRegistrasi.setText(dataCustomer.nomorRegistrasi)
-                        binding.edtNamaPelanggan.setText(dataCustomer.name)
-                        binding.edtAlamatPelanggan.setText(dataCustomer.address)
-                        binding.edtKeterangan.setText(dataCustomer.keterangan)
+
                     }
                 } else {
                     // Data tidak ditemukan
@@ -224,6 +272,7 @@ class AddFirstDataActivity : AppCompatActivity() {
             }
         })
     }
+
 
 
     private lateinit var currentPhotoPath: String
