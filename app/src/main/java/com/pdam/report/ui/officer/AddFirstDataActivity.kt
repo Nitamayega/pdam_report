@@ -13,7 +13,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.pdam.report.MainActivity
 import com.pdam.report.R
@@ -32,6 +35,7 @@ class AddFirstDataActivity : AppCompatActivity() {
 
     private val auth by lazy { FirebaseAuth.getInstance() }
     private val currentUser = auth.currentUser
+    private val firebaseKey by lazy { intent.getStringExtra(EXTRA_FIREBASE_KEY) }
 
     private var imageNumber: Int = 0
 
@@ -45,6 +49,7 @@ class AddFirstDataActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         setupDropdownField()
         setupButtons()
+        firebaseKey?.let { loadDataFromFirebase(it) }
     }
 
     private fun setupButtons() {
@@ -112,8 +117,6 @@ class AddFirstDataActivity : AppCompatActivity() {
                 .isNotEmpty() && nomorRegistrasi.isNotEmpty() && name.isNotEmpty() && address.isNotEmpty() && keterangan.isNotEmpty() && (firstImageFile != null) && (secondImageFile != null)
         ) {
             Log.d("Jenis Pekerjaan", jenisPekerjaan)
-            val userReference =
-                currentUser?.let { databaseReference.child("users").child(it.uid) }
             val storageReference = FirebaseStorage.getInstance().reference
 
             val dokumentasi1Ref =
@@ -125,29 +128,35 @@ class AddFirstDataActivity : AppCompatActivity() {
             val uploadTask1 = dokumentasi1Ref.putFile(Uri.fromFile(firstImageFile))
             val uploadTask2 = dokumentasi2Ref.putFile(Uri.fromFile(secondImageFile))
 
-            uploadTask1.addOnSuccessListener { taskSnapshot1 ->
+            uploadTask1.addOnSuccessListener {
                 dokumentasi1Ref.downloadUrl.addOnSuccessListener { uri1 ->
                     val dokumentasi1 = uri1.toString()
 
-                    uploadTask2.addOnSuccessListener { taskSnapshot2 ->
+                    uploadTask2.addOnSuccessListener {
                         dokumentasi2Ref.downloadUrl.addOnSuccessListener { uri2 ->
                             val dokumentasi2 = uri2.toString()
 
                             // Setelah berhasil mendapatkan URL, simpan data ke Firebase Realtime Database
-                            val data = DataCustomer(
-                                currentDate = currentDate,
-                                jenisPekerjaan = jenisPekerjaan,
-                                PW = PW.toInt(),
-                                nomorRegistrasi = nomorRegistrasi,
-                                name = name,
-                                address = address,
-                                keterangan = keterangan,
-                                dokumentasi1 = dokumentasi1,
-                                dokumentasi2 = dokumentasi2
-                            )
+                            val userReference = currentUser?.let { databaseReference.child("users").child(it.uid) }
+                            val newCustomerRef =
+                                userReference?.child("listCustomer")?.push() // Membuat simpul baru
+                            val newCustomerId = newCustomerRef?.key // Mengambil ID dari simpul baru
 
-                            userReference?.child("listCustomer")?.push()?.setValue(data)
-                                ?.addOnCompleteListener { task ->
+                            if (newCustomerId != null) {
+                                val data = DataCustomer(
+                                    firebaseKey = newCustomerId, // Menggunakan ID sebagai firebaseKey
+                                    currentDate = currentDate,
+                                    jenisPekerjaan = jenisPekerjaan,
+                                    PW = PW.toInt(),
+                                    nomorRegistrasi = nomorRegistrasi,
+                                    name = name,
+                                    address = address,
+                                    keterangan = keterangan,
+                                    dokumentasi1 = dokumentasi1,
+                                    dokumentasi2 = dokumentasi2
+                                )
+
+                                newCustomerRef.setValue(data).addOnCompleteListener { task ->
                                     if (task.isSuccessful) {
                                         Log.d("Jenis Pekerjaan save", jenisPekerjaan)
                                         showLoading(false, binding.progressBar, binding.btnSimpan, binding.btnHapus)
@@ -168,6 +177,7 @@ class AddFirstDataActivity : AppCompatActivity() {
                                         showLoading(false, binding.progressBar, binding.btnSimpan, binding.btnHapus)
                                     }
                                 }
+                            }
                         }
                     }
                 }
@@ -178,6 +188,43 @@ class AddFirstDataActivity : AppCompatActivity() {
             Toast.makeText(this, "Harap isi semua data dan ambil kedua foto", Toast.LENGTH_SHORT).show()
         }
     }
+
+    private fun loadDataFromFirebase(firebaseKey: String) {
+        val userReference = currentUser?.let { databaseReference.child("users").child(it.uid) }
+
+        // Gunakan kunci Firebase untuk mengambil data dari Firebase Realtime Database
+        userReference?.child("listCustomer")?.child(firebaseKey)?.addListenerForSingleValueEvent(object :
+            ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    val dataCustomer = snapshot.getValue(DataCustomer::class.java)
+                    if (dataCustomer != null) {
+                        binding.dropdownJenisPekerjaan.setText(dataCustomer.jenisPekerjaan)
+                        if (snapshot.hasChild("PW")) {
+                            val pwValue = snapshot.child("PW").getValue(Int::class.java)
+                            Log.d("PW", pwValue.toString())
+                            if (pwValue != null) {
+                                binding.edtPw.setText(pwValue.toString())
+                            }
+                        }
+                        Log.d("Data Customer", dataCustomer.toString())
+                        binding.edtNomorRegistrasi.setText(dataCustomer.nomorRegistrasi)
+                        binding.edtNamaPelanggan.setText(dataCustomer.name)
+                        binding.edtAlamatPelanggan.setText(dataCustomer.address)
+                        binding.edtKeterangan.setText(dataCustomer.keterangan)
+                    }
+                } else {
+                    // Data tidak ditemukan
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Penanganan kesalahan saat mengambil data dari Firebase
+                // Misalnya, menampilkan pesan kesalahan kepada pengguna
+            }
+        })
+    }
+
 
     private lateinit var currentPhotoPath: String
     private fun startTakePhoto() {
@@ -236,5 +283,9 @@ class AddFirstDataActivity : AppCompatActivity() {
         val dropdownField: AutoCompleteTextView = binding.dropdownJenisPekerjaan
         val adapter = ArrayAdapter(this, R.layout.dropdown_item, items)
         dropdownField.setAdapter(adapter)
+    }
+
+    companion object {
+        const val EXTRA_FIREBASE_KEY = "firebase_key"
     }
 }

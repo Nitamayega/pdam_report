@@ -7,6 +7,7 @@ data class UserData (
 )
 
 data class DataCustomer(
+    val firebaseKey: String = "",
     val currentDate: String = "",
     val petugas: String = "",
     val jenisPekerjaan: String = "",

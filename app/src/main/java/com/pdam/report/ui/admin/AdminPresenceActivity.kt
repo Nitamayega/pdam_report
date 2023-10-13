@@ -2,7 +2,6 @@ package com.pdam.report.ui.admin
 
 import android.os.Bundle
 import android.view.MenuItem
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.database.DataSnapshot
@@ -11,6 +10,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.pdam.report.data.PresenceData
 import com.pdam.report.databinding.ActivityAdminPresenceBinding
+import com.pdam.report.utils.setRecyclerViewVisibility
 
 class AdminPresenceActivity : AppCompatActivity() {
     private val binding by lazy { ActivityAdminPresenceBinding.inflate(layoutInflater) }
@@ -42,9 +42,8 @@ class AdminPresenceActivity : AppCompatActivity() {
         userRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.hasChildren()) {
-                    binding.tvEmptyItems.visibility = View.GONE
+                    setRecyclerViewVisibility(binding.tvEmptyItems, binding.rvPresence, false)
                     binding.rvPresence.apply {
-                        visibility = View.VISIBLE
                         layoutManager = LinearLayoutManager(this@AdminPresenceActivity)
                         setHasFixedSize(true)
                     }
@@ -63,8 +62,7 @@ class AdminPresenceActivity : AppCompatActivity() {
                     adapter.updateData(presenceList)
                     binding.rvPresence.adapter = adapter
                 } else {
-                    binding.tvEmptyItems.visibility = View.VISIBLE
-                    binding.rvPresence.visibility = View.GONE
+                    setRecyclerViewVisibility(binding.tvEmptyItems, binding.rvPresence, true)
                 }
             }
             override fun onCancelled(error: DatabaseError) {

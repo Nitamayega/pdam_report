@@ -2,21 +2,15 @@ package com.pdam.report
 
 import android.content.Intent
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.google.firebase.auth.FirebaseAuth
 import com.pdam.report.data.DataCustomer
 import com.pdam.report.databinding.ReportItemRowBinding
-import com.pdam.report.ui.admin.DetailPresenceActivity
 import com.pdam.report.ui.officer.AddFirstDataActivity
 
 class MainAdapter(private val customerList: ArrayList<DataCustomer>) :
     RecyclerView.Adapter<MainAdapter.CustomerViewHolder>() {
-
-    private val auth by lazy { FirebaseAuth.getInstance() }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomerViewHolder {
         return CustomerViewHolder(
@@ -29,7 +23,8 @@ class MainAdapter(private val customerList: ArrayList<DataCustomer>) :
         holder.bind(customer)
         holder.itemView.setOnClickListener {
             val intent = Intent(holder.itemView.context, AddFirstDataActivity::class.java)
-            intent.putExtra(DetailPresenceActivity.EXTRA_DATE, customer.currentDate)
+            // Mengirim kunci Firebase ke AddFirstDataActivity
+            intent.putExtra(AddFirstDataActivity.EXTRA_FIREBASE_KEY, customer.firebaseKey)
             holder.itemView.context.startActivity(intent)
         }
     }

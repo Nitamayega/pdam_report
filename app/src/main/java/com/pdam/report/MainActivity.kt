@@ -27,10 +27,12 @@ import com.pdam.report.ui.common.LoginActivity
 import com.pdam.report.ui.officer.AddFirstDataActivity
 import com.pdam.report.ui.officer.OfficerPresenceActivity
 import com.pdam.report.utils.UserManager
+import com.pdam.report.utils.setRecyclerViewVisibility
 
 class MainActivity : AppCompatActivity() {
 
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
+    private val adapter by lazy { MainAdapter(ArrayList()) }
     private lateinit var toggle: ActionBarDrawerToggle
 
     private val auth by lazy { FirebaseAuth.getInstance() }
@@ -46,6 +48,10 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.hide()
         setupView()
         setupData()
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            setContent()
+            binding.swipeRefreshLayout.isRefreshing = false
+        }
     }
     private fun setupData() {
         userManager.fetchUserAndSetupData {
@@ -148,9 +154,8 @@ class MainActivity : AppCompatActivity() {
         listCustomerRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.hasChildren()) {
-                    binding.emptyView.visibility = View.GONE
+                    setRecyclerViewVisibility(binding.emptyView, binding.rvCusts, false)
                     binding.rvCusts.apply {
-                        visibility = View.VISIBLE
                         layoutManager = LinearLayoutManager(this@MainActivity)
                         setHasFixedSize(true)
                     }
@@ -163,15 +168,15 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                     customerList.sortByDescending { it.currentDate }
-                    val adapter = MainAdapter(customerList)
+                    adapter.updateData(customerList)
                     binding.rvCusts.adapter = adapter
                 } else {
-                    binding.emptyView.visibility = View.VISIBLE
-                    binding.rvCusts.visibility = View.GONE
+                    setRecyclerViewVisibility(binding.emptyView, binding.rvCusts, true)
                 }
             }
             override fun onCancelled(error: DatabaseError) {
                 // Handle onCancelled event
+
             }
         })
     }
