@@ -5,11 +5,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.pdam.report.data.DataCustomer
+import com.pdam.report.data.CustomerData
 import com.pdam.report.databinding.ReportItemRowBinding
 import com.pdam.report.ui.officer.AddFirstDataActivity
 
-class MainAdapter(private val customerList: ArrayList<DataCustomer>) :
+class MainAdapter(private val customerList: ArrayList<CustomerData>) :
     RecyclerView.Adapter<MainAdapter.CustomerViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomerViewHolder {
@@ -29,7 +29,7 @@ class MainAdapter(private val customerList: ArrayList<DataCustomer>) :
         }
     }
 
-    fun updateData(newData: List<DataCustomer>) {
+    fun updateData(newData: List<CustomerData>) {
         val diffResult = DiffUtil.calculateDiff(
             CustomerDataDiffCallback(customerList, newData)
         )
@@ -42,7 +42,7 @@ class MainAdapter(private val customerList: ArrayList<DataCustomer>) :
     override fun getItemCount(): Int = customerList.size
 
     inner class CustomerViewHolder(private var binding: ReportItemRowBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(customer: DataCustomer) {
+        fun bind(customer: CustomerData) {
             binding.apply {
                 tvName.text = customer.name
                 tvAddress.text = customer.address
@@ -51,8 +51,8 @@ class MainAdapter(private val customerList: ArrayList<DataCustomer>) :
     }
 
     class CustomerDataDiffCallback(
-        private val oldList: List<DataCustomer>,
-        private val newList: List<DataCustomer>
+        private val oldList: List<CustomerData>,
+        private val newList: List<CustomerData>
     ) : DiffUtil.Callback() {
 
         override fun getOldListSize(): Int {

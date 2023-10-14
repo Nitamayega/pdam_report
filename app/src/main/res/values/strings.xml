@@ -6,6 +6,7 @@
     <string name="uname">Nama Pengguna</string>
     <string name="password">Kata Sandi</string>
     <string name="login">Masuk</string>
+    <string name="logged_out">Akun Keluar</string>
 
     <string name="empty_field">Isian tidak boleh kosong</string>
     <string name="login_failed">Gagal masuk, cek data kembali</string>

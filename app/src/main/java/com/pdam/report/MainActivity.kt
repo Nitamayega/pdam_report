@@ -23,7 +23,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.pdam.report.data.DataCustomer
+import com.pdam.report.data.CustomerData
 import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ActivityMainBinding
 import com.pdam.report.ui.admin.AdminPresenceActivity
@@ -33,6 +33,7 @@ import com.pdam.report.ui.officer.OfficerPresenceActivity
 import com.pdam.report.utils.GeocoderHelper
 import com.pdam.report.utils.PermissionHelper
 import com.pdam.report.utils.UserManager
+import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.setRecyclerViewVisibility
 import com.pdam.report.utils.showToast
 import java.text.SimpleDateFormat
@@ -42,16 +43,11 @@ class MainActivity : AppCompatActivity() {
 
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
     private val adapter by lazy { MainAdapter(ArrayList()) }
+
     private lateinit var toggle: ActionBarDrawerToggle
 
     private val auth by lazy { FirebaseAuth.getInstance() }
     private val currentUser = auth.currentUser
-
-    private val fuse: FusedLocationProviderClient by lazy { LocationServices.getFusedLocationProviderClient(this) }
-
-    private var latLng: LatLng? = null
-    private val geocoderHelper = GeocoderHelper(this)
-    private lateinit var locationRequest: LocationRequest
 
     private val userManager by lazy { UserManager(this) }
     private lateinit var user: UserData
@@ -80,8 +76,7 @@ class MainActivity : AppCompatActivity() {
             } else {
                 binding.buttonAdd.visibility = View.VISIBLE
                 binding.buttonAdd.setOnClickListener {
-                    val moveIntent = Intent(this@MainActivity, AddFirstDataActivity::class.java)
-                    startActivity(moveIntent)
+                    navigatePage(this, AddFirstDataActivity::class.java)
                 }
             }
         }
@@ -89,8 +84,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupView() {
         if (currentUser == null) {
-            val intent = Intent(this@MainActivity, LoginActivity::class.java)
-            startActivity(intent)
+            navigatePage(this, LoginActivity::class.java)
             finish()
             return
         } else {
@@ -100,13 +94,7 @@ class MainActivity : AppCompatActivity() {
             setupDrawerLayout()
         }
 
-        // Check and request camera and location permissions
-        if (!PermissionHelper.hasCameraPermission(this)) {
-            PermissionHelper.requestCameraPermission(this)
-        }
-        if (!PermissionHelper.hasLocationPermission(this)) {
-            PermissionHelper.requestLocationPermission(this)
-        }
+        checkAndRequestPermissions()
     }
 
     override fun onRequestPermissionsResult(
@@ -129,23 +117,19 @@ class MainActivity : AppCompatActivity() {
     private fun setupNavigationMenu() {
         binding.navView.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
+
                 R.id.nav_report -> {
-                    val moveIntent = Intent(this@MainActivity, MainActivity::class.java)
-                    moveIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    startActivity(moveIntent)
+                    navigatePage(this, MainActivity::class.java, true)
                 }
+
                 R.id.nav_presence -> {
                     val currentDate = Date().time
                     val referenceDate = SimpleDateFormat("dd/MM/yyyy").parse("03/10/2023")?.time
                     val daysDifference = ((currentDate - referenceDate!!) / (1000L * 60 * 60 * 24) % 5).toInt()
 
                     val moveIntent = when {
-                        user.team == 0 -> {
-                            Intent(this@MainActivity, AdminPresenceActivity::class.java)
-                        }
-                        user.team == daysDifference -> {
-                            Intent(this@MainActivity, OfficerPresenceActivity::class.java)
-                        }
+                        user.team == 0 -> Intent(this@MainActivity, AdminPresenceActivity::class.java)
+                        user.team == daysDifference -> Intent(this@MainActivity, OfficerPresenceActivity::class.java)
                         else -> {
                             showToast(this@MainActivity, R.string.permission_denied)
                             null
@@ -156,14 +140,11 @@ class MainActivity : AppCompatActivity() {
                         startActivity(it)
                     }
                 }
+
                 R.id.nav_logout -> {
-                    Toast.makeText(
-                        applicationContext,
-                        "Logged out",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    showToast(applicationContext, R.string.logged_out)
                     auth.signOut()
-                    startActivity(Intent(this@MainActivity, LoginActivity::class.java))
+                    navigatePage(this, LoginActivity::class.java)
                     finish()
                 }
             }
@@ -180,12 +161,7 @@ class MainActivity : AppCompatActivity() {
 
         val displayName = user.username
         uname.text = displayName
-
-        if (user.team == 0) {
-            role.text = resources.getStringArray(R.array.roles)[1]
-        } else {
-            role.text = resources.getStringArray(R.array.roles)[0]
-        }
+        role.text = resources.getStringArray(R.array.roles)[if (user.team == 0) 1 else 0]
 
         Glide.with(this@MainActivity)
             .load("https://ui-avatars.com/api/?name=$displayName&background=1C6996&color=fff")
@@ -195,8 +171,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setContent() {
-        val userRef = FirebaseDatabase.getInstance().getReference("users").child(currentUser?.uid ?: "")
-        val listCustomerRef = userRef.child("listCustomer")
+        val listCustomerRef = FirebaseDatabase.getInstance().getReference("listCustomer")
 
         listCustomerRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -207,14 +182,10 @@ class MainActivity : AppCompatActivity() {
                         setHasFixedSize(true)
                     }
 
-                    val customerList = ArrayList<DataCustomer>()
-                    for (customerSnapshot in snapshot.children) {
-                        val customer = customerSnapshot.getValue(DataCustomer::class.java)
-                        customer?.let {
-                            customerList.add(it)
-                        }
-                    }
-                    customerList.sortByDescending { it.currentDate }
+                    val customerList = snapshot.children.mapNotNull { customerSnapshot ->
+                        customerSnapshot.getValue(CustomerData::class.java)
+                    }.sortedByDescending { it.currentDate }
+
                     adapter.updateData(customerList)
                     binding.rvCusts.adapter = adapter
                 } else {
@@ -223,7 +194,6 @@ class MainActivity : AppCompatActivity() {
             }
             override fun onCancelled(error: DatabaseError) {
                 // Handle onCancelled event
-
             }
         })
     }
@@ -233,5 +203,14 @@ class MainActivity : AppCompatActivity() {
             return true
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun checkAndRequestPermissions() {
+        if (!PermissionHelper.hasCameraPermission(this)) {
+            PermissionHelper.requestCameraPermission(this)
+        }
+        if (!PermissionHelper.hasLocationPermission(this)) {
+            PermissionHelper.requestLocationPermission(this)
+        }
     }
 }

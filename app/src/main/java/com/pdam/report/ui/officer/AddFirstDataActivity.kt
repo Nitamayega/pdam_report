@@ -21,7 +21,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.pdam.report.MainActivity
 import com.pdam.report.R
-import com.pdam.report.data.DataCustomer
+import com.pdam.report.data.CustomerData
 import com.pdam.report.databinding.ActivityAddFirstDataBinding
 import com.pdam.report.utils.createCustomTempFile
 import com.pdam.report.utils.showLoading
@@ -63,17 +63,16 @@ class AddFirstDataActivity : AppCompatActivity() {
             imageNumber = 2
             startTakePhoto()
         }
+        binding.btnSimpan.setOnClickListener { saveData() }
         if (firebaseKey == null) {
             binding.btnHapus.setOnClickListener { clearData() }
         } else {
             binding.btnHapus.setOnClickListener { deleteData() }
         }
-        binding.btnSimpan.setOnClickListener { saveData() }
     }
 
     private fun deleteData() {
-        val userRef = databaseReference.child("users").child(currentUser?.uid ?: "")
-        val listCustomerRef = userRef.child("listCustomer")
+        val listCustomerRef = databaseReference.child("listCustomer")
         val customerRef = firebaseKey?.let { listCustomerRef.child(it) }
 
         customerRef?.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -123,7 +122,7 @@ class AddFirstDataActivity : AppCompatActivity() {
     }
 
     private fun saveData() {
-        val currentDate = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date())
+        val currentDate = System.currentTimeMillis()
         val jenisPekerjaan = binding.dropdownJenisPekerjaan.text.toString()
         val PW = binding.edtPw.text.toString()
         val nomorRegistrasi = binding.edtNomorRegistrasi.text.toString()
@@ -162,7 +161,6 @@ class AddFirstDataActivity : AppCompatActivity() {
 
         if (jenisPekerjaan.isNotEmpty() && PW != "" && nomorRegistrasi.isNotEmpty() && name.isNotEmpty() && address.isNotEmpty() && keterangan.isNotEmpty() && (firstImageFile != null) && (secondImageFile != null)
         ) {
-            Log.d("Jenis Pekerjaan", jenisPekerjaan)
             val storageReference = FirebaseStorage.getInstance().reference
 
             val dokumentasi1Ref =
@@ -183,13 +181,12 @@ class AddFirstDataActivity : AppCompatActivity() {
                             val dokumentasi2 = uri2.toString()
 
                             // Setelah berhasil mendapatkan URL, simpan data ke Firebase Realtime Database
-                            val userReference = currentUser?.let { databaseReference.child("users").child(it.uid) }
                             val newCustomerRef =
-                                userReference?.child("listCustomer")?.push() // Membuat simpul baru
-                            val newCustomerId = newCustomerRef?.key // Mengambil ID dari simpul baru
+                                databaseReference.child("listCustomer").push() // Membuat simpul baru
+                            val newCustomerId = newCustomerRef.key // Mengambil ID dari simpul baru
 
                             if (newCustomerId != null) {
-                                val data = DataCustomer(
+                                val data = CustomerData(
                                     firebaseKey = newCustomerId, // Menggunakan ID sebagai firebaseKey
                                     currentDate = currentDate,
                                     jenisPekerjaan = jenisPekerjaan,
@@ -236,14 +233,12 @@ class AddFirstDataActivity : AppCompatActivity() {
     }
 
     private fun loadDataFromFirebase(firebaseKey: String) {
-        val userReference = currentUser?.let { databaseReference.child("users").child(it.uid) }
-
         // Gunakan kunci Firebase untuk mengambil data dari Firebase Realtime Database
-        userReference?.child("listCustomer")?.child(firebaseKey)?.addListenerForSingleValueEvent(object :
+        databaseReference.child("listCustomer")?.child(firebaseKey)?.addListenerForSingleValueEvent(object :
             ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
-                    val dataCustomer = snapshot.getValue(DataCustomer::class.java)
+                    val dataCustomer = snapshot.getValue(CustomerData::class.java)
                     if (dataCustomer != null) {
                         binding.dropdownJenisPekerjaan.apply {
                             setText(dataCustomer.jenisPekerjaan, false)

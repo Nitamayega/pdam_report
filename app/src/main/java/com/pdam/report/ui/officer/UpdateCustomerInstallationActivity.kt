@@ -12,7 +12,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.pdam.report.MainActivity
 import com.pdam.report.R
-import com.pdam.report.data.DataCustomer
+import com.pdam.report.data.CustomerData
 import com.pdam.report.databinding.ActivityUpdateCustomerInstallationBinding
 
 class UpdateCustomerInstallationActivity : AppCompatActivity() {
@@ -24,6 +24,7 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
     private val auth by lazy { FirebaseAuth.getInstance() }
     private val currentUser = auth.currentUser
     private val firebaseKey by lazy { intent.getStringExtra(AddFirstDataActivity.EXTRA_FIREBASE_KEY) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -58,7 +59,7 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
             ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
-                    val dataCustomer = snapshot.getValue(DataCustomer::class.java)
+                    val dataCustomer = snapshot.getValue(CustomerData::class.java)
                     if (dataCustomer != null) {
                         binding.edtPemasanganSambungan.apply {
                             setText(dataCustomer.jenisPekerjaan.toString())
