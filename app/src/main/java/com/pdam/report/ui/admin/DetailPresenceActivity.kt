@@ -7,6 +7,7 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.pdam.report.databinding.ActivityDetailPresenceBinding
+import com.pdam.report.utils.navigatePage
 
 class DetailPresenceActivity : AppCompatActivity() {
 
@@ -21,6 +22,7 @@ class DetailPresenceActivity : AppCompatActivity() {
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        // Mengambil data tambahan yang dikirim melalui Intent
         val itemDate = intent.getStringExtra(EXTRA_DATE)
         val itemLocation = intent.getStringExtra(EXTRA_LOCATION)
         val itemPhotoUrl = intent.getStringExtra(EXTRA_PHOTOURL)
@@ -38,10 +40,7 @@ class DetailPresenceActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            val intent = Intent(this, AdminPresenceActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-            startActivity(intent)
-            finish()
+            navigatePage(this, AdminPresenceActivity::class.java, true)
             return true
         }
         return super.onOptionsItemSelected(item)
@@ -49,13 +48,12 @@ class DetailPresenceActivity : AppCompatActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        val intent = Intent(this, AdminPresenceActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-        startActivity(intent)
+        navigatePage(this, AdminPresenceActivity::class.java, true)
         super.onBackPressed()
     }
 
     companion object {
+        // Konstanta yang digunakan untuk mengirim data tambahan melalui Intent
         const val EXTRA_DATE = "extra_date"
         const val EXTRA_LOCATION = "extra_location"
         const val EXTRA_PHOTOURL = "extra_photourl"

@@ -45,7 +45,7 @@ import java.io.File
 class OfficerPresenceActivity : AppCompatActivity() {
 
     private var getFile: File? = null
-    private var storageReference = FirebaseStorage.getInstance().reference
+    private val storageReference = FirebaseStorage.getInstance().reference
     private val databaseReference = FirebaseDatabase.getInstance().reference
 
     private val fuse: FusedLocationProviderClient by lazy { LocationServices.getFusedLocationProviderClient(this) }
@@ -67,12 +67,15 @@ class OfficerPresenceActivity : AppCompatActivity() {
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        // Membuat permintaan lokasi
         locationRequest = createLocationRequest()
+
         checkPermissions()
         setupButtons()
         checkLocationSettings()
     }
 
+    // Membuat permintaan lokasi dengan preferensi tinggi
     private fun createLocationRequest(): LocationRequest {
         return LocationRequest.create().apply {
             interval = 10000
@@ -81,7 +84,9 @@ class OfficerPresenceActivity : AppCompatActivity() {
         }
     }
 
+    // Mengatur fungsi tombol pada tampilan
     private fun setupButtons() {
+        // Aksi saat tombol kamera ditekan
         binding.cameraButton.setOnClickListener {
             if (PermissionHelper.hasCameraPermission(this@OfficerPresenceActivity)) {
                 startTakePhoto()
@@ -89,16 +94,22 @@ class OfficerPresenceActivity : AppCompatActivity() {
                 PermissionHelper.requestCameraPermission(this@OfficerPresenceActivity)
             }
         }
+
+        // Membuat tombol unggah nonaktif awalnya
         binding.uploadButton.isEnabled = false
+
+        // Aksi saat tombol unggah ditekan
         binding.uploadButton.setOnClickListener { uploadImage() }
     }
 
+    // Navigasi kembali ke halaman utama (MainActivity)
     private fun navigateToMainActivity() {
         if (PermissionHelper.hasLocationPermission(this@OfficerPresenceActivity)) { fuse.removeLocationUpdates(locationCallback) }
         navigatePage(this, MainActivity::class.java, true)
         finish()
     }
 
+    // Menangani tindakan saat tombol kembali di ActionBar ditekan
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
             navigateToMainActivity()
@@ -107,6 +118,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
+    // Metode untuk menangani hasil dari permintaan pengaturan lokasi
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -119,17 +131,20 @@ class OfficerPresenceActivity : AppCompatActivity() {
         }
     }
 
+    // Menangani tindakan saat tombol kembali perangkat ditekan
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         navigateToMainActivity()
         super.onBackPressed()
     }
 
+    // Metode untuk memulai pengambilan foto
     private lateinit var currentPhotoPath: String
     private fun startTakePhoto() {
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         intent.resolveActivity(packageManager)
 
+        // Membuat file temporer untuk menyimpan foto
         createCustomTempFile(application).also { file ->
             val photoURI: Uri = FileProvider.getUriForFile(
                 this@OfficerPresenceActivity,
@@ -138,10 +153,13 @@ class OfficerPresenceActivity : AppCompatActivity() {
             )
             currentPhotoPath = file.absolutePath
             intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+
+            // Memulai kamera untuk mengambil foto
             launcherIntentCamera.launch(intent)
         }
     }
 
+    // Metode untuk menangani hasil dari pemotretan
     private val launcherIntentCamera = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -154,6 +172,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
         }
     }
 
+    // Fungsi untuk mengunggah gambar
     private fun uploadImage() {
         if (getFile != null) {
             val uid = currentUser?.uid
@@ -169,12 +188,18 @@ class OfficerPresenceActivity : AppCompatActivity() {
 
                                 showLoading(true, binding.progressBar, binding.cameraButton, binding.uploadButton)
 
+                                // Mengompres gambar sebelum diunggah
                                 val compressedFile = reduceFileImage(getFile!!)
 
+                                // Menentukan referensi untuk penyimpanan gambar
                                 val photoRef = storageReference.child("images/presence/${System.currentTimeMillis()}.jpg")
+
+                                // Mengunggah gambar ke Firebase Storage
                                 photoRef.putFile(Uri.fromFile(compressedFile)).addOnSuccessListener { uploadTask ->
                                     uploadTask.storage.downloadUrl.addOnSuccessListener { downloadUri ->
                                         showLoading(false, binding.progressBar, binding.cameraButton, binding.uploadButton)
+
+                                        // Membuat objek data presensi
                                         val data = PresenceData(
                                             System.currentTimeMillis(),
                                             username,
@@ -182,6 +207,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
                                             downloadUri.toString(),
                                         )
 
+                                        // Mengunggah data presensi ke database
                                         databaseReference.child("listPresence")
                                             .child(uid).push().setValue(data)
                                             .addOnCompleteListener { task ->
@@ -214,6 +240,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
         }
     }
 
+    // Memeriksa izin yang diperlukan
     private fun checkPermissions() {
         if (!allPermissionsGranted()) {
             ActivityCompat.requestPermissions(
@@ -224,6 +251,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
         }
     }
 
+    // Memeriksa pengaturan lokasi perangkat
     @Suppress("DEPRECATION")
     private fun checkLocationSettings() {
         val locationRequest = LocationRequest.create().apply {
@@ -252,7 +280,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
         }
     }
 
-
+    // Menangani pembaruan lokasi perangkat
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             locationResult.lastLocation?.let { location ->
@@ -268,6 +296,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
         }
     }
 
+    // Memulai permintaan lokasi
     private fun getLocation() {
         if (latLng != null && !isToastShown) {
             showToast(this@OfficerPresenceActivity, R.string.initialize_location)
@@ -283,6 +312,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
         }
     }
 
+    // Menangani hasil permintaan izin
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -300,6 +330,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
         }
     }
 
+    // Memeriksa apakah semua izin yang diperlukan telah diberikan
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
     }

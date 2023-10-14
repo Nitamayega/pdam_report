@@ -15,13 +15,15 @@ import com.pdam.report.utils.setRecyclerViewVisibility
 class AdminPresenceActivity : AppCompatActivity() {
     private val binding by lazy { ActivityAdminPresenceBinding.inflate(layoutInflater) }
     private val adapter by lazy { AdminPresenceAdapter(ArrayList()) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(binding.root)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        setupRecyclerView()
 
-        setContentView(binding.root)
-        setContent()
+        // Menambahkan aksi ketika pengguna menarik untuk menyegarkan (swipe to refresh)
         binding.swipeRefreshLayout.setOnRefreshListener {
             setContent()
             binding.swipeRefreshLayout.isRefreshing = false
@@ -36,39 +38,48 @@ class AdminPresenceActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
+    // Mengatur konfigurasi RecyclerView
+    private fun setupRecyclerView() {
+        binding.rvPresence.apply {
+            layoutManager = LinearLayoutManager(this@AdminPresenceActivity)
+            setHasFixedSize(true)
+            adapter = this@AdminPresenceActivity.adapter
+        }
+    }
+
+    // Memuat data presensi dari Firebase Database
     private fun setContent() {
         val userRef = FirebaseDatabase.getInstance().getReference("listPresence")
 
         userRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.hasChildren()) {
+                val presenceList = ArrayList<PresenceData>()
+
+                // Iterasi melalui data presensi
+                snapshot.children.forEach { presenceSnapshot ->
+                    presenceSnapshot.children.forEach { presenceDataSnapshot ->
+                        val presenceData = presenceDataSnapshot.getValue(PresenceData::class.java)
+                        presenceData?.let { presenceList.add(it) }
+                    }
+                }
+
+                if (presenceList.isNotEmpty()) {
+                    // Menampilkan RecyclerView dan menyembunyikan pesan "Data Kosong"
                     setRecyclerViewVisibility(binding.tvEmptyItems, binding.rvPresence, false)
-                    binding.rvPresence.apply {
-                        layoutManager = LinearLayoutManager(this@AdminPresenceActivity)
-                        setHasFixedSize(true)
-                    }
 
-                    val presenceList = ArrayList<PresenceData>()
-                    for (presenceSnapshot in snapshot.children) {
-                        for (presenceDataSnapshot in presenceSnapshot.children) {
-                            val presenceData = presenceDataSnapshot.getValue(PresenceData::class.java)
-                            presenceData?.let {
-                                presenceList.add(it)
-                            }
-                        }
-                    }
-
+                    // Mengurutkan data presensi berdasarkan tanggal secara menurun
                     presenceList.sortByDescending { it.currentDate }
+
+                    // Memperbarui data di adapter
                     adapter.updateData(presenceList)
-                    binding.rvPresence.adapter = adapter
                 } else {
                     setRecyclerViewVisibility(binding.tvEmptyItems, binding.rvPresence, true)
                 }
             }
+
             override fun onCancelled(error: DatabaseError) {
                 // Handle onCancelled event
             }
         })
     }
-
 }

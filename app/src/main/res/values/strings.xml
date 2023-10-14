@@ -66,12 +66,32 @@
         <item>Pemasangan baru</item>
         <item>Pemasangan kembali</item>
     </string-array>
+
     <string name="pemasangan_sambungan_baru">Pemasangan Sambungan Baru</string>
     <string name="verifikasi_pemasangan">Verifikasi Pemasangan</string>
 
-    <string name="location_not_found">Lokasi tidak dapat ditemukan</string>
     <string name="location_found">Lokasi ditemukan</string>
     <string name="initialize_location">Sedang Mencari Lokasi…</string>
-    <string name="next">Lanjutkan</string>
+    <string name="location_not_found">Lokasi tidak dapat ditemukan</string>
     <string name="must_allow_permission">Anda Harus Mengizinkan Semua Permission</string>
+
+    <string name="next">Lanjutkan</string>
+    <string name="finish">Selesai</string>
+
+    <string name="save_failed">Data gagal disimpan</string>
+    <string name="save_success">Data berhasil disimpan</string>
+
+    <string name="fill_all_data">Isi semua data dan unggah semua gambar</string>
+
+    <string name="delete_data">Konfirmasi Hapus Data"</string>
+    <string name="delete_confirmation">Apakah anda yakin ingin menghapus data ini?</string>
+    <string name="delete">Hapus</string>
+    <string name="cancel">Batal</string>
+    <string name="delete_success">Data berhasil dihapus</string>
+    <string name="delete_failed">Data gagal dihapus</string>
+
+    <string name="data_not_found">Data tidak ditemukan</string>
+    <string name="failed_access_data">Gagal mengakses data</string>
+
+
 </resources>

@@ -127,9 +127,9 @@ class MainActivity : AppCompatActivity() {
                     val referenceDate = SimpleDateFormat("dd/MM/yyyy").parse("03/10/2023")?.time
                     val daysDifference = ((currentDate - referenceDate!!) / (1000L * 60 * 60 * 24) % 5).toInt()
 
-                    val moveIntent = when {
-                        user.team == 0 -> Intent(this@MainActivity, AdminPresenceActivity::class.java)
-                        user.team == daysDifference -> Intent(this@MainActivity, OfficerPresenceActivity::class.java)
+                    val moveIntent = when (user.team) {
+                        0 -> Intent(this@MainActivity, AdminPresenceActivity::class.java)
+                        daysDifference -> Intent(this@MainActivity, OfficerPresenceActivity::class.java)
                         else -> {
                             showToast(this@MainActivity, R.string.permission_denied)
                             null

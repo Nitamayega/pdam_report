@@ -46,6 +46,7 @@ class MainAdapter(private val customerList: ArrayList<CustomerData>) :
             binding.apply {
                 tvName.text = customer.name
                 tvAddress.text = customer.address
+                tvPetugas.text = customer.petugas
             }
         }
     }

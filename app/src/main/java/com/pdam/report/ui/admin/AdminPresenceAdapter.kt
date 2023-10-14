@@ -15,18 +15,21 @@ import com.pdam.report.databinding.PresenceItemRowBinding
 class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>) :
     RecyclerView.Adapter<AdminPresenceAdapter.PresenceViewHolder>() {
 
-    private val auth by lazy { FirebaseAuth.getInstance() }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PresenceViewHolder {
+
+        // Menginflate layout item presensi ke dalam view holder
         return PresenceViewHolder(
             PresenceItemRowBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     }
 
     override fun onBindViewHolder(holder: PresenceViewHolder, position: Int) {
+
+        // Mengikat data presensi ke tampilan item dan menambahkan aksi klik
         val presence = presenceList[position]
         holder.bind(presence)
         holder.itemView.setOnClickListener {
+            // Menavigasi ke halaman detail presensi saat item diklik
             val intent = Intent(holder.itemView.context, DetailPresenceActivity::class.java)
             intent.putExtra(DetailPresenceActivity.EXTRA_DATE, presence.currentDate)
             intent.putExtra(DetailPresenceActivity.EXTRA_LOCATION, presence.location)
@@ -36,6 +39,7 @@ class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>) :
         }
     }
 
+    // Memperbarui data pada adapter dan melakukan perbandingan item yang berbeda
     fun updateData(newData: List<PresenceData>) {
         val diffResult = calculateDiff(
             PresenceDataDiffCallback(presenceList, newData)
@@ -59,7 +63,7 @@ class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>) :
                 tvLocation.text = presence.location
                 tvTimestampe.text = presence.currentDate.toString()
 
-                // Mengecek apakah tanggal sama dengan tanggal entri sebelumnya
+                // Mengelola tampilan tanggal untuk menghindari duplikasi
                 if (adapterPosition > 0 && presence.currentDate == presenceList[adapterPosition - 1].currentDate) {
                     tvDate.visibility = View.GONE
                 } else {
@@ -70,6 +74,7 @@ class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>) :
         }
     }
 
+    // Kelas yang digunakan oleh DiffUtil untuk menghitung perubahan data
     class PresenceDataDiffCallback(
         private val oldList: List<PresenceData>,
         private val newList: List<PresenceData>
@@ -84,6 +89,7 @@ class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>) :
         }
 
         override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            // Memeriksa apakah item presensi pada kedua daftar adalah sama
             return oldList[oldItemPosition] == newList[newItemPosition]
         }
 
