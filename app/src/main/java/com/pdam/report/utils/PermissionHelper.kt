@@ -7,15 +7,14 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
 object PermissionHelper {
-    private const val REQUEST_CODE_CAMERA = 1
-    private const val REQUEST_CODE_LOCATION = 2
+    private const val REQUEST_CODE_PERMISSION = 10
 
     fun requestCameraPermission(activity: Activity) {
         if (!hasCameraPermission(activity)) {
             ActivityCompat.requestPermissions(
                 activity,
                 arrayOf(Manifest.permission.CAMERA),
-                REQUEST_CODE_CAMERA
+                REQUEST_CODE_PERMISSION
             )
         }
     }
@@ -28,7 +27,7 @@ object PermissionHelper {
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.ACCESS_COARSE_LOCATION
                 ),
-                REQUEST_CODE_LOCATION
+                REQUEST_CODE_PERMISSION
             )
         }
     }
@@ -55,10 +54,8 @@ object PermissionHelper {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        if (requestCode == REQUEST_CODE_CAMERA) {
+        if (requestCode == REQUEST_CODE_PERMISSION) {
             // Handle camera permission result
-        } else if (requestCode == REQUEST_CODE_LOCATION) {
-            // Handle location permission result
         }
     }
 }

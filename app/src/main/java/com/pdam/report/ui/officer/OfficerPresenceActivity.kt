@@ -34,6 +34,7 @@ import com.pdam.report.data.PresenceData
 import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ActivityOfficerPresenceBinding
 import com.pdam.report.utils.GeocoderHelper
+import com.pdam.report.utils.PermissionHelper
 import com.pdam.report.utils.createCustomTempFile
 import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.reduceFileImage
@@ -81,13 +82,19 @@ class OfficerPresenceActivity : AppCompatActivity() {
     }
 
     private fun setupButtons() {
-        binding.cameraButton.setOnClickListener { startTakePhoto() }
+        binding.cameraButton.setOnClickListener {
+            if (PermissionHelper.hasCameraPermission(this@OfficerPresenceActivity)) {
+                startTakePhoto()
+            } else {
+                PermissionHelper.requestCameraPermission(this@OfficerPresenceActivity)
+            }
+        }
         binding.uploadButton.isEnabled = false
         binding.uploadButton.setOnClickListener { uploadImage() }
     }
 
     private fun navigateToMainActivity() {
-        if (hasLocationPermissions()) { fuse.removeLocationUpdates(locationCallback) }
+        if (PermissionHelper.hasLocationPermission(this@OfficerPresenceActivity)) { fuse.removeLocationUpdates(locationCallback) }
         navigatePage(this, MainActivity::class.java, true)
         finish()
     }
@@ -265,36 +272,15 @@ class OfficerPresenceActivity : AppCompatActivity() {
         if (latLng != null && !isToastShown) {
             showToast(this@OfficerPresenceActivity, R.string.initialize_location)
         }
-        if (hasLocationPermissions()) {
+        if (PermissionHelper.hasLocationPermission(this)) {
             try {
                 fuse.requestLocationUpdates(locationRequest, locationCallback, null)
             } catch (e: SecurityException) {
                 showToast(this@OfficerPresenceActivity, R.string.permission_denied)
             }
         } else {
-            requestLocationPermissions()
+            PermissionHelper.requestLocationPermission(this@OfficerPresenceActivity)
         }
-    }
-
-    private fun hasLocationPermissions(): Boolean {
-        return (ContextCompat.checkSelfPermission(
-            this@OfficerPresenceActivity,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
-            this@OfficerPresenceActivity,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED)
-    }
-
-    private fun requestLocationPermissions() {
-        ActivityCompat.requestPermissions(
-            this@OfficerPresenceActivity,
-            arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ),
-            REQUEST_CODE_PERMISSIONS
-        )
     }
 
     override fun onRequestPermissionsResult(
@@ -308,7 +294,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
                 if (allPermissionsGranted()) {
                     getLocation()
                 } else {
-                    showToast(this@OfficerPresenceActivity, R.string.permission_denied)
+                    showToast(this@OfficerPresenceActivity, R.string.must_allow_permission)
                 }
             }
         }

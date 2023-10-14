@@ -1,5 +1,6 @@
 package com.pdam.report
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
@@ -124,6 +125,7 @@ class MainActivity : AppCompatActivity() {
         toggle.syncState()
     }
 
+    @SuppressLint("SimpleDateFormat")
     private fun setupNavigationMenu() {
         binding.navView.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
@@ -135,7 +137,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_presence -> {
                     val currentDate = Date().time
                     val referenceDate = SimpleDateFormat("dd/MM/yyyy").parse("03/10/2023")?.time
-                    val daysDifference = ((currentDate - referenceDate!!) / (1000L * 60 * 60 * 24)).toInt()
+                    val daysDifference = ((currentDate - referenceDate!!) / (1000L * 60 * 60 * 24) % 5).toInt()
 
                     val moveIntent = when {
                         user.team == 0 -> {

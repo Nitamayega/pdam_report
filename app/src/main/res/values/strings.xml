@@ -72,4 +72,5 @@
     <string name="location_found">Lokasi ditemukan</string>
     <string name="initialize_location">Sedang Mencari Lokasi…</string>
     <string name="next">Lanjutkan</string>
+    <string name="must_allow_permission">Anda Harus Mengizinkan Semua Permission</string>
 </resources>
