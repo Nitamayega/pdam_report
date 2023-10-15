@@ -1,11 +1,15 @@
 package com.pdam.report.utils
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.database.DatabaseReference
+import com.pdam.report.R
 
 fun showLoading(isLoading: Boolean, view: View, firstButton: Button? = null, secondButton: Button? = null) {
     view.visibility = if (isLoading) View.VISIBLE else View.GONE
@@ -21,6 +25,25 @@ fun setRecyclerViewVisibility(emptyView: View, recyclerView: RecyclerView, empty
 fun showToast(context: Context, resId: Int) {
     val message = context.getString(resId)
     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+}
+
+fun showDeleteConfirmationDialog(customerRef: DatabaseReference, context: Context) {
+    AlertDialog.Builder(context).apply {
+        setTitle(R.string.delete_data)
+        setMessage(R.string.delete_confirmation)
+        setPositiveButton(R.string.delete) { _, _ ->
+            // Confirm and proceed with deletion
+            customerRef.removeValue()
+                .addOnSuccessListener {
+                    showToast(context, R.string.delete_success)
+                    (context as Activity).finish()
+                }
+                .addOnFailureListener { error ->
+                    showToast(context, "${R.string.delete_failed}: ${error.message}".toInt())
+                }
+        }
+        setNegativeButton(R.string.cancel, null)
+    }.create().show()
 }
 
 fun navigatePage(context: Context, destination: Class<*>, clearTask: Boolean = false) {

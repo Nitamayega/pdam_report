@@ -1,17 +1,18 @@
 package com.pdam.report.ui.officer
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.MenuItem
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
@@ -21,6 +22,8 @@ import com.pdam.report.data.CustomerData
 import com.pdam.report.databinding.ActivityUpdateCustomerInstallationBinding
 import com.pdam.report.utils.createCustomTempFile
 import com.pdam.report.utils.navigatePage
+import com.pdam.report.utils.parsingNameImage
+import com.pdam.report.utils.showDeleteConfirmationDialog
 import com.pdam.report.utils.showLoading
 import com.pdam.report.utils.showToast
 import java.io.File
@@ -35,13 +38,28 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
     private val firebaseKey by lazy { intent.getStringExtra(AddFirstDataActivity.EXTRA_FIREBASE_KEY) }
     private val customerData by lazy { intent.getIntExtra(AddFirstDataActivity.EXTRA_CUSTOMER_DATA, 0) }
 
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+//            navigatePage(this@UpdateCustomerInstallationActivity, AddFirstDataActivity::class.java, true)
+            intent = Intent(this@UpdateCustomerInstallationActivity, AddFirstDataActivity::class.java)
+            intent.putExtra(AddFirstDataActivity.EXTRA_FIREBASE_KEY, firebaseKey)
+            startActivity(intent)
+        }
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         loadDataFromFirebase(firebaseKey.toString())
+
+
+        Log.d("firebaseKey", firebaseKey.toString())
+        Log.d("customerData", customerData.toString())
 
         setupButtons()
     }
@@ -51,9 +69,9 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
         binding.btnSimpan.setOnClickListener { saveData() }
         binding.btnHapus.setOnClickListener {
             if (customerData == 1) {
-                binding.btnHapus.setOnClickListener { clearData() }
+                clearData()
             } else {
-                binding.btnHapus.setOnClickListener { deleteData() }
+                deleteData()
             }
         }
     }
@@ -66,7 +84,7 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
                     // Show a confirmation dialog for delete
-                    showDeleteConfirmationDialog(customerRef)
+                    showDeleteConfirmationDialog(customerRef, this@UpdateCustomerInstallationActivity)
                 } else {
                     showToast(this@UpdateCustomerInstallationActivity, R.string.data_not_found)
                 }
@@ -78,29 +96,6 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
         })
     }
 
-    private fun showDeleteConfirmationDialog(customerRef: DatabaseReference) {
-        AlertDialog.Builder(this@UpdateCustomerInstallationActivity).apply {
-            setTitle(R.string.delete_data)
-            setMessage(R.string.delete_confirmation)
-            setPositiveButton(R.string.delete) { _, _ ->
-                // Confirm and proceed with deletion
-                deleteCustomerData(customerRef)
-            }
-            setNegativeButton(R.string.cancel, null)
-        }.create().show()
-    }
-
-    private fun deleteCustomerData(customerRef: DatabaseReference) {
-        customerRef.removeValue()
-            .addOnSuccessListener {
-                showToast(this@UpdateCustomerInstallationActivity, R.string.delete_success)
-                finish()
-            }
-            .addOnFailureListener { error ->
-                showToast(this@UpdateCustomerInstallationActivity, "${R.string.delete_failed}: ${error.message}".toInt())
-            }
-    }
-
     private fun clearData() {
         // Clear all input fields
         binding.edtNomorKl.text.clear()
@@ -110,13 +105,6 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
         binding.edtNomorMeter.text.clear()
         binding.edtNomorSegel.text.clear()
         binding.edtKeterangan.text.clear()
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        val intent = Intent(this, AddFirstDataActivity::class.java)
-        startActivity(intent)
-        super.onBackPressed()
     }
 
     private fun saveData() {
@@ -209,7 +197,7 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
                     if (dataCustomer != null) {
                         // Jika data pelanggan ditemukan, tampilkan datanya
                         displayCustomerData(dataCustomer)
-                        if (customerData != 1) {
+                        if (dataCustomer.data != 1) {
                             displayAnotherData(dataCustomer)
                         }
                     }
@@ -240,6 +228,7 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private val launcherIntentCamera = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -337,7 +326,7 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
         }
 
         binding.itemImage.apply {
-            text = dataCustomer.dokumentasi3
+            text = parsingNameImage(dataCustomer.dokumentasi3)
             isEnabled = false
         }
 
@@ -346,7 +335,9 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
             if (dataCustomer.jenisPekerjaan == "Pemasangan kembali") {
                 text = getString(R.string.finish)
                 layoutParams.width = 1000
-                navigatePage(this@UpdateCustomerInstallationActivity, UpdateCustomerInstallationActivity::class.java, true)
+                setOnClickListener {
+                    navigatePage(this@UpdateCustomerInstallationActivity, MainActivity::class.java, true)
+                }
             } else {
                 text = getString(R.string.next)
                 setOnClickListener {

@@ -1,20 +1,20 @@
 package com.pdam.report.ui.officer
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.MenuItem
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
@@ -26,6 +26,8 @@ import com.pdam.report.databinding.ActivityAddFirstDataBinding
 import com.pdam.report.utils.UserManager
 import com.pdam.report.utils.createCustomTempFile
 import com.pdam.report.utils.navigatePage
+import com.pdam.report.utils.parsingNameImage
+import com.pdam.report.utils.showDeleteConfirmationDialog
 import com.pdam.report.utils.showLoading
 import com.pdam.report.utils.showToast
 import java.io.File
@@ -34,27 +36,37 @@ class AddFirstDataActivity : AppCompatActivity() {
 
     private val databaseReference = FirebaseDatabase.getInstance().reference
 
-    private val auth by lazy { FirebaseAuth.getInstance() }
 
     private val userManager by lazy { UserManager(this) }
     private lateinit var user: UserData
 
-    private val firebaseKey by lazy { intent.getStringExtra(EXTRA_FIREBASE_KEY) }
+    private val firebaseKey by lazy {
+        intent.getStringExtra(EXTRA_FIREBASE_KEY)
+    }
 
     private var imageNumber: Int = 0
 
     private var firstImageFile: File? = null
     private var secondImageFile: File? = null
     private val binding by lazy { ActivityAddFirstDataBinding.inflate(layoutInflater) }
+
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            navigatePage(this@AddFirstDataActivity, MainActivity::class.java)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         setupDropdownField()
         setupButtons()
         setUser()
         firebaseKey?.let { loadDataFromFirebase(it) }
+        Log.d("firebaseKeyOnAddFirst", firebaseKey.toString())
     }
 
     private fun setUser() {
@@ -72,10 +84,10 @@ class AddFirstDataActivity : AppCompatActivity() {
         binding.btnHapus.setOnClickListener {
             if (firebaseKey == null) {
                 // If no Firebase key is provided, it's a new entry, so allow clearing data
-                binding.btnHapus.setOnClickListener { clearData() }
+                clearData()
             } else {
                 // If a Firebase key is provided, it's an existing entry, so allow deleting
-                binding.btnHapus.setOnClickListener { deleteData() }
+                deleteData()
             }
         }
     }
@@ -88,7 +100,7 @@ class AddFirstDataActivity : AppCompatActivity() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
                     // Show a confirmation dialog for delete
-                    showDeleteConfirmationDialog(customerRef)
+                    showDeleteConfirmationDialog(customerRef, this@AddFirstDataActivity)
                 } else {
                     showToast(this@AddFirstDataActivity, R.string.data_not_found)
                 }
@@ -98,29 +110,6 @@ class AddFirstDataActivity : AppCompatActivity() {
                 showToast(this@AddFirstDataActivity, "${R.string.failed_access_data}: ${error.message}".toInt())
             }
         })
-    }
-
-    private fun showDeleteConfirmationDialog(customerRef: DatabaseReference) {
-        AlertDialog.Builder(this@AddFirstDataActivity).apply {
-            setTitle(R.string.delete_data)
-            setMessage(R.string.delete_confirmation)
-            setPositiveButton(R.string.delete) { _, _ ->
-                // Confirm and proceed with deletion
-                deleteCustomerData(customerRef)
-            }
-            setNegativeButton(R.string.cancel, null)
-        }.create().show()
-    }
-
-    private fun deleteCustomerData(customerRef: DatabaseReference) {
-        customerRef.removeValue()
-            .addOnSuccessListener {
-                showToast(this@AddFirstDataActivity, R.string.delete_success)
-                finish()
-            }
-            .addOnFailureListener { error ->
-                showToast(this@AddFirstDataActivity, "${R.string.delete_failed}: ${error.message}".toInt())
-            }
     }
 
     private fun clearData() {
@@ -184,7 +173,7 @@ class AddFirstDataActivity : AppCompatActivity() {
     private fun saveCustomerData(currentDate: Long, jenisPekerjaan: String, pw: String, nomorRegistrasi: String, name: String, address: String, keterangan: String, dokumentasi1: String, dokumentasi2: String) {
         val newCustomerRef = databaseReference.child("listCustomer").push()
         val newCustomerId = newCustomerRef.key
-        var uname = user.username
+        val uname = user.username
 
         if (newCustomerId != null) {
             val data = CustomerData(
@@ -281,12 +270,12 @@ class AddFirstDataActivity : AppCompatActivity() {
             }
 
             binding.itemImage1.apply {
-                text = dataCustomer.dokumentasi1
+                text = parsingNameImage(dataCustomer.dokumentasi1)
                 isEnabled = false
             }
 
             binding.itemImage2.apply {
-                text = dataCustomer.dokumentasi2
+                text = parsingNameImage(dataCustomer.dokumentasi2)
                 isEnabled = false
             }
 
@@ -295,15 +284,24 @@ class AddFirstDataActivity : AppCompatActivity() {
         binding.btnSimpan.apply {
             binding.btnSimpan.text = getString(R.string.next)
             binding.btnSimpan.setOnClickListener {
-                val intent = Intent(this@AddFirstDataActivity, UpdateCustomerInstallationActivity::class.java)
+                val intent = Intent(
+                    this@AddFirstDataActivity,
+                    UpdateCustomerInstallationActivity::class.java
+                )
 
                 // Mengirim kunci Firebase ke AddFirstDataActivity
-                intent.putExtra(UpdateCustomerInstallationActivity.EXTRA_FIREBASE_KEY, dataCustomer.firebaseKey)
-                intent.putExtra(UpdateCustomerInstallationActivity.EXTRA_CUSTOMER_DATA, dataCustomer.data)
+                intent.putExtra(
+                    UpdateCustomerInstallationActivity.EXTRA_FIREBASE_KEY,
+                    dataCustomer.firebaseKey
+                )
+                intent.putExtra(
+                    UpdateCustomerInstallationActivity.EXTRA_CUSTOMER_DATA,
+                    dataCustomer.data
+                )
 
                 startActivity(intent)
             }
-}
+        }
     }
 
     private lateinit var currentPhotoPath: String
@@ -323,6 +321,7 @@ class AddFirstDataActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private val launcherIntentCamera = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -348,12 +347,6 @@ class AddFirstDataActivity : AppCompatActivity() {
             return true
         }
         return super.onOptionsItemSelected(item)
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        navigatePage(this, MainActivity::class.java)
-        super.onBackPressed()
     }
 
     private fun setupDropdownField() {
