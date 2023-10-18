@@ -27,11 +27,13 @@ import com.pdam.report.ui.officer.AddFirstDataActivity
 import com.pdam.report.ui.officer.OfficerPresenceActivity
 import com.pdam.report.utils.PermissionHelper
 import com.pdam.report.utils.UserManager
+import com.pdam.report.utils.getCurrentTimeStamp
+import com.pdam.report.utils.getInitialDate
 import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.setRecyclerViewVisibility
 import com.pdam.report.utils.showToast
+import kotlinx.coroutines.runBlocking
 import java.text.SimpleDateFormat
-import java.util.Date
 
 class MainActivity : AppCompatActivity() {
 
@@ -117,15 +119,20 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 R.id.nav_presence -> {
-                    val currentDate = Date().time
-                    val referenceDate = SimpleDateFormat("dd/MM/yyyy").parse("03/10/2023")?.time
-                    val daysDifference = ((currentDate - referenceDate!!) / (1000L * 60 * 60 * 24) % 5).toInt()
+                    val initialDate = runBlocking { getInitialDate() }
+                    val currentDate = SimpleDateFormat("dd-MM-yyyy").parse(getCurrentTimeStamp())?.time
+                    val referenceDate = SimpleDateFormat("dd-MM-yyyy").parse(initialDate.toString())?.time
+                    var daysDifference = ((currentDate!! - referenceDate!!) / (1000L * 60 * 60 * 24) % 5).toInt()
+
+                    if (daysDifference == 0) {
+                        daysDifference = 5
+                    }
 
                     val moveIntent = when (user.team) {
                         0 -> Intent(this@MainActivity, AdminPresenceActivity::class.java)
                         daysDifference -> Intent(this@MainActivity, OfficerPresenceActivity::class.java)
                         else -> {
-                            showToast(this@MainActivity, R.string.permission_denied)
+                            showToast(this@MainActivity, R.string.presence_denied)
                             null
                         }
                     }

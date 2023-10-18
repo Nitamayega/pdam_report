@@ -41,9 +41,10 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
 //            navigatePage(this@UpdateCustomerInstallationActivity, AddFirstDataActivity::class.java, true)
-            intent = Intent(this@UpdateCustomerInstallationActivity, AddFirstDataActivity::class.java)
-            intent.putExtra(AddFirstDataActivity.EXTRA_FIREBASE_KEY, firebaseKey)
+            val intent = Intent(this@UpdateCustomerInstallationActivity, AddFirstDataActivity::class.java)
+            intent.putExtra(AddFirstDataActivity.EXTRA_FIREBASE_KEY, firebaseKey.toString())
             startActivity(intent)
+            finish()
         }
     }
 
@@ -244,7 +245,9 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            navigatePage(this, AddFirstDataActivity::class.java, true)
+            val intent = Intent(this@UpdateCustomerInstallationActivity, AddFirstDataActivity::class.java)
+            intent.putExtra(AddFirstDataActivity.EXTRA_FIREBASE_KEY, firebaseKey.toString())
+            startActivity(intent)
             finish()
             return true
         }
@@ -334,7 +337,6 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
         binding.btnSimpan.apply {
             if (dataCustomer.jenisPekerjaan == "Pemasangan kembali") {
                 text = getString(R.string.finish)
-                layoutParams.width = 1000
                 setOnClickListener {
                     navigatePage(this@UpdateCustomerInstallationActivity, MainActivity::class.java, true)
                 }
@@ -356,6 +358,7 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
                     )
 
                     startActivity(intent)
+                    finish()
                 }
             }
         }

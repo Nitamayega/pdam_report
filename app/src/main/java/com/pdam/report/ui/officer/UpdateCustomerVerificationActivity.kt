@@ -39,7 +39,9 @@ class UpdateCustomerVerificationActivity : AppCompatActivity() {
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-            navigatePage(this@UpdateCustomerVerificationActivity, AddFirstDataActivity::class.java, true)
+            val intent = Intent(this@UpdateCustomerVerificationActivity, UpdateCustomerInstallationActivity::class.java)
+            intent.putExtra(UpdateCustomerInstallationActivity.EXTRA_FIREBASE_KEY, firebaseKey)
+            startActivity(intent)
             finish()
         }
     }
@@ -136,9 +138,9 @@ class UpdateCustomerVerificationActivity : AppCompatActivity() {
 
         val data = mapOf(
             "updateInstallDate" to currentDate,
-            "xKoordinat" to koorX,
-            "yKoordinat" to koorY,
-            "zKoordinat" to koorZ,
+            "xkoordinat" to koorX,
+            "ykoordinat" to koorY,
+            "zkoordinat" to koorZ,
             "keterangan3" to keterangan,
             "dokumentasi4" to dokumentasi4,
             "data" to 3
@@ -166,7 +168,7 @@ class UpdateCustomerVerificationActivity : AppCompatActivity() {
                     if (dataCustomer != null) {
                         // Jika data pelanggan ditemukan, tampilkan datanya
                         displayCustomerData(dataCustomer)
-                        if (customerData != 1) {
+                        if (customerData != 2) {
                             displayAnotherData(dataCustomer)
                         }
                     }
@@ -213,7 +215,9 @@ class UpdateCustomerVerificationActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            navigatePage(this, AddFirstDataActivity::class.java, true)
+            val intent = Intent(this@UpdateCustomerVerificationActivity, UpdateCustomerInstallationActivity::class.java)
+            intent.putExtra(UpdateCustomerInstallationActivity.EXTRA_FIREBASE_KEY, firebaseKey)
+            startActivity(intent)
             finish()
             return true
         }
@@ -289,7 +293,7 @@ class UpdateCustomerVerificationActivity : AppCompatActivity() {
         }
 
         binding.edtZ.apply {
-            setText(dataCustomer.zKooridnat)
+            setText(dataCustomer.zKoordinat)
             isEnabled = false
             isFocusable = false
         }

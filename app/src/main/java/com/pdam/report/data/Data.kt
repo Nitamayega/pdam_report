@@ -32,7 +32,7 @@ data class CustomerData(
     val nomorSegel: String = "",
     val xKoordinat: String = "",
     val yKoordinat: String = "",
-    val zKooridnat: String = "",
+    val zKoordinat: String = "",
     val keterangan1: String = "",
     val keterangan2: String = "",
     val keterangan3: String = "",

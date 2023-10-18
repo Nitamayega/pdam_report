@@ -2,6 +2,7 @@
     <string name="app_name">PDAM Report</string>
 
     <string name="permission_denied">Permission Denied</string>
+    <string name="presence_denied">Sedang di luar jadwal presensi</string>
 
     <string name="uname">Nama Pengguna</string>
     <string name="password">Kata Sandi</string>
@@ -73,7 +74,7 @@
     <string name="location_found">Lokasi ditemukan</string>
     <string name="initialize_location">Sedang Mencari Lokasi…</string>
     <string name="location_not_found">Lokasi tidak dapat ditemukan</string>
-    <string name="must_allow_permission">Anda Harus Mengizinkan Semua Permission</string>
+    <string name="must_allow_permission">Anda Harus Mengizinkan Semua Perizinan Aplikasi</string>
 
     <string name="next">Lanjutkan</string>
     <string name="finish">Selesai</string>

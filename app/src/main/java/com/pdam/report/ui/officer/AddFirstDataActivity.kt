@@ -83,10 +83,8 @@ class AddFirstDataActivity : AppCompatActivity() {
 
         binding.btnHapus.setOnClickListener {
             if (firebaseKey == null) {
-                // If no Firebase key is provided, it's a new entry, so allow clearing data
                 clearData()
             } else {
-                // If a Firebase key is provided, it's an existing entry, so allow deleting
                 deleteData()
             }
         }
@@ -300,6 +298,7 @@ class AddFirstDataActivity : AppCompatActivity() {
                 )
 
                 startActivity(intent)
+                finish()
             }
         }
     }
