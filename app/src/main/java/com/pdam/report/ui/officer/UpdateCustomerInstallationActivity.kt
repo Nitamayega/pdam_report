@@ -5,7 +5,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
 import android.view.MenuItem
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
@@ -294,6 +293,7 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private fun displayAnotherData(dataCustomer: CustomerData) {
         binding.edtNomorKl.apply {
             setText(dataCustomer.nomorKL)
