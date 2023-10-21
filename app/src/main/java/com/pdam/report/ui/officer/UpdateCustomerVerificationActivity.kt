@@ -24,6 +24,7 @@ import com.pdam.report.utils.UserManager
 import com.pdam.report.utils.createCustomTempFile
 import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.parsingNameImage
+import com.pdam.report.utils.reduceFileImage
 import com.pdam.report.utils.showDeleteConfirmationDialog
 import com.pdam.report.utils.showLoading
 import com.pdam.report.utils.showToast
@@ -136,7 +137,7 @@ class UpdateCustomerVerificationActivity : AppCompatActivity() {
         val dokumentasi4Ref = storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi4.jpg")
 
         // Upload image 4
-        dokumentasi4Ref.putFile(Uri.fromFile(imageFile)).addOnSuccessListener {
+        dokumentasi4Ref.putFile(Uri.fromFile(reduceFileImage(imageFile!!))).addOnSuccessListener {
             dokumentasi4Ref.downloadUrl.addOnSuccessListener { uri1 ->
                 val dokumentasi4 = uri1.toString()
 
@@ -287,6 +288,7 @@ class UpdateCustomerVerificationActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private fun displayAnotherData(dataCustomer: CustomerData) {
         binding.edtNomorKl.apply {
             setText(dataCustomer.nomorKL)

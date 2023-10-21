@@ -27,6 +27,7 @@ import com.pdam.report.utils.UserManager
 import com.pdam.report.utils.createCustomTempFile
 import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.parsingNameImage
+import com.pdam.report.utils.reduceFileImage
 import com.pdam.report.utils.showDeleteConfirmationDialog
 import com.pdam.report.utils.showLoading
 import com.pdam.report.utils.showToast
@@ -151,12 +152,12 @@ class AddFirstDataActivity : AppCompatActivity() {
         val dokumentasi2Ref = storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi2.jpg")
 
         // Upload image 1
-        dokumentasi1Ref.putFile(Uri.fromFile(firstImageFile)).addOnSuccessListener {
+        dokumentasi1Ref.putFile(Uri.fromFile(reduceFileImage(firstImageFile!!))).addOnSuccessListener {
             dokumentasi1Ref.downloadUrl.addOnSuccessListener { uri1 ->
                 val dokumentasi1 = uri1.toString()
 
                 // Upload image 2
-                dokumentasi2Ref.putFile(Uri.fromFile(secondImageFile)).addOnSuccessListener {
+                dokumentasi2Ref.putFile(Uri.fromFile(reduceFileImage(secondImageFile!!))).addOnSuccessListener {
                     dokumentasi2Ref.downloadUrl.addOnSuccessListener { uri2 ->
                         val dokumentasi2 = uri2.toString()
 

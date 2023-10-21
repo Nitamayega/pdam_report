@@ -24,6 +24,7 @@ import com.pdam.report.utils.UserManager
 import com.pdam.report.utils.createCustomTempFile
 import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.parsingNameImage
+import com.pdam.report.utils.reduceFileImage
 import com.pdam.report.utils.showDeleteConfirmationDialog
 import com.pdam.report.utils.showLoading
 import com.pdam.report.utils.showToast
@@ -146,7 +147,7 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
             storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi3.jpg")
 
         // Upload image 3
-        dokumentasi3Ref.putFile(Uri.fromFile(imageFile)).addOnSuccessListener {
+        dokumentasi3Ref.putFile(Uri.fromFile(reduceFileImage(imageFile!!))).addOnSuccessListener {
             dokumentasi3Ref.downloadUrl.addOnSuccessListener { uri1 ->
                 val dokumentasi3 = uri1.toString()
 
