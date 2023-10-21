@@ -20,6 +20,7 @@ data class CustomerData(
     val updateVerifDate: Long = 0,
     val updateInstallDate: Long = 0,
     val petugas: String = "",
+    val dailyTeam: Int = 0,
     val jenisPekerjaan: String = "",
     val pw: Int = 0,
     val nomorRegistrasi: String = "",

@@ -9,7 +9,9 @@ import com.pdam.report.data.CustomerData
 import com.pdam.report.databinding.ReportItemRowBinding
 import com.pdam.report.ui.officer.AddFirstDataActivity
 
-class MainAdapter(private val customerList: ArrayList<CustomerData>) :
+class MainAdapter(
+    private val customerList: ArrayList<CustomerData>
+) :
     RecyclerView.Adapter<MainAdapter.CustomerViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomerViewHolder {

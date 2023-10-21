@@ -171,13 +171,12 @@ class AddFirstDataActivity : AppCompatActivity() {
     private fun saveCustomerData(currentDate: Long, jenisPekerjaan: String, pw: String, nomorRegistrasi: String, name: String, address: String, keterangan: String, dokumentasi1: String, dokumentasi2: String) {
         val newCustomerRef = databaseReference.child("listCustomer").push()
         val newCustomerId = newCustomerRef.key
-        val uname = user.username
 
         if (newCustomerId != null) {
             val data = CustomerData(
                 firebaseKey = newCustomerId,
                 currentDate = currentDate,
-                petugas = uname,
+                petugas =  user.username,
                 jenisPekerjaan = jenisPekerjaan,
                 pw = pw.toInt(),
                 nomorRegistrasi = nomorRegistrasi,
@@ -186,7 +185,8 @@ class AddFirstDataActivity : AppCompatActivity() {
                 keterangan1 = keterangan,
                 dokumentasi1 = dokumentasi1,
                 dokumentasi2 = dokumentasi2,
-                data = 1
+                data = 1,
+                dailyTeam = user.dailyTeam
             )
 
             newCustomerRef.setValue(data).addOnCompleteListener { task ->
@@ -227,6 +227,7 @@ class AddFirstDataActivity : AppCompatActivity() {
         })
     }
 
+    @SuppressLint("SetTextI18n")
     private fun displayCustomerData(dataCustomer: CustomerData) {
         // Mengisi tampilan dengan data pelanggan yang ditemukan dari Firebase
         binding.dropdownJenisPekerjaan.apply {

@@ -39,7 +39,7 @@ import java.util.Calendar
 class MainActivity : AppCompatActivity() {
 
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
-    private val adapter by lazy { MainAdapter(ArrayList()) }
+    private val adapter by lazy { MainAdapter(ArrayList())}
 
     private lateinit var toggle: ActionBarDrawerToggle
 
@@ -190,19 +190,39 @@ class MainActivity : AppCompatActivity() {
 
                     val customerList = snapshot.children.mapNotNull { customerSnapshot ->
                         customerSnapshot.getValue(CustomerData::class.java)
-                    }.sortedByDescending { it.currentDate }
+                    }
 
-                    adapter.updateData(customerList)
+                    // Check if user.dailyTeam is 0
+                    if (user.dailyTeam == 0) {
+                        // Use all data without filtering
+                        adapter.updateData(customerList.sortedByDescending { it.currentDate })
+                    } else {
+                        // Filter item sesuai dengan user.dailyTeam
+                        val filteredCustomerList = customerList.filter { customer ->
+                            customer.dailyTeam == user.dailyTeam
+                        }
+                        adapter.updateData(filteredCustomerList.sortedByDescending { it.currentDate })
+                    }
+
                     binding.rvCusts.adapter = adapter
+
+                    if (binding.rvCusts.adapter?.itemCount == 0) {
+                        setRecyclerViewVisibility(binding.emptyView, binding.rvCusts, true)
+                    }
+
+
                 } else {
                     setRecyclerViewVisibility(binding.emptyView, binding.rvCusts, true)
                 }
             }
+
             override fun onCancelled(error: DatabaseError) {
                 // Handle onCancelled event
             }
         })
     }
+
+
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (toggle.onOptionsItemSelected(item)) {
