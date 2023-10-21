@@ -36,6 +36,7 @@ import com.pdam.report.databinding.ActivityOfficerPresenceBinding
 import com.pdam.report.utils.GeocoderHelper
 import com.pdam.report.utils.PermissionHelper
 import com.pdam.report.utils.createCustomTempFile
+import com.pdam.report.utils.getCurrentTimeStamp
 import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.reduceFileImage
 import com.pdam.report.utils.showLoading
@@ -212,6 +213,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
                                             .child(uid).push().setValue(data)
                                             .addOnCompleteListener { task ->
                                                 if (task.isSuccessful) {
+                                                    userData.lastPresence = getCurrentTimeStamp()
                                                     showToast(this@OfficerPresenceActivity, R.string.upload_success)
                                                     navigateToMainActivity()
                                                 } else {

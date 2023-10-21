@@ -119,6 +119,11 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 R.id.nav_presence -> {
+                    if (user.lastPresence == getCurrentTimeStamp()) {
+                        showToast(this, R.string.presence_already_done)
+                        return@setNavigationItemSelectedListener false
+                    } else {
+
                     val initialDate = runBlocking { getInitialDate() }
                     val currentDate = SimpleDateFormat("dd-MM-yyyy").parse(getCurrentTimeStamp())?.time
                     val referenceDate = SimpleDateFormat("dd-MM-yyyy").parse(initialDate.toString())?.time
@@ -139,7 +144,7 @@ class MainActivity : AppCompatActivity() {
 
                     moveIntent?.let {
                         startActivity(it)
-                    }
+                    }}
                 }
 
                 R.id.nav_logout -> {
