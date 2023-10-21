@@ -23,6 +23,7 @@ import com.pdam.report.R
 import com.pdam.report.data.CustomerData
 import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ActivityAddFirstDataBinding
+import com.pdam.report.utils.FullScreenImageDialogFragment
 import com.pdam.report.utils.UserManager
 import com.pdam.report.utils.createCustomTempFile
 import com.pdam.report.utils.navigatePage
@@ -277,12 +278,22 @@ class AddFirstDataActivity : AppCompatActivity() {
 
             binding.itemImage1.apply {
                 text = parsingNameImage(dataCustomer.dokumentasi1)
-                isEnabled = false
+                setOnClickListener {
+                    supportFragmentManager.beginTransaction()
+                        .add(FullScreenImageDialogFragment(dataCustomer.dokumentasi1), "FullScreenImageDialogFragment")
+                        .addToBackStack(null)
+                        .commit()
+                }
             }
 
             binding.itemImage2.apply {
                 text = parsingNameImage(dataCustomer.dokumentasi2)
-                isEnabled = false
+                setOnClickListener {
+                    supportFragmentManager.beginTransaction()
+                        .add(FullScreenImageDialogFragment(dataCustomer.dokumentasi2), "FullScreenImageDialogFragment")
+                        .addToBackStack(null)
+                        .commit()
+                }
             }
 
 

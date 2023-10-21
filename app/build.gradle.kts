@@ -78,4 +78,7 @@ dependencies {
     //Location
     implementation ("com.google.android.gms:play-services-location:21.0.1")
     implementation ("com.google.android.gms:play-services-maps:18.1.0")
+
+    implementation ("com.github.chrisbanes:PhotoView:2.3.0")
+
 }

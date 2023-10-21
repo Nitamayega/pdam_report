@@ -6,6 +6,7 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.pdam.report.databinding.ActivityDetailPresenceBinding
+import com.pdam.report.utils.FullScreenImageDialogFragment
 import com.pdam.report.utils.navigatePage
 
 class DetailPresenceActivity : AppCompatActivity() {
@@ -31,9 +32,17 @@ class DetailPresenceActivity : AppCompatActivity() {
             tvName.text = itemUsername
             tvTimestampe.text = "Diambil pada $itemDate"
             tvLocation.text = itemLocation
+
             Glide.with(this@DetailPresenceActivity)
                 .load(itemPhotoUrl)
                 .into(imgPhoto)
+
+            imgPhoto.setOnClickListener {
+                supportFragmentManager.beginTransaction()
+                    .add(FullScreenImageDialogFragment(itemPhotoUrl!!), "FullScreenImageDialogFragment")
+                    .addToBackStack(null)
+                    .commit()
+            }
         }
     }
 

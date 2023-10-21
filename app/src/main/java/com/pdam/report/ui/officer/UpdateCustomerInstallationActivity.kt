@@ -20,6 +20,7 @@ import com.pdam.report.R
 import com.pdam.report.data.CustomerData
 import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ActivityUpdateCustomerInstallationBinding
+import com.pdam.report.utils.FullScreenImageDialogFragment
 import com.pdam.report.utils.UserManager
 import com.pdam.report.utils.createCustomTempFile
 import com.pdam.report.utils.navigatePage
@@ -347,7 +348,12 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
 
         binding.itemImage.apply {
             text = parsingNameImage(dataCustomer.dokumentasi3)
-            isEnabled = false
+            setOnClickListener {
+                supportFragmentManager.beginTransaction()
+                    .add(FullScreenImageDialogFragment(dataCustomer.dokumentasi3), "FullScreenImageDialogFragment")
+                    .addToBackStack(null)
+                    .commit()
+            }
         }
 
         // Mengganti teks tombol Simpan untuk melanjutkan ke halaman berikutnya
