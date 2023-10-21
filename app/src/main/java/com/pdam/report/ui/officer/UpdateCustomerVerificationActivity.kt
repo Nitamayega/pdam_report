@@ -10,6 +10,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import androidx.lifecycle.lifecycleScope
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -25,10 +26,11 @@ import com.pdam.report.utils.UserManager
 import com.pdam.report.utils.createCustomTempFile
 import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.parsingNameImage
-import com.pdam.report.utils.reduceFileImage
+import com.pdam.report.utils.reduceFileImageInBackground
 import com.pdam.report.utils.showDeleteConfirmationDialog
 import com.pdam.report.utils.showLoading
 import com.pdam.report.utils.showToast
+import kotlinx.coroutines.launch
 import java.io.File
 
 class UpdateCustomerVerificationActivity : AppCompatActivity() {
@@ -137,8 +139,12 @@ class UpdateCustomerVerificationActivity : AppCompatActivity() {
         val storageReference = FirebaseStorage.getInstance().reference
         val dokumentasi4Ref = storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi4.jpg")
 
+        lifecycleScope.launch {
+            imageFile = imageFile?.reduceFileImageInBackground()
+        }
+
         // Upload image 4
-        dokumentasi4Ref.putFile(Uri.fromFile(reduceFileImage(imageFile!!))).addOnSuccessListener {
+        dokumentasi4Ref.putFile(Uri.fromFile(imageFile)).addOnSuccessListener {
             dokumentasi4Ref.downloadUrl.addOnSuccessListener { uri1 ->
                 val dokumentasi4 = uri1.toString()
 

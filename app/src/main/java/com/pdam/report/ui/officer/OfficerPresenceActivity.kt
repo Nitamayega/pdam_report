@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -38,9 +39,10 @@ import com.pdam.report.utils.PermissionHelper
 import com.pdam.report.utils.createCustomTempFile
 import com.pdam.report.utils.getCurrentTimeStamp
 import com.pdam.report.utils.navigatePage
-import com.pdam.report.utils.reduceFileImage
+import com.pdam.report.utils.reduceFileImageInBackground
 import com.pdam.report.utils.showLoading
 import com.pdam.report.utils.showToast
+import kotlinx.coroutines.launch
 import java.io.File
 
 class OfficerPresenceActivity : AppCompatActivity() {
@@ -76,7 +78,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
         checkLocationSettings()
     }
 
-    // Membuat permintaan lokasi dengan preferensi tinggi
+    @Suppress("DEPRECATION")
     private fun createLocationRequest(): LocationRequest {
         return LocationRequest.create().apply {
             interval = 10000
@@ -189,14 +191,15 @@ class OfficerPresenceActivity : AppCompatActivity() {
 
                                 showLoading(true, binding.progressBar, binding.cameraButton, binding.uploadButton)
 
-                                // Mengompres gambar sebelum diunggah
-                                val compressedFile = reduceFileImage(getFile!!)
+                                lifecycleScope.launch {
+                                    getFile = getFile?.reduceFileImageInBackground()
+                                }
 
                                 // Menentukan referensi untuk penyimpanan gambar
                                 val photoRef = storageReference.child("images/presence/${System.currentTimeMillis()}.jpg")
 
                                 // Mengunggah gambar ke Firebase Storage
-                                photoRef.putFile(Uri.fromFile(compressedFile)).addOnSuccessListener { uploadTask ->
+                                photoRef.putFile(Uri.fromFile(getFile)).addOnSuccessListener { uploadTask ->
                                     uploadTask.storage.downloadUrl.addOnSuccessListener { downloadUri ->
                                         showLoading(false, binding.progressBar, binding.cameraButton, binding.uploadButton)
 

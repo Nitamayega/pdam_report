@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Environment
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -54,6 +56,10 @@ fun reduceFileImage(file: File): File {
     }
 
     return file
+}
+
+suspend fun File.reduceFileImageInBackground(): File = withContext(Dispatchers.Default) {
+    return@withContext reduceFileImage(this@reduceFileImageInBackground)
 }
 
 fun parsingNameImage(url: String): String {
