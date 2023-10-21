@@ -66,3 +66,14 @@ fun parsingNameImage(url: String): String {
     }
     return ""
 }
+
+
+fun milisToDate(milis: Long): String {
+    val formatter = SimpleDateFormat(FILENAME_FORMAT, Locale.US)
+    return formatter.format(milis)
+}
+
+fun milisToDateTime(milis: Long): String {
+    val formatter = SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.US)
+    return formatter.format(milis)
+}

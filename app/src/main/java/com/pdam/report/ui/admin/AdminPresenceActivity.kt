@@ -22,6 +22,7 @@ class AdminPresenceActivity : AppCompatActivity() {
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         setupRecyclerView()
+        setContent()
 
         // Menambahkan aksi ketika pengguna menarik untuk menyegarkan (swipe to refresh)
         binding.swipeRefreshLayout.setOnRefreshListener {

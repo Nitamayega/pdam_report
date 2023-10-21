@@ -10,12 +10,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.pdam.report.data.PresenceData
 import com.pdam.report.databinding.PresenceItemRowBinding
+import com.pdam.report.utils.milisToDate
+import com.pdam.report.utils.milisToDateTime
 
 class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>) :
     RecyclerView.Adapter<AdminPresenceAdapter.PresenceViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PresenceViewHolder {
-
         // Menginflate layout item presensi ke dalam view holder
         return PresenceViewHolder(
             PresenceItemRowBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -53,6 +54,8 @@ class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>) :
 
     inner class PresenceViewHolder(private var binding: PresenceItemRowBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(presence: PresenceData) {
+            val date = milisToDate(presence.currentDate)
+
             binding.apply {
                 Glide.with(itemView)
                     .load(presence.photoUrl)
@@ -60,14 +63,14 @@ class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>) :
                     .into(imgPhoto)
                 tvName.text = presence.username
                 tvLocation.text = presence.location
-                tvTimestampe.text = presence.currentDate.toString()
+                tvTimestampe.text = milisToDateTime(presence.currentDate)
 
                 // Mengelola tampilan tanggal untuk menghindari duplikasi
-                if (adapterPosition > 0 && presence.currentDate == presenceList[adapterPosition - 1].currentDate) {
+                if (adapterPosition > 0 && date == milisToDate(presenceList[adapterPosition - 1].currentDate)) {
                     tvDate.visibility = View.GONE
                 } else {
                     tvDate.visibility = View.VISIBLE
-                    tvDate.text = presence.currentDate.toString()
+                    tvDate.text = date
                 }
             }
         }
