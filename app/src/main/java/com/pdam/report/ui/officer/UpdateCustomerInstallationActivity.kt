@@ -19,7 +19,9 @@ import com.google.firebase.storage.FirebaseStorage
 import com.pdam.report.MainActivity
 import com.pdam.report.R
 import com.pdam.report.data.CustomerData
+import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ActivityUpdateCustomerInstallationBinding
+import com.pdam.report.utils.UserManager
 import com.pdam.report.utils.createCustomTempFile
 import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.parsingNameImage
@@ -38,6 +40,9 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
     private val firebaseKey by lazy { intent.getStringExtra(AddFirstDataActivity.EXTRA_FIREBASE_KEY) }
     private val customerData by lazy { intent.getIntExtra(AddFirstDataActivity.EXTRA_CUSTOMER_DATA, 0) }
 
+    private val userManager by lazy { UserManager(this) }
+    private lateinit var user: UserData
+
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
 //            navigatePage(this@UpdateCustomerInstallationActivity, AddFirstDataActivity::class.java, true)
@@ -48,6 +53,11 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
         }
     }
 
+    private fun setUser() {
+        userManager.fetchUserAndSetupData {
+            user = userManager.getUser()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,11 +68,8 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
 
         loadDataFromFirebase(firebaseKey.toString())
 
-
-        Log.d("firebaseKey", firebaseKey.toString())
-        Log.d("customerData", customerData.toString())
-
         setupButtons()
+        setUser()
     }
 
     private fun setupButtons() {
@@ -122,7 +129,7 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
         // Validate input
         if (isInputValid(nomorKL, merkMeter, diameterMeter, standMeter, nomorMeter, nomorSegel, keterangan)) {
             showLoading(true, binding.progressBar, binding.btnSimpan, binding.btnHapus)
-            uploadImagesAndSaveData(currentDate, nomorKL, merkMeter, diameterMeter, standMeter, nomorMeter, nomorSegel, keterangan)
+            uploadImagesAndSaveData(user.username, currentDate, nomorKL, merkMeter, diameterMeter, standMeter, nomorMeter, nomorSegel, keterangan)
         } else {
             showLoading(false, binding.progressBar, binding.btnSimpan, binding.btnHapus)
             showToast(this, R.string.fill_all_data)
@@ -134,7 +141,7 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
         return nomorKL.isNotEmpty() && merk.isNotEmpty() && diameter.isNotEmpty() && stand.isNotEmpty() && nomorMeter.isNotEmpty() && nomorSegel.isNotEmpty() && keterangan.isNotEmpty() && imageFile != null
     }
 
-    private fun uploadImagesAndSaveData(currentDate: Long, nomorKL: String, merk: String, diameter: String, stand: String, nomorMeter: String, nomorSegel: String, keterangan: String) {
+    private fun uploadImagesAndSaveData(petugas: String, currentDate: Long, nomorKL: String, merk: String, diameter: String, stand: String, nomorMeter: String, nomorSegel: String, keterangan: String) {
         val storageReference = FirebaseStorage.getInstance().reference
         val dokumentasi3Ref =
             storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi3.jpg")
@@ -146,6 +153,7 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
 
                 // After successfully obtaining image URLs, save the data to Firebase
                 saveCustomerData(
+                    petugas,
                     currentDate,
                     nomorKL,
                     merk,
@@ -160,10 +168,11 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
         }
     }
 
-    private fun saveCustomerData(currentDate: Long, nomorKL: String, merk: String, diameter: String, stand: String, nomorMeter: String, nomorSegel: String, keterangan: String, dokumentasi3: String) {
+    private fun saveCustomerData(petugas: String, currentDate: Long, nomorKL: String, merk: String, diameter: String, stand: String, nomorMeter: String, nomorSegel: String, keterangan: String, dokumentasi3: String) {
         val customerRef = databaseReference.child("listCustomer").child(firebaseKey.toString())
 
         val data = mapOf(
+            "petugas" to petugas,
             "updateVerifDate" to currentDate,
             "nomorKL" to nomorKL,
             "merkMeter" to merk,
@@ -290,6 +299,13 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
             setText(dataCustomer.nomorKL)
             isEnabled = false
             isFocusable = false
+        }
+
+        binding.updatedby.apply {
+            text = "Update by " + dataCustomer.petugas
+            isEnabled = false
+            isFocusable = false
+            visibility = android.view.View.VISIBLE
         }
 
         binding.edtMerk.apply {

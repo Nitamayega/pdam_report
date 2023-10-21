@@ -223,13 +223,25 @@
         app:layout_constraintStart_toStartOf="@+id/ed_keterangan"
         app:layout_constraintTop_toBottomOf="@+id/item_image_1" />
 
+    <TextView
+        android:id="@+id/addedby"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Created By Kepala Suku"
+        android:visibility="gone"
+        android:gravity="end"
+        app:layout_constraintTop_toBottomOf="@+id/item_image_2"
+        app:layout_constraintStart_toStartOf="@+id/item_image_2"
+        app:layout_constraintEnd_toEndOf="@+id/item_image_2" />
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_hapus"
         style="@style/button"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="16dp"
         android:text="@string/hapus"
         app:backgroundTint="@color/cognac"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -243,7 +255,7 @@
         android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="16dp"
         android:text="@string/simpan"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/item_image_2"

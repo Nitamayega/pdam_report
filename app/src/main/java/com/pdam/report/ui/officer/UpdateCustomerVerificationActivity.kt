@@ -18,7 +18,9 @@ import com.google.firebase.storage.FirebaseStorage
 import com.pdam.report.MainActivity
 import com.pdam.report.R
 import com.pdam.report.data.CustomerData
+import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ActivityUpdateCustomerVerificationBinding
+import com.pdam.report.utils.UserManager
 import com.pdam.report.utils.createCustomTempFile
 import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.parsingNameImage
@@ -36,6 +38,9 @@ class UpdateCustomerVerificationActivity : AppCompatActivity() {
 
     private val firebaseKey by lazy { intent.getStringExtra(AddFirstDataActivity.EXTRA_FIREBASE_KEY) }
     private val customerData by lazy { intent.getIntExtra(AddFirstDataActivity.EXTRA_CUSTOMER_DATA, 0) }
+
+    private val userManager by lazy { UserManager(this) }
+    private lateinit var user: UserData
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
@@ -55,7 +60,15 @@ class UpdateCustomerVerificationActivity : AppCompatActivity() {
         firebaseKey?.let {
             loadDataFromFirebase(it)
         }
+
         setupButtons()
+        setUser()
+    }
+
+    private fun setUser() {
+        userManager.fetchUserAndSetupData {
+            user = userManager.getUser()
+        }
     }
 
     private fun setupButtons() {
@@ -106,7 +119,7 @@ class UpdateCustomerVerificationActivity : AppCompatActivity() {
         // Validate input
         if (isInputValid(koorX, koorY, koorZ, keterangan)) {
             showLoading(true, binding.progressBar, binding.btnSimpan, binding.btnHapus)
-            uploadImagesAndSaveData(currentDate, koorX, koorY, koorZ, keterangan)
+            uploadImagesAndSaveData(user.username, currentDate, koorX, koorY, koorZ, keterangan)
         } else {
             showLoading(false, binding.progressBar, binding.btnSimpan, binding.btnHapus)
             showToast(this, R.string.fill_all_data)
@@ -118,7 +131,7 @@ class UpdateCustomerVerificationActivity : AppCompatActivity() {
         return koorX.isNotEmpty() && koorY.isNotEmpty() && koorZ.isNotEmpty() && keterangan.isNotEmpty() && imageFile != null
     }
 
-    private fun uploadImagesAndSaveData(currentDate: Long, koorX: String, koorY: String, koorZ: String, keterangan: String) {
+    private fun uploadImagesAndSaveData(petugas: String, currentDate: Long, koorX: String, koorY: String, koorZ: String, keterangan: String) {
         val storageReference = FirebaseStorage.getInstance().reference
         val dokumentasi4Ref = storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi4.jpg")
 
@@ -128,15 +141,16 @@ class UpdateCustomerVerificationActivity : AppCompatActivity() {
                 val dokumentasi4 = uri1.toString()
 
                 // After successfully obtaining image URLs, save the data to Firebase
-                saveCustomerData(currentDate, koorX, koorY, koorZ, keterangan, dokumentasi4)
+                saveCustomerData(petugas, currentDate, koorX, koorY, koorZ, keterangan, dokumentasi4)
             }
         }
     }
 
-    private fun saveCustomerData(currentDate: Long, koorX: String, koorY: String, koorZ: String, keterangan: String, dokumentasi4: String) {
+    private fun saveCustomerData(petugas: String, currentDate: Long, koorX: String, koorY: String, koorZ: String, keterangan: String, dokumentasi4: String) {
         val customerRef = databaseReference.child("listCustomer").child(firebaseKey.toString())
 
         val data = mapOf(
+            "petugas" to petugas,
             "updateInstallDate" to currentDate,
             "xkoordinat" to koorX,
             "ykoordinat" to koorY,
@@ -278,6 +292,13 @@ class UpdateCustomerVerificationActivity : AppCompatActivity() {
             setText(dataCustomer.nomorKL)
             isEnabled = false
             isFocusable = false
+        }
+
+        binding.updatedby.apply {
+            text = "Update by " + dataCustomer.petugas
+            isEnabled = false
+            isFocusable = false
+            visibility = android.view.View.VISIBLE
         }
 
         binding.edtX.apply {

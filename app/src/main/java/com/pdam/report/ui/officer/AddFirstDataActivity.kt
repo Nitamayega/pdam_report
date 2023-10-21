@@ -235,6 +235,13 @@ class AddFirstDataActivity : AppCompatActivity() {
             isFocusable = false
         }
 
+        binding.addedby.apply {
+            text = "Added by " + dataCustomer.petugas
+            isEnabled = false
+            isFocusable = false
+            visibility = android.view.View.VISIBLE
+        }
+
             binding.edtPw.apply {
                 setText(dataCustomer.pw.toString())
                 isEnabled = false
@@ -253,7 +260,6 @@ class AddFirstDataActivity : AppCompatActivity() {
                 isEnabled = false
                 isFocusable = false
             }
-
 
             binding.edtAlamatPelanggan.apply {
                 setText(dataCustomer.address)

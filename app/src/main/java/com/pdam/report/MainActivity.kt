@@ -34,6 +34,7 @@ import com.pdam.report.utils.setRecyclerViewVisibility
 import com.pdam.report.utils.showToast
 import kotlinx.coroutines.runBlocking
 import java.text.SimpleDateFormat
+import java.util.Calendar
 
 class MainActivity : AppCompatActivity() {
 
@@ -122,20 +123,19 @@ class MainActivity : AppCompatActivity() {
                     if (user.lastPresence == getCurrentTimeStamp()) {
                         showToast(this, R.string.presence_already_done)
                         return@setNavigationItemSelectedListener false
-                    } else {
+                    }
 
                     val initialDate = runBlocking { getInitialDate() }
                     val currentDate = SimpleDateFormat("dd-MM-yyyy").parse(getCurrentTimeStamp())?.time
                     val referenceDate = SimpleDateFormat("dd-MM-yyyy").parse(initialDate.toString())?.time
                     var daysDifference = ((currentDate!! - referenceDate!!) / (1000L * 60 * 60 * 24) % 5).toInt()
+                    if (daysDifference == 0) { daysDifference = 5 }
 
-                    if (daysDifference == 0) {
-                        daysDifference = 5
-                    }
+                    val currentTime = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
 
-                    val moveIntent = when (user.team) {
-                        0 -> Intent(this@MainActivity, AdminPresenceActivity::class.java)
-                        daysDifference -> Intent(this@MainActivity, OfficerPresenceActivity::class.java)
+                    val moveIntent = when {
+                        user.team == 0 -> Intent(this@MainActivity, AdminPresenceActivity::class.java)
+                        user.team == daysDifference && currentTime in 19..23 -> Intent(this@MainActivity, OfficerPresenceActivity::class.java)
                         else -> {
                             showToast(this@MainActivity, R.string.presence_denied)
                             null
@@ -144,7 +144,7 @@ class MainActivity : AppCompatActivity() {
 
                     moveIntent?.let {
                         startActivity(it)
-                    }}
+                    }
                 }
 
                 R.id.nav_logout -> {
