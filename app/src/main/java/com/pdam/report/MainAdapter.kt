@@ -7,7 +7,8 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.pdam.report.data.CustomerData
 import com.pdam.report.databinding.ReportItemRowBinding
-import com.pdam.report.ui.officer.AddFirstDataActivity
+import com.pdam.report.ui.officer.PemasanganKelayakanActivity
+import com.pdam.report.ui.officer.PemutusanActivity
 
 class MainAdapter(
     private val customerList: ArrayList<CustomerData>
@@ -23,13 +24,17 @@ class MainAdapter(
     override fun onBindViewHolder(holder: CustomerViewHolder, position: Int) {
         val customer = customerList[position]
         holder.bind(customer)
-        holder.itemView.setOnClickListener {
-            val intent = Intent(holder.itemView.context, AddFirstDataActivity::class.java)
-            // Mengirim kunci Firebase ke AddFirstDataActivity
-            intent.putExtra(AddFirstDataActivity.EXTRA_FIREBASE_KEY, customer.firebaseKey)
-            holder.itemView.context.startActivity(intent)
+            holder.itemView.setOnClickListener {
+                val intent =
+                    Intent(holder.itemView.context, PemasanganKelayakanActivity::class.java)
+                // Mengirim kunci Firebase ke AddFirstDataActivity
+                intent.putExtra(
+                    PemasanganKelayakanActivity.EXTRA_FIREBASE_KEY,
+                    customer.firebaseKey
+                )
+                holder.itemView.context.startActivity(intent)
+            }
         }
-    }
 
     fun updateData(newData: List<CustomerData>) {
         val diffResult = DiffUtil.calculateDiff(

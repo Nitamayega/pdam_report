@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
-import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -23,12 +22,12 @@ import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ActivityMainBinding
 import com.pdam.report.ui.admin.AdminPresenceActivity
 import com.pdam.report.ui.common.LoginActivity
-import com.pdam.report.ui.officer.AddFirstDataActivity
 import com.pdam.report.ui.officer.OfficerPresenceActivity
 import com.pdam.report.utils.PermissionHelper
 import com.pdam.report.utils.UserManager
 import com.pdam.report.utils.getCurrentTimeStamp
 import com.pdam.report.utils.getInitialDate
+import com.pdam.report.utils.milisToDate
 import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.setRecyclerViewVisibility
 import com.pdam.report.utils.showToast
@@ -67,15 +66,6 @@ class MainActivity : AppCompatActivity() {
             setupNavigationHeader()
             setupNavigationMenu()
             setContent()
-
-            if (user.team == 0) {
-                binding.buttonAdd.visibility = View.GONE
-            } else {
-                binding.buttonAdd.visibility = View.VISIBLE
-                binding.buttonAdd.setOnClickListener {
-                    navigatePage(this, AddFirstDataActivity::class.java)
-                }
-            }
         }
     }
 
@@ -116,14 +106,10 @@ class MainActivity : AppCompatActivity() {
             when (menuItem.itemId) {
 
                 R.id.nav_report -> {
-                    navigatePage(this, MainActivity::class.java, true)
+                    navigatePage(this, ListofPemasanganActivity::class.java, true)
                 }
 
                 R.id.nav_presence -> {
-                    if (user.lastPresence == getCurrentTimeStamp()) {
-                        showToast(this, R.string.presence_already_done)
-                        return@setNavigationItemSelectedListener false
-                    }
 
                     val initialDate = runBlocking { getInitialDate() }
                     val currentDate = SimpleDateFormat("dd-MM-yyyy").parse(getCurrentTimeStamp())?.time
@@ -132,6 +118,11 @@ class MainActivity : AppCompatActivity() {
                     if (daysDifference == 0) { daysDifference = 5 }
 
                     val currentTime = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+
+                    if (user.lastPresence == milisToDate(currentDate)) {
+                        showToast(this, R.string.presence_already_done)
+                        return@setNavigationItemSelectedListener false
+                    }
 
                     val moveIntent = when {
                         user.team == 0 -> Intent(this@MainActivity, AdminPresenceActivity::class.java)
@@ -177,43 +168,52 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setContent() {
-        val listCustomerRef = FirebaseDatabase.getInstance().getReference("listCustomer")
+        val listPemasanganRef = FirebaseDatabase.getInstance().getReference("listPemasangan")
+        val listPemutusanRef = FirebaseDatabase.getInstance().getReference("listPemutusan")
 
-        listCustomerRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        listPemasanganRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.hasChildren()) {
-                    setRecyclerViewVisibility(binding.emptyView, binding.rvCusts, false)
-                    binding.rvCusts.apply {
-                        layoutManager = LinearLayoutManager(this@MainActivity)
-                        setHasFixedSize(true)
-                    }
+                listPemutusanRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (snapshot.hasChildren()) {
+                            setRecyclerViewVisibility(binding.emptyView, binding.rvCusts, false)
+                            binding.rvCusts.apply {
+                                layoutManager = LinearLayoutManager(this@MainActivity)
+                                setHasFixedSize(true)
+                            }
 
-                    val customerList = snapshot.children.mapNotNull { customerSnapshot ->
-                        customerSnapshot.getValue(CustomerData::class.java)
-                    }
+                            val customerList = snapshot.children.mapNotNull { customerSnapshot ->
+                                customerSnapshot.getValue(CustomerData::class.java)
+                            }
 
-                    // Check if user.dailyTeam is 0
-                    if (user.dailyTeam == 0) {
-                        // Use all data without filtering
-                        adapter.updateData(customerList.sortedByDescending { it.currentDate })
-                    } else {
-                        // Filter item sesuai dengan user.dailyTeam
-                        val filteredCustomerList = customerList.filter { customer ->
-                            customer.dailyTeam == user.dailyTeam
+                            // Check if user.dailyTeam is 0
+                            if (user.dailyTeam == 0) {
+                                // Use all data without filtering
+                                adapter.updateData(customerList.sortedByDescending { it.currentDate })
+                            } else {
+                                // Filter item sesuai dengan user.dailyTeam
+                                val filteredCustomerList = customerList.filter { customer ->
+                                    customer.dailyTeam == user.dailyTeam
+                                }
+                                adapter.updateData(filteredCustomerList.sortedByDescending { it.currentDate })
+                            }
+
+                            binding.rvCusts.adapter = adapter
+
+                            if (binding.rvCusts.adapter?.itemCount == 0) {
+                                setRecyclerViewVisibility(binding.emptyView, binding.rvCusts, true)
+                            }
+
+
+                        } else {
+                            setRecyclerViewVisibility(binding.emptyView, binding.rvCusts, true)
                         }
-                        adapter.updateData(filteredCustomerList.sortedByDescending { it.currentDate })
                     }
 
-                    binding.rvCusts.adapter = adapter
-
-                    if (binding.rvCusts.adapter?.itemCount == 0) {
-                        setRecyclerViewVisibility(binding.emptyView, binding.rvCusts, true)
+                    override fun onCancelled(error: DatabaseError) {
+                        // Handle onCancelled event
                     }
-
-
-                } else {
-                    setRecyclerViewVisibility(binding.emptyView, binding.rvCusts, true)
-                }
+                })
             }
 
             override fun onCancelled(error: DatabaseError) {

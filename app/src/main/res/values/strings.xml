@@ -22,9 +22,15 @@
         <item>Petugas</item>
         <item>Admin</item>
     </string-array>
+    <string name="pemasangan">Pemasangan</string>
+    <string name="pemutusan">Pemutusan</string>
     <string name="report">Laporan</string>
     <string name="presence">Presensi</string>
     <string name="logout">Keluar</string>
+
+    <string name="first_data">Status Kelayakan</string>
+    <string name="second_data">Status Pemasangan</string>
+    <string name="third_data">GPS</string>
 
     <string name="empty_list">Belum Ada Data Pelanggan</string>
     <string name="empty_list_presence">Belum Ada Data Presensi</string>
@@ -39,10 +45,14 @@
     <string name="pw">PW</string>
     <string name="nomor_registrasi">Nomor Registrasi</string>
     <string name="nomor_k_l">Nomor K/L</string>
-    <string name="nama_pelanggan">Nama</string>
-    <string name="alamat_pelanggan">Alamat</string>
+    <string name="nama_pelanggan">Nama Pelanggan</string>
+    <string name="alamat_pelanggan">Alamat Pelanggan</string>
     <string name="keterangan">Keterangan</string>
     <string name="dokumentasi">Dokumentasi</string>
+    <string name="dokumentasiDokumen">Dokumentasi Dokumen Survei Kelayakan</string>
+    <string name="dokumentasiSekitar">Dokumentasi Kondisi Sekitar</string>
+    <string name="dokumentasiKonstruksi">Dokumentasi Konstruksi</string>
+    <string name="dokumentasiMeter">Dokumentasi Nomor dan Segel Meter</string>
 
     <string name="meter">Meter</string>
     <string name="merk">Merk</string>
@@ -67,6 +77,11 @@
     <string-array name="type_of_work">
         <item>Pemasangan baru</item>
         <item>Pemasangan kembali</item>
+    </string-array>
+
+    <string-array name="type_of_ket">
+        <item>Layak</item>
+        <item>Tidak layak</item>
     </string-array>
 
     <string name="pemasangan_sambungan_baru">Pemasangan Sambungan Baru</string>

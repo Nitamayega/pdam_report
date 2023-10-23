@@ -14,7 +14,7 @@
     android:layout_height="wrap_content"
     android:paddingTop="16dp"
     android:paddingHorizontal="16dp"
-    tools:context=".ui.officer.AddFirstDataActivity">
+    tools:context=".ui.officer.PemasanganKelayakanActivity">
 
     <ProgressBar
         android:id="@+id/progressBar"
@@ -155,34 +155,33 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/ed_keterangan"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="0dp"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        app:boxBackgroundMode="outline"
+        android:focusableInTouchMode="true"
+        android:hint="@string/keterangan"
         app:boxStrokeColor="@color/funblue"
         app:boxStrokeWidth="2dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/ed_alamat_pelanggan">
 
-        <EditText
-            android:id="@+id/edt_keterangan"
+        <AutoCompleteTextView
+            android:id="@+id/dropdown_keterangan"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ems="10"
-            android:hint="@string/keterangan"
-            android:inputType="textMultiLine"
-            tools:ignore="SpeakableTextPresentCheck" />
+            android:inputType="none"
+            tools:ignore="LabelFor" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/dokumentasiDokumen"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
-        android:text="@string/dokumentasi"
+        android:text="@string/dokumentasiDokumen"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="@+id/ed_keterangan"
         app:layout_constraintTop_toBottomOf="@+id/ed_keterangan" />
@@ -202,8 +201,19 @@
         android:gravity="center"
         app:layout_constraintEnd_toEndOf="@+id/ed_keterangan"
         app:layout_constraintStart_toStartOf="@+id/ed_keterangan"
-        app:layout_constraintTop_toBottomOf="@+id/textView"
+        app:layout_constraintTop_toBottomOf="@+id/dokumentasiDokumen"
         android:focusable="true" />
+
+    <TextView
+        android:id="@+id/dokumentasiSekitar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/dokumentasiSekitar"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/ed_keterangan"
+        app:layout_constraintTop_toBottomOf="@+id/item_image_1" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/item_image_2"
@@ -221,7 +231,7 @@
         android:textCursorDrawable="@null"
         app:layout_constraintEnd_toEndOf="@+id/ed_keterangan"
         app:layout_constraintStart_toStartOf="@+id/ed_keterangan"
-        app:layout_constraintTop_toBottomOf="@+id/item_image_1" />
+        app:layout_constraintTop_toBottomOf="@+id/dokumentasiSekitar" />
 
     <TextView
         android:id="@+id/addedby"
@@ -246,7 +256,7 @@
         app:backgroundTint="@color/cognac"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="@+id/item_image_2"
-        app:layout_constraintTop_toBottomOf="@id/item_image_2"
+        app:layout_constraintTop_toBottomOf="@id/addedby"
         app:layout_constraintVertical_bias="1.0" />
 
     <Button
@@ -259,10 +269,8 @@
         android:text="@string/simpan"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/item_image_2"
-        app:layout_constraintTop_toBottomOf="@+id/item_image_2"
+        app:layout_constraintTop_toBottomOf="@+id/addedby"
         app:layout_constraintVertical_bias="1.0" />
-
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

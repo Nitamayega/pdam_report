@@ -33,23 +33,23 @@ import com.pdam.report.utils.showToast
 import kotlinx.coroutines.launch
 import java.io.File
 
-class UpdateCustomerVerificationActivity : AppCompatActivity() {
+class PemasanganGPSActivity : AppCompatActivity() {
 
     private val binding by lazy { ActivityUpdateCustomerVerificationBinding.inflate(layoutInflater) }
     private var imageFile: File? = null
 
     private val databaseReference = FirebaseDatabase.getInstance().reference
 
-    private val firebaseKey by lazy { intent.getStringExtra(AddFirstDataActivity.EXTRA_FIREBASE_KEY) }
-    private val customerData by lazy { intent.getIntExtra(AddFirstDataActivity.EXTRA_CUSTOMER_DATA, 0) }
+    private val firebaseKey by lazy { intent.getStringExtra(PemasanganKelayakanActivity.EXTRA_FIREBASE_KEY) }
+    private val customerData by lazy { intent.getIntExtra(PemasanganKelayakanActivity.EXTRA_CUSTOMER_DATA, 0) }
 
     private val userManager by lazy { UserManager(this) }
     private lateinit var user: UserData
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-            val intent = Intent(this@UpdateCustomerVerificationActivity, UpdateCustomerInstallationActivity::class.java)
-            intent.putExtra(UpdateCustomerInstallationActivity.EXTRA_FIREBASE_KEY, firebaseKey)
+            val intent = Intent(this@PemasanganGPSActivity, PemasanganSambunganActivity::class.java)
+            intent.putExtra(PemasanganSambunganActivity.EXTRA_FIREBASE_KEY, firebaseKey)
             startActivity(intent)
             finish()
         }
@@ -95,21 +95,23 @@ class UpdateCustomerVerificationActivity : AppCompatActivity() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
                     // Show a confirmation dialog for delete
-                    showDeleteConfirmationDialog(customerRef, this@UpdateCustomerVerificationActivity)
+                    showDeleteConfirmationDialog(customerRef, this@PemasanganGPSActivity)
                 } else {
-                    showToast(this@UpdateCustomerVerificationActivity, R.string.data_not_found)
+                    showToast(this@PemasanganGPSActivity, R.string.data_not_found)
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                showToast(this@UpdateCustomerVerificationActivity, "${R.string.failed_access_data}: ${error.message}".toInt())
+                showToast(this@PemasanganGPSActivity, "${R.string.failed_access_data}: ${error.message}".toInt())
             }
         })
     }
 
     private fun clearData() {
         // Clear all input fields
-        binding.edtKeterangan.text.clear()
+        binding.edtX.text.clear()
+        binding.edtY.text.clear()
+        binding.edtZ.text.clear()
     }
 
     private fun saveData() {
@@ -118,43 +120,42 @@ class UpdateCustomerVerificationActivity : AppCompatActivity() {
         val koorX = binding.edtX.text.toString()
         val koorY = binding.edtY.text.toString()
         val koorZ = binding.edtZ.text.toString()
-        val keterangan = binding.edtKeterangan.text.toString()
 
         // Validate input
-        if (isInputValid(koorX, koorY, koorZ, keterangan)) {
+        if (isInputValid(koorX, koorY, koorZ)) {
             showLoading(true, binding.progressBar, binding.btnSimpan, binding.btnHapus)
-            uploadImagesAndSaveData(user.username, currentDate, koorX, koorY, koorZ, keterangan)
+            uploadImagesAndSaveData(user.username, currentDate, koorX, koorY, koorZ)
         } else {
             showLoading(false, binding.progressBar, binding.btnSimpan, binding.btnHapus)
             showToast(this, R.string.fill_all_data)
         }
     }
 
-    private fun isInputValid(koorX: String, koorY: String, koorZ: String, keterangan: String): Boolean {
+    private fun isInputValid(koorX: String, koorY: String, koorZ: String): Boolean {
         // Check if all required input is valid
-        return koorX.isNotEmpty() && koorY.isNotEmpty() && koorZ.isNotEmpty() && keterangan.isNotEmpty() && imageFile != null
+        return koorX.isNotEmpty() && koorY.isNotEmpty() && koorZ.isNotEmpty() && imageFile != null
     }
 
-    private fun uploadImagesAndSaveData(petugas: String, currentDate: Long, koorX: String, koorY: String, koorZ: String, keterangan: String) {
+    private fun uploadImagesAndSaveData(petugas: String, currentDate: Long, koorX: String, koorY: String, koorZ: String) {
         val storageReference = FirebaseStorage.getInstance().reference
-        val dokumentasi4Ref = storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi4.jpg")
+        val dokumentasiRef = storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi5_GPS.jpg")
 
         lifecycleScope.launch {
             imageFile = imageFile?.reduceFileImageInBackground()
         }
 
         // Upload image 4
-        dokumentasi4Ref.putFile(Uri.fromFile(imageFile)).addOnSuccessListener {
-            dokumentasi4Ref.downloadUrl.addOnSuccessListener { uri1 ->
-                val dokumentasi4 = uri1.toString()
+        dokumentasiRef.putFile(Uri.fromFile(imageFile)).addOnSuccessListener {
+            dokumentasiRef.downloadUrl.addOnSuccessListener { uri1 ->
+                val dokumentasi = uri1.toString()
 
                 // After successfully obtaining image URLs, save the data to Firebase
-                saveCustomerData(petugas, currentDate, koorX, koorY, koorZ, keterangan, dokumentasi4)
+                saveCustomerData(petugas, currentDate, koorX, koorY, koorZ, dokumentasi)
             }
         }
     }
 
-    private fun saveCustomerData(petugas: String, currentDate: Long, koorX: String, koorY: String, koorZ: String, keterangan: String, dokumentasi4: String) {
+    private fun saveCustomerData(petugas: String, currentDate: Long, koorX: String, koorY: String, koorZ: String, dokumentasi: String) {
         val customerRef = databaseReference.child("listCustomer").child(firebaseKey.toString())
 
         val data = mapOf(
@@ -163,8 +164,7 @@ class UpdateCustomerVerificationActivity : AppCompatActivity() {
             "xkoordinat" to koorX,
             "ykoordinat" to koorY,
             "zkoordinat" to koorZ,
-            "keterangan3" to keterangan,
-            "dokumentasi4" to dokumentasi4,
+            "dokumentasi5" to dokumentasi,
             "data" to 3
         )
 
@@ -199,7 +199,7 @@ class UpdateCustomerVerificationActivity : AppCompatActivity() {
 
             override fun onCancelled(error: DatabaseError) {
                 // Menampilkan pesan kesalahan jika mengakses data gagal
-                showToast(this@UpdateCustomerVerificationActivity, "${R.string.failed_access_data}: ${error.message}".toInt())
+                showToast(this@PemasanganGPSActivity, "${R.string.failed_access_data}: ${error.message}".toInt())
             }
         })
     }
@@ -211,7 +211,7 @@ class UpdateCustomerVerificationActivity : AppCompatActivity() {
 
         createCustomTempFile(application).also { file ->
             val photoURI: Uri = FileProvider.getUriForFile(
-                this@UpdateCustomerVerificationActivity,
+                this@PemasanganGPSActivity,
                 "com.pdam.report",
                 file
             )
@@ -230,15 +230,15 @@ class UpdateCustomerVerificationActivity : AppCompatActivity() {
             val myFile = File(currentPhotoPath)
             myFile.let { file ->
                 imageFile = file
-                binding.itemImage.text = System.currentTimeMillis().toString() + "_dokumentasi3.jpg"
+                binding.itemImage.text = System.currentTimeMillis().toString() + "_dokumentasi5_GPS.jpg"
             }
         }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            val intent = Intent(this@UpdateCustomerVerificationActivity, UpdateCustomerInstallationActivity::class.java)
-            intent.putExtra(UpdateCustomerInstallationActivity.EXTRA_FIREBASE_KEY, firebaseKey)
+            val intent = Intent(this@PemasanganGPSActivity, PemasanganSambunganActivity::class.java)
+            intent.putExtra(PemasanganSambunganActivity.EXTRA_FIREBASE_KEY, firebaseKey)
             startActivity(intent)
             finish()
             return true
@@ -289,10 +289,6 @@ class UpdateCustomerVerificationActivity : AppCompatActivity() {
             isEnabled = false
             isFocusable = false
         }
-
-        binding.edtKeterangan.apply {
-            setText(dataCustomer.keterangan2)
-        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -304,41 +300,35 @@ class UpdateCustomerVerificationActivity : AppCompatActivity() {
         }
 
         binding.updatedby.apply {
-            text = "Update by " + dataCustomer.petugas
+            text = "Update by " + dataCustomer.petugas + " at " + dataCustomer.updateVerifDate.toString()
             isEnabled = false
             isFocusable = false
             visibility = android.view.View.VISIBLE
         }
 
         binding.edtX.apply {
-            setText(dataCustomer.xKoordinat)
+            setText(dataCustomer.xkoordinat)
             isEnabled = false
             isFocusable = false
         }
 
         binding.edtY.apply {
-            setText(dataCustomer.yKoordinat)
+            setText(dataCustomer.ykoordinat)
             isEnabled = false
             isFocusable = false
         }
 
         binding.edtZ.apply {
-            setText(dataCustomer.zKoordinat)
-            isEnabled = false
-            isFocusable = false
-        }
-
-        binding.edtKeterangan.apply {
-            setText(dataCustomer.keterangan3)
+            setText(dataCustomer.zkoordinat)
             isEnabled = false
             isFocusable = false
         }
 
         binding.itemImage.apply {
-            text = parsingNameImage(dataCustomer.dokumentasi4)
+            text = parsingNameImage(dataCustomer.dokumentasi5)
             setOnClickListener {
                 supportFragmentManager.beginTransaction()
-                    .add(FullScreenImageDialogFragment(dataCustomer.dokumentasi4), "FullScreenImageDialogFragment")
+                    .add(FullScreenImageDialogFragment(dataCustomer.dokumentasi5), "FullScreenImageDialogFragment")
                     .addToBackStack(null)
                     .commit()
             }
@@ -348,7 +338,7 @@ class UpdateCustomerVerificationActivity : AppCompatActivity() {
         binding.btnSimpan.apply {
             binding.btnSimpan.text = getString(R.string.finish)
             binding.btnSimpan.setOnClickListener {
-                navigatePage(this@UpdateCustomerVerificationActivity, MainActivity::class.java, true)
+                navigatePage(this@PemasanganGPSActivity, MainActivity::class.java, true)
             }
         }
     }

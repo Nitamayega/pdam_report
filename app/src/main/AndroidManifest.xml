@@ -7,7 +7,8 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission
@@ -25,6 +26,15 @@
         android:theme="@style/Theme.PDAMReport"
         tools:targetApi="31">
         <activity
+            android:name=".ListofPemutusanActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ListofPemasanganActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.officer.PemutusanActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.common.SplashScreen"
             android:exported="true"
             android:theme="@style/Theme.PDAMReport.Splash">
@@ -35,14 +45,17 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.officer.UpdateCustomerVerificationActivity"
-            android:exported="false" />
+            android:name=".ui.officer.PemasanganGPSActivity"
+            android:exported="false"
+            android:label="@string/third_data" />
         <activity
-            android:name=".ui.officer.UpdateCustomerInstallationActivity"
-            android:exported="false" />
+            android:name=".ui.officer.PemasanganSambunganActivity"
+            android:exported="false"
+            android:label="@string/second_data" />
         <activity
-            android:name=".ui.officer.AddFirstDataActivity"
-            android:exported="false" />
+            android:name=".ui.officer.PemasanganKelayakanActivity"
+            android:exported="false"
+            android:label="@string/first_data" />
         <activity
             android:name=".ui.admin.DetailPresenceActivity"
             android:exported="false" />
@@ -58,7 +71,7 @@
             android:exported="false" />
         <activity
             android:name=".MainActivity"
-            android:exported="false"/>
+            android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

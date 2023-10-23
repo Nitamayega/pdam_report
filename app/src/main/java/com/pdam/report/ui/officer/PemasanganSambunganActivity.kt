@@ -33,24 +33,28 @@ import com.pdam.report.utils.showToast
 import kotlinx.coroutines.launch
 import java.io.File
 
-class UpdateCustomerInstallationActivity : AppCompatActivity() {
+class PemasanganSambunganActivity : AppCompatActivity() {
 
     private val binding by lazy { ActivityUpdateCustomerInstallationBinding.inflate(layoutInflater) }
     private var imageFile: File? = null
 
     private val databaseReference = FirebaseDatabase.getInstance().reference
 
-    private val firebaseKey by lazy { intent.getStringExtra(AddFirstDataActivity.EXTRA_FIREBASE_KEY) }
-    private val customerData by lazy { intent.getIntExtra(AddFirstDataActivity.EXTRA_CUSTOMER_DATA, 0) }
+    private val firebaseKey by lazy { intent.getStringExtra(PemasanganKelayakanActivity.EXTRA_FIREBASE_KEY) }
+    private val customerData by lazy { intent.getIntExtra(PemasanganKelayakanActivity.EXTRA_CUSTOMER_DATA, 0) }
 
     private val userManager by lazy { UserManager(this) }
     private lateinit var user: UserData
 
+    private var imageNumber: Int = 0
+    private var firstImageFile: File? = null
+    private var secondImageFile: File? = null
+
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
 //            navigatePage(this@UpdateCustomerInstallationActivity, AddFirstDataActivity::class.java, true)
-            val intent = Intent(this@UpdateCustomerInstallationActivity, AddFirstDataActivity::class.java)
-            intent.putExtra(AddFirstDataActivity.EXTRA_FIREBASE_KEY, firebaseKey.toString())
+            val intent = Intent(this@PemasanganSambunganActivity, PemasanganKelayakanActivity::class.java)
+            intent.putExtra(PemasanganKelayakanActivity.EXTRA_FIREBASE_KEY, firebaseKey.toString())
             startActivity(intent)
             finish()
         }
@@ -76,7 +80,9 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
     }
 
     private fun setupButtons() {
-        binding.itemImage.setOnClickListener { startTakePhoto() }
+        binding.itemImage1.setOnClickListener { imageNumber = 1; startTakePhoto() }
+        binding.itemImage2.setOnClickListener { imageNumber = 2; startTakePhoto() }
+
         binding.btnSimpan.setOnClickListener { saveData() }
         binding.btnHapus.setOnClickListener {
             if (customerData == 1) {
@@ -95,14 +101,14 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
                     // Show a confirmation dialog for delete
-                    showDeleteConfirmationDialog(customerRef, this@UpdateCustomerInstallationActivity)
+                    showDeleteConfirmationDialog(customerRef, this@PemasanganSambunganActivity)
                 } else {
-                    showToast(this@UpdateCustomerInstallationActivity, R.string.data_not_found)
+                    showToast(this@PemasanganSambunganActivity, R.string.data_not_found)
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                showToast(this@UpdateCustomerInstallationActivity, "${R.string.failed_access_data}: ${error.message}".toInt())
+                showToast(this@PemasanganSambunganActivity, "${R.string.failed_access_data}: ${error.message}".toInt())
             }
         })
     }
@@ -146,11 +152,12 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
 
     private fun uploadImagesAndSaveData(petugas: String, currentDate: Long, nomorKL: String, merk: String, diameter: String, stand: String, nomorMeter: String, nomorSegel: String, keterangan: String) {
         val storageReference = FirebaseStorage.getInstance().reference
-        val dokumentasi3Ref =
-            storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi3.jpg")
+        val dokumentasi3Ref = storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi3_konstruksi.jpg")
+        val dokumentasi4Ref = storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi4_meter.jpg")
 
         lifecycleScope.launch {
-            imageFile = imageFile?.reduceFileImageInBackground()
+            firstImageFile = firstImageFile?.reduceFileImageInBackground()
+            secondImageFile = secondImageFile?.reduceFileImageInBackground()
         }
 
         // Upload image 3
@@ -158,24 +165,31 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
             dokumentasi3Ref.downloadUrl.addOnSuccessListener { uri1 ->
                 val dokumentasi3 = uri1.toString()
 
-                // After successfully obtaining image URLs, save the data to Firebase
-                saveCustomerData(
-                    petugas,
-                    currentDate,
-                    nomorKL,
-                    merk,
-                    diameter,
-                    stand,
-                    nomorMeter,
-                    nomorSegel,
-                    keterangan,
-                    dokumentasi3
-                )
+                dokumentasi4Ref.putFile(Uri.fromFile(secondImageFile)).addOnSuccessListener {
+                    dokumentasi4Ref.downloadUrl.addOnSuccessListener { uri2 ->
+                        val dokumentasi4 = uri2.toString()
+
+                        // After successfully obtaining image URLs, save the data to Firebase
+                        saveCustomerData(
+                            petugas,
+                            currentDate,
+                            nomorKL,
+                            merk,
+                            diameter,
+                            stand,
+                            nomorMeter,
+                            nomorSegel,
+                            keterangan,
+                            dokumentasi3,
+                            dokumentasi4
+                        )
+                    }
+                }
             }
         }
     }
 
-    private fun saveCustomerData(petugas: String, currentDate: Long, nomorKL: String, merk: String, diameter: String, stand: String, nomorMeter: String, nomorSegel: String, keterangan: String, dokumentasi3: String) {
+    private fun saveCustomerData(petugas: String, currentDate: Long, nomorKL: String, merk: String, diameter: String, stand: String, nomorMeter: String, nomorSegel: String, keterangan: String, dokumentasi3: String, dokumentasi4: String) {
         val customerRef = databaseReference.child("listCustomer").child(firebaseKey.toString())
 
         val data = mapOf(
@@ -189,6 +203,7 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
             "nomorSegel" to nomorSegel,
             "keterangan2" to keterangan,
             "dokumentasi3" to dokumentasi3,
+            "dokumentasi4" to dokumentasi4,
             "data" to 2
         )
 
@@ -223,7 +238,7 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
 
             override fun onCancelled(error: DatabaseError) {
                 // Menampilkan pesan kesalahan jika mengakses data gagal
-                showToast(this@UpdateCustomerInstallationActivity, "${R.string.failed_access_data}: ${error.message}".toInt())
+                showToast(this@PemasanganSambunganActivity, "${R.string.failed_access_data}: ${error.message}".toInt())
             }
         })
     }
@@ -235,7 +250,7 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
 
         createCustomTempFile(application).also { file ->
             val photoURI: Uri = FileProvider.getUriForFile(
-                this@UpdateCustomerInstallationActivity,
+                this@PemasanganSambunganActivity,
                 "com.pdam.report",
                 file
             )
@@ -253,16 +268,21 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
             // After successfully capturing an image, assign it to the appropriate file
             val myFile = File(currentPhotoPath)
             myFile.let { file ->
-                imageFile = file
-                binding.itemImage.text = System.currentTimeMillis().toString() + "_dokumentasi3.jpg"
+                if (imageNumber == 1) {
+                    firstImageFile = file
+                    binding.itemImage1.text = System.currentTimeMillis().toString() + "_dokumentasi3_konstruksi.jpg"
+                } else if (imageNumber == 2) {
+                    secondImageFile = file
+                    binding.itemImage2.text = System.currentTimeMillis().toString() + "_dokumentasi4_meter.jpg"
+                }
             }
         }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            val intent = Intent(this@UpdateCustomerInstallationActivity, AddFirstDataActivity::class.java)
-            intent.putExtra(AddFirstDataActivity.EXTRA_FIREBASE_KEY, firebaseKey.toString())
+            val intent = Intent(this@PemasanganSambunganActivity, PemasanganKelayakanActivity::class.java)
+            intent.putExtra(PemasanganKelayakanActivity.EXTRA_FIREBASE_KEY, firebaseKey.toString())
             startActivity(intent)
             finish()
             return true
@@ -310,7 +330,7 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
         }
 
         binding.updatedby.apply {
-            text = "Update by " + dataCustomer.petugas
+            text = "Update by " + dataCustomer.petugas + " at " + dataCustomer.updateInstallDate.toString()
             isEnabled = false
             isFocusable = false
             visibility = android.view.View.VISIBLE
@@ -352,11 +372,21 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
             isFocusable = false
         }
 
-        binding.itemImage.apply {
+        binding.itemImage1.apply {
             text = parsingNameImage(dataCustomer.dokumentasi3)
             setOnClickListener {
                 supportFragmentManager.beginTransaction()
                     .add(FullScreenImageDialogFragment(dataCustomer.dokumentasi3), "FullScreenImageDialogFragment")
+                    .addToBackStack(null)
+                    .commit()
+            }
+        }
+
+        binding.itemImage2.apply {
+            text = parsingNameImage(dataCustomer.dokumentasi4)
+            setOnClickListener {
+                supportFragmentManager.beginTransaction()
+                    .add(FullScreenImageDialogFragment(dataCustomer.dokumentasi4), "FullScreenImageDialogFragment")
                     .addToBackStack(null)
                     .commit()
             }
@@ -367,22 +397,22 @@ class UpdateCustomerInstallationActivity : AppCompatActivity() {
             if (dataCustomer.jenisPekerjaan == "Pemasangan kembali") {
                 text = getString(R.string.finish)
                 setOnClickListener {
-                    navigatePage(this@UpdateCustomerInstallationActivity, MainActivity::class.java, true)
+                    navigatePage(this@PemasanganSambunganActivity, MainActivity::class.java, true)
                 }
             } else {
                 text = getString(R.string.next)
                 setOnClickListener {
                     val intent = Intent(
-                        this@UpdateCustomerInstallationActivity,
-                        UpdateCustomerVerificationActivity::class.java
+                        this@PemasanganSambunganActivity,
+                        PemasanganGPSActivity::class.java
                     )
 
                     intent.putExtra(
-                        UpdateCustomerVerificationActivity.EXTRA_FIREBASE_KEY,
+                        PemasanganGPSActivity.EXTRA_FIREBASE_KEY,
                         dataCustomer.firebaseKey
                     )
                     intent.putExtra(
-                        UpdateCustomerVerificationActivity.EXTRA_CUSTOMER_DATA,
+                        PemasanganGPSActivity.EXTRA_CUSTOMER_DATA,
                         dataCustomer.data
                     )
 

@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:paddingHorizontal="16dp"
         android:paddingTop="16dp"
-        tools:context=".ui.officer.UpdateCustomerInstallationActivity">
+        tools:context=".ui.officer.PemasanganSambunganActivity">
 
         <ProgressBar
             android:id="@+id/progressBar"
@@ -133,7 +133,7 @@
             android:id="@+id/ed_alamat_pelanggan"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
-            android:layout_height="62dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             app:boxBackgroundMode="outline"
             app:boxStrokeColor="@color/funblue"
@@ -321,8 +321,60 @@
             app:layout_constraintStart_toStartOf="@+id/ed_alamat_pelanggan"
             app:layout_constraintTop_toBottomOf="@+id/ed_alamat_pelanggan" />
 
+        <TextView
+            android:id="@+id/updatedby"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Updated By Kepala Suku"
+            android:visibility="gone"
+            android:gravity="end"
+            app:layout_constraintTop_toBottomOf="@+id/item_image_1"
+            app:layout_constraintStart_toStartOf="@+id/item_image_1"
+            app:layout_constraintEnd_toEndOf="@+id/item_image_1" />
+
+        <TextView
+            android:id="@+id/dokumentasiKonstruksi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/dokumentasiKonstruksi"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@+id/ed_keterangan"
+            app:layout_constraintTop_toBottomOf="@+id/ed_keterangan" />
+
         <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/item_image"
+            android:id="@+id/item_image_1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:drawableStart="@drawable/preview_upload_photo"
+            android:textCursorDrawable="@null"
+            android:drawablePadding="5dp"
+            android:text="@string/take_photo"
+            android:clickable="true"
+            android:padding="5dp"
+            android:background="@drawable/field"
+            android:gravity="center"
+            app:layout_constraintEnd_toEndOf="@+id/ed_keterangan"
+            app:layout_constraintStart_toStartOf="@+id/ed_keterangan"
+            app:layout_constraintTop_toBottomOf="@+id/dokumentasiKonstruksi"
+            android:focusable="true" />
+
+        <TextView
+            android:id="@+id/dokumentasiMeter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/dokumentasiMeter"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@+id/ed_keterangan"
+            app:layout_constraintTop_toBottomOf="@+id/item_image_1" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/item_image_2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -336,32 +388,8 @@
             android:text="@string/take_photo"
             android:textCursorDrawable="@null"
             app:layout_constraintEnd_toEndOf="@+id/ed_keterangan"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView2" />
-
-        <TextView
-            android:id="@+id/updatedby"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Updated By Kepala Suku"
-            android:visibility="gone"
-            android:gravity="end"
-            app:layout_constraintTop_toBottomOf="@+id/item_image"
-            app:layout_constraintStart_toStartOf="@+id/item_image"
-            app:layout_constraintEnd_toEndOf="@+id/item_image" />
-
-        <TextView
-            android:id="@+id/textView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="16dp"
-            android:text="@string/dokumentasi"
-            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="@+id/ed_keterangan"
-            app:layout_constraintTop_toBottomOf="@+id/ed_keterangan" />
-
+            app:layout_constraintTop_toBottomOf="@+id/dokumentasiMeter" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_hapus"
@@ -373,8 +401,9 @@
             android:text="@string/hapus"
             app:backgroundTint="@color/cognac"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/item_image"
-            app:layout_constraintTop_toBottomOf="@+id/item_image" />
+            app:layout_constraintStart_toStartOf="@+id/item_image_2"
+            app:layout_constraintTop_toBottomOf="@id/updatedby"
+            app:layout_constraintVertical_bias="1.0" />
 
         <Button
             android:id="@+id/btn_simpan"
@@ -385,8 +414,9 @@
             android:layout_marginBottom="16dp"
             android:text="@string/simpan"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/item_image"
-            app:layout_constraintTop_toBottomOf="@+id/item_image" />
+            app:layout_constraintEnd_toEndOf="@+id/item_image_2"
+            app:layout_constraintTop_toBottomOf="@+id/updatedby"
+            app:layout_constraintVertical_bias="1.0" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

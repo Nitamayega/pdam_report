@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:paddingHorizontal="16dp"
         android:paddingTop="16dp"
-        tools:context=".ui.officer.UpdateCustomerInstallationActivity">
+        tools:context=".ui.officer.PemasanganSambunganActivity">
 
         <ProgressBar
             android:id="@+id/progressBar"
@@ -287,29 +287,6 @@
                 tools:ignore="SpeakableTextPresentCheck" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/ed_keterangan"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:boxBackgroundMode="outline"
-            app:boxStrokeColor="@color/funblue"
-            app:boxStrokeWidth="2dp"
-            app:layout_constraintEnd_toEndOf="@+id/ed_nomor_segel"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ed_nomor_segel">
-
-            <EditText
-                android:id="@+id/edt_keterangan"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:hint="@string/keterangan"
-                android:inputType="textMultiLine"
-                tools:ignore="SpeakableTextPresentCheck" />
-        </com.google.android.material.textfield.TextInputLayout>
-
         <TextView
             android:id="@+id/tv_meter"
             android:layout_width="wrap_content"
@@ -335,7 +312,7 @@
             android:padding="5dp"
             android:text="@string/take_photo"
             android:textCursorDrawable="@null"
-            app:layout_constraintEnd_toEndOf="@+id/ed_keterangan"
+            app:layout_constraintEnd_toEndOf="@+id/ed_nomor_segel"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
@@ -359,8 +336,8 @@
             android:layout_marginTop="16dp"
             android:text="@string/dokumentasi"
             android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="@+id/ed_keterangan"
-            app:layout_constraintTop_toBottomOf="@+id/ed_keterangan" />
+            app:layout_constraintStart_toStartOf="@+id/ed_nomor_segel"
+            app:layout_constraintTop_toBottomOf="@+id/ed_nomor_segel" />
 
 
         <com.google.android.material.button.MaterialButton

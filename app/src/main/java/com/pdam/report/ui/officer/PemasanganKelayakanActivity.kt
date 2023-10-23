@@ -23,7 +23,7 @@ import com.pdam.report.MainActivity
 import com.pdam.report.R
 import com.pdam.report.data.CustomerData
 import com.pdam.report.data.UserData
-import com.pdam.report.databinding.ActivityAddFirstDataBinding
+import com.pdam.report.databinding.ActivityPemasanganKelayakanBinding
 import com.pdam.report.utils.FullScreenImageDialogFragment
 import com.pdam.report.utils.UserManager
 import com.pdam.report.utils.createCustomTempFile
@@ -36,7 +36,7 @@ import com.pdam.report.utils.showToast
 import kotlinx.coroutines.launch
 import java.io.File
 
-class AddFirstDataActivity : AppCompatActivity() {
+class PemasanganKelayakanActivity : AppCompatActivity() {
 
     private val databaseReference = FirebaseDatabase.getInstance().reference
 
@@ -52,11 +52,11 @@ class AddFirstDataActivity : AppCompatActivity() {
 
     private var firstImageFile: File? = null
     private var secondImageFile: File? = null
-    private val binding by lazy { ActivityAddFirstDataBinding.inflate(layoutInflater) }
+    private val binding by lazy { ActivityPemasanganKelayakanBinding.inflate(layoutInflater) }
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-            navigatePage(this@AddFirstDataActivity, MainActivity::class.java)
+            navigatePage(this@PemasanganKelayakanActivity, MainActivity::class.java)
         }
     }
 
@@ -102,14 +102,14 @@ class AddFirstDataActivity : AppCompatActivity() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
                     // Show a confirmation dialog for delete
-                    showDeleteConfirmationDialog(customerRef, this@AddFirstDataActivity)
+                    showDeleteConfirmationDialog(customerRef, this@PemasanganKelayakanActivity)
                 } else {
-                    showToast(this@AddFirstDataActivity, R.string.data_not_found)
+                    showToast(this@PemasanganKelayakanActivity, R.string.data_not_found)
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                showToast(this@AddFirstDataActivity, "${R.string.failed_access_data}: ${error.message}".toInt())
+                showToast(this@PemasanganKelayakanActivity, "${R.string.failed_access_data}: ${error.message}".toInt())
             }
         })
     }
@@ -121,7 +121,7 @@ class AddFirstDataActivity : AppCompatActivity() {
         binding.edtNomorRegistrasi.text.clear()
         binding.edtNamaPelanggan.text.clear()
         binding.edtAlamatPelanggan.text.clear()
-        binding.edtKeterangan.text.clear()
+        binding.dropdownKeterangan.text.clear()
     }
 
     private fun saveData() {
@@ -132,7 +132,7 @@ class AddFirstDataActivity : AppCompatActivity() {
         val nomorRegistrasi = binding.edtNomorRegistrasi.text.toString()
         val name = binding.edtNamaPelanggan.text.toString()
         val address = binding.edtAlamatPelanggan.text.toString()
-        val keterangan = binding.edtKeterangan.text.toString()
+        val keterangan = binding.dropdownKeterangan.text.toString()
 
         // Validate input
         if (isInputValid(jenisPekerjaan, pw, nomorRegistrasi, name, address, keterangan)) {
@@ -151,8 +151,8 @@ class AddFirstDataActivity : AppCompatActivity() {
 
     private fun uploadImagesAndSaveData(currentDate: Long, jenisPekerjaan: String, pw: String, nomorRegistrasi: String, name: String, address: String, keterangan: String) {
         val storageReference = FirebaseStorage.getInstance().reference
-        val dokumentasi1Ref = storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi1.jpg")
-        val dokumentasi2Ref = storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi2.jpg")
+        val dokumentasi1Ref = storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi1_dokumen.jpg")
+        val dokumentasi2Ref = storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi2_kondisi.jpg")
 
         lifecycleScope.launch {
             firstImageFile = firstImageFile?.reduceFileImageInBackground()
@@ -231,7 +231,7 @@ class AddFirstDataActivity : AppCompatActivity() {
 
             override fun onCancelled(error: DatabaseError) {
                 // Menampilkan pesan kesalahan jika mengakses data gagal
-                showToast(this@AddFirstDataActivity, "${R.string.failed_access_data}: ${error.message}".toInt())
+                showToast(this@PemasanganKelayakanActivity, "${R.string.failed_access_data}: ${error.message}".toInt())
             }
         })
     }
@@ -246,7 +246,7 @@ class AddFirstDataActivity : AppCompatActivity() {
         }
 
         binding.addedby.apply {
-            text = "Added by " + dataCustomer.petugas
+            text = "Added by " + dataCustomer.petugas + " at " + dataCustomer.currentDate.toString()
             isEnabled = false
             isFocusable = false
             visibility = android.view.View.VISIBLE
@@ -277,7 +277,7 @@ class AddFirstDataActivity : AppCompatActivity() {
                 isFocusable = false
             }
 
-            binding.edtKeterangan.apply {
+            binding.dropdownKeterangan.apply {
                 setText(dataCustomer.keterangan1)
                 isEnabled = false
                 isFocusable = false
@@ -309,17 +309,17 @@ class AddFirstDataActivity : AppCompatActivity() {
             binding.btnSimpan.text = getString(R.string.next)
             binding.btnSimpan.setOnClickListener {
                 val intent = Intent(
-                    this@AddFirstDataActivity,
-                    UpdateCustomerInstallationActivity::class.java
+                    this@PemasanganKelayakanActivity,
+                    PemasanganSambunganActivity::class.java
                 )
 
                 // Mengirim kunci Firebase ke AddFirstDataActivity
                 intent.putExtra(
-                    UpdateCustomerInstallationActivity.EXTRA_FIREBASE_KEY,
+                    PemasanganSambunganActivity.EXTRA_FIREBASE_KEY,
                     dataCustomer.firebaseKey
                 )
                 intent.putExtra(
-                    UpdateCustomerInstallationActivity.EXTRA_CUSTOMER_DATA,
+                    PemasanganSambunganActivity.EXTRA_CUSTOMER_DATA,
                     dataCustomer.data
                 )
 
@@ -336,7 +336,7 @@ class AddFirstDataActivity : AppCompatActivity() {
 
         createCustomTempFile(application).also { file ->
             val photoURI: Uri = FileProvider.getUriForFile(
-                this@AddFirstDataActivity,
+                this@PemasanganKelayakanActivity,
                 "com.pdam.report",
                 file
             )
@@ -356,10 +356,10 @@ class AddFirstDataActivity : AppCompatActivity() {
             myFile.let { file ->
                 if (imageNumber == 1) {
                     firstImageFile = file
-                    binding.itemImage1.text = System.currentTimeMillis().toString() + "_dokumentasi1.jpg"
+                    binding.itemImage1.text = System.currentTimeMillis().toString() + "_dokumentasi1_dokumen.jpg"
                 } else if (imageNumber == 2) {
                     secondImageFile = file
-                    binding.itemImage2.text = System.currentTimeMillis().toString() + "_dokumentasi2.jpg"
+                    binding.itemImage2.text = System.currentTimeMillis().toString() + "_dokumentasi2_kondisi.jpg"
                 }
             }
         }
@@ -376,10 +376,14 @@ class AddFirstDataActivity : AppCompatActivity() {
 
     private fun setupDropdownField() {
         // Populate a dropdown field with data from resources
-        val items = resources.getStringArray(R.array.type_of_work)
-        val dropdownField: AutoCompleteTextView = binding.dropdownJenisPekerjaan
-        val adapter = ArrayAdapter(this, R.layout.dropdown_item, items)
-        dropdownField.setAdapter(adapter)
+        val items1 = resources.getStringArray(R.array.type_of_work)
+        val items2 = resources.getStringArray(R.array.type_of_ket)
+
+        val dropdownField1: AutoCompleteTextView = binding.dropdownJenisPekerjaan
+        val dropdownField2: AutoCompleteTextView = binding.dropdownKeterangan
+
+        dropdownField1.setAdapter(ArrayAdapter(this, R.layout.dropdown_item, items1))
+        dropdownField2.setAdapter(ArrayAdapter(this, R.layout.dropdown_item, items2))
     }
 
     companion object {

@@ -1,6 +1,7 @@
 package com.pdam.report.ui.admin
 
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +13,7 @@ import com.pdam.report.data.PresenceData
 import com.pdam.report.databinding.PresenceItemRowBinding
 import com.pdam.report.utils.milisToDate
 import com.pdam.report.utils.milisToDateTime
+import com.pdam.report.utils.showToast
 
 class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>) :
     RecyclerView.Adapter<AdminPresenceAdapter.PresenceViewHolder>() {
@@ -31,7 +33,7 @@ class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>) :
         holder.itemView.setOnClickListener {
             // Menavigasi ke halaman detail presensi saat item diklik
             val intent = Intent(holder.itemView.context, DetailPresenceActivity::class.java)
-            intent.putExtra(DetailPresenceActivity.EXTRA_DATE, presence.currentDate)
+            intent.putExtra(DetailPresenceActivity.EXTRA_DATE, milisToDate(presence.currentDate))
             intent.putExtra(DetailPresenceActivity.EXTRA_LOCATION, presence.location)
             intent.putExtra(DetailPresenceActivity.EXTRA_PHOTOURL, presence.photoUrl)
             intent.putExtra(DetailPresenceActivity.EXTRA_USERNAME, presence.username)
@@ -99,6 +101,4 @@ class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>) :
             return oldList[oldItemPosition] == newList[newItemPosition]
         }
     }
-
-
 }
