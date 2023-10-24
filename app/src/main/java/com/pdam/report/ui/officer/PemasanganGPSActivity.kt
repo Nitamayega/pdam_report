@@ -20,7 +20,7 @@ import com.pdam.report.MainActivity
 import com.pdam.report.R
 import com.pdam.report.data.CustomerData
 import com.pdam.report.data.UserData
-import com.pdam.report.databinding.ActivityUpdateCustomerVerificationBinding
+import com.pdam.report.databinding.ActivityPemasanganGpsBinding
 import com.pdam.report.utils.FullScreenImageDialogFragment
 import com.pdam.report.utils.UserManager
 import com.pdam.report.utils.createCustomTempFile
@@ -35,7 +35,7 @@ import java.io.File
 
 class PemasanganGPSActivity : AppCompatActivity() {
 
-    private val binding by lazy { ActivityUpdateCustomerVerificationBinding.inflate(layoutInflater) }
+    private val binding by lazy { ActivityPemasanganGpsBinding.inflate(layoutInflater) }
     private var imageFile: File? = null
 
     private val databaseReference = FirebaseDatabase.getInstance().reference
