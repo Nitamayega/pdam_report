@@ -14,6 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -118,40 +119,50 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
 
     private fun clearData() {
         // Clear all input fields
-        binding.edtPw.text.clear()
-        binding.dropdownJenisPekerjaan.text.clear()
-        binding.edtNomorRegistrasi.text.clear()
-        binding.edtNamaPelanggan.text.clear()
-        binding.edtAlamatPelanggan.text.clear()
-        binding.dropdownKeterangan.text.clear()
+        binding.apply {
+            dropdownJenisPekerjaan.text.clear()
+            dropdownPw.text.clear()
+            edtNomorRegistrasi.text.clear()
+            edtNamaPelanggan.text.clear()
+            edtAlamatPelanggan.text.clear()
+            edtRt.text.clear()
+            edtRw.text.clear()
+            edtKelurahan.text.clear()
+            edtKecamatan.text.clear()
+            dropdownKeterangan.text.clear()
+        }
     }
 
     private fun saveData() {
         // Get data from input fields
         val currentDate = System.currentTimeMillis()
         val jenisPekerjaan = binding.dropdownJenisPekerjaan.text.toString()
-        val pw = binding.edtPw.text.toString()
+        val pw = binding.dropdownPw.text.toString()
         val nomorRegistrasi = binding.edtNomorRegistrasi.text.toString()
         val name = binding.edtNamaPelanggan.text.toString()
         val address = binding.edtAlamatPelanggan.text.toString()
+        val rt = binding.edtRt.text.toString()
+        val rw = binding.edtRw.text.toString()
+        val kelurahan = binding.edtKelurahan.text.toString()
+        val kecamatan = binding.edtKecamatan.text.toString()
         val keterangan = binding.dropdownKeterangan.text.toString()
 
         // Validate input
-        if (isInputValid(jenisPekerjaan, pw, nomorRegistrasi, name, address, keterangan)) {
+        if (isInputValid(jenisPekerjaan, pw, nomorRegistrasi, name, address, rt, rw, kelurahan, kecamatan, keterangan)) {
             showLoading(true, binding.progressBar, binding.btnSimpan, binding.btnHapus)
-            uploadImagesAndSaveData(currentDate, jenisPekerjaan, pw, nomorRegistrasi, name, address, keterangan)
+            uploadImagesAndSaveData(currentDate, jenisPekerjaan, pw, nomorRegistrasi, name, address, rt, rw, kelurahan, kecamatan, keterangan)
         } else {
             showLoading(false, binding.progressBar, binding.btnSimpan, binding.btnHapus)
-            showToast(this, R.string.fill_all_data)
+            showToast(this, R.string.fill_all_dataImage)
         }
     }
 
-    private fun isInputValid(jenisPekerjaan: String, pw: String, nomorRegistrasi: String, name: String, address: String, keterangan: String): Boolean {
+    private fun isInputValid(jenisPekerjaan: String, pw: String, nomorRegistrasi: String, name: String, address: String, rt: String, rw: String, kelurahan: String, kecamatan: String, keterangan: String): Boolean {
         // Check if all required input is valid
-        return jenisPekerjaan.isNotEmpty() && pw.isNotEmpty() && nomorRegistrasi.isNotEmpty() && name.isNotEmpty() && address.isNotEmpty() && keterangan.isNotEmpty() && (firstImageFile != null) && (secondImageFile != null)
+        return jenisPekerjaan.isNotEmpty() && pw.isNotEmpty() && nomorRegistrasi.isNotEmpty() && name.isNotEmpty() && address.isNotEmpty() && rt.isNotEmpty() && rw.isNotEmpty() && kelurahan.isNotEmpty() && kecamatan.isNotEmpty() && keterangan.isNotEmpty() && (firstImageFile != null) && (secondImageFile != null)
     }
 
-    private fun uploadImagesAndSaveData(currentDate: Long, jenisPekerjaan: String, pw: String, nomorRegistrasi: String, name: String, address: String, keterangan: String) {
+    private fun uploadImagesAndSaveData(currentDate: Long, jenisPekerjaan: String, pw: String, nomorRegistrasi: String, name: String, address: String, rt: String, rw: String, kelurahan: String, kecamatan: String, keterangan: String) {
         val storageReference = FirebaseStorage.getInstance().reference
         val dokumentasi1Ref = storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi1_dokumen.jpg")
         val dokumentasi2Ref = storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi2_kondisi.jpg")
@@ -172,16 +183,17 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
                         val dokumentasi2 = uri2.toString()
 
                         // After successfully obtaining image URLs, save the data to Firebase
-                        saveCustomerData(currentDate, jenisPekerjaan, pw, nomorRegistrasi, name, address, keterangan, dokumentasi1, dokumentasi2)
+                        saveCustomerData(currentDate, jenisPekerjaan, pw, nomorRegistrasi, name, address, rt, rw, kelurahan, kecamatan, keterangan, dokumentasi1, dokumentasi2)
                     }
                 }
             }
         }
     }
 
-    private fun saveCustomerData(currentDate: Long, jenisPekerjaan: String, pw: String, nomorRegistrasi: String, name: String, address: String, keterangan: String, dokumentasi1: String, dokumentasi2: String) {
+    private fun saveCustomerData(currentDate: Long, jenisPekerjaan: String, pw: String, nomorRegistrasi: String, name: String, address: String, rt: String, rw: String, kelurahan: String, kecamatan: String, keterangan: String, dokumentasi1: String, dokumentasi2: String) {
         val newCustomerRef = databaseReference.child("listCustomer").push()
         val newCustomerId = newCustomerRef.key
+
 
         if (newCustomerId != null) {
             val data = CustomerData(
@@ -193,6 +205,10 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
                 nomorRegistrasi = nomorRegistrasi,
                 name = name,
                 address = address,
+                rt = rt,
+                rw = rw,
+                kelurahan = kelurahan,
+                kecamatan = kecamatan,
                 keterangan1 = keterangan,
                 dokumentasi1 = dokumentasi1,
                 dokumentasi2 = dokumentasi2,
@@ -213,7 +229,7 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
         } else {
             // Handle if images are not taken or data is incomplete
             showLoading(false, binding.progressBar, binding.btnSimpan, binding.btnHapus)
-            showToast(this, R.string.fill_all_data)
+            showToast(this, R.string.fill_all_dataImage)
         }
     }
 
@@ -254,7 +270,7 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
             visibility = android.view.View.VISIBLE
         }
 
-            binding.edtPw.apply {
+            binding.dropdownPw.apply {
                 setText(dataCustomer.pw.toString())
                 isEnabled = false
                 isFocusable = false
@@ -278,6 +294,30 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
                 isEnabled = false
                 isFocusable = false
             }
+
+        binding.edtRt.apply {
+            setText(dataCustomer.rt)
+            isEnabled = false
+            isFocusable = false
+        }
+
+        binding.edtRw.apply {
+            setText(dataCustomer.rw)
+            isEnabled = false
+            isFocusable = false
+        }
+
+        binding.edtKelurahan.apply {
+            setText(dataCustomer.kelurahan)
+            isEnabled = false
+            isFocusable = false
+        }
+
+        binding.edtKecamatan.apply {
+            setText(dataCustomer.kecamatan)
+            isEnabled = false
+            isFocusable = false
+        }
 
             binding.dropdownKeterangan.apply {
                 setText(dataCustomer.keterangan1)
@@ -306,6 +346,15 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
             }
 
 
+        if (dataCustomer.keterangan1 == "Tidak Layak") {
+            binding.btnSimpan.text = getString(R.string.finish)
+            binding.btnSimpan.setOnClickListener {
+                navigatePage(this@PemasanganKelayakanActivity, MainActivity::class.java, true)
+                finish()
+            }
+        } else {
+
+
         // Mengganti teks tombol Simpan untuk melanjutkan ke halaman berikutnya
         binding.btnSimpan.apply {
             binding.btnSimpan.text = getString(R.string.next)
@@ -328,6 +377,7 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
                 startActivity(intent)
                 finish()
             }
+        }
         }
     }
 
@@ -358,10 +408,33 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
             myFile.let { file ->
                 if (imageNumber == 1) {
                     firstImageFile = file
-                    binding.itemImage1.text = System.currentTimeMillis().toString() + "_dokumentasi1_dokumen.jpg"
+                    binding.itemImage1.text = System.currentTimeMillis().toString() + "_dokumen.jpg"
+
+                    Glide.with(this@PemasanganKelayakanActivity)
+                        .load(firstImageFile)
+                        .into(binding.imageView1)
+
+                    binding.imageView1.setOnClickListener {
+                        supportFragmentManager.beginTransaction()
+                            .add(FullScreenImageDialogFragment(firstImageFile.toString()), "FullScreenImageDialogFragment")
+                            .addToBackStack(null)
+                            .commit()
+                    }
+
                 } else if (imageNumber == 2) {
                     secondImageFile = file
-                    binding.itemImage2.text = System.currentTimeMillis().toString() + "_dokumentasi2_kondisi.jpg"
+                    binding.itemImage2.text = System.currentTimeMillis().toString() + "_kondisi.jpg"
+
+                    Glide.with(this@PemasanganKelayakanActivity)
+                        .load(secondImageFile)
+                        .into(binding.imageView2)
+
+                    binding.imageView2.setOnClickListener {
+                        supportFragmentManager.beginTransaction()
+                            .add(FullScreenImageDialogFragment(secondImageFile.toString()), "FullScreenImageDialogFragment")
+                            .addToBackStack(null)
+                            .commit()
+                    }
                 }
             }
         }
@@ -379,13 +452,17 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
     private fun setupDropdownField() {
         // Populate a dropdown field with data from resources
         val items1 = resources.getStringArray(R.array.type_of_work)
-        val items2 = resources.getStringArray(R.array.type_of_ket)
+        val items2 = resources.getStringArray(R.array.type_of_pw)
+        val items3 = resources.getStringArray(R.array.type_of_ket)
+
 
         val dropdownField1: AutoCompleteTextView = binding.dropdownJenisPekerjaan
-        val dropdownField2: AutoCompleteTextView = binding.dropdownKeterangan
+        val dropdownField2: AutoCompleteTextView = binding.dropdownPw
+        val dropdownField3: AutoCompleteTextView = binding.dropdownKeterangan
 
         dropdownField1.setAdapter(ArrayAdapter(this, R.layout.dropdown_item, items1))
         dropdownField2.setAdapter(ArrayAdapter(this, R.layout.dropdown_item, items2))
+        dropdownField3.setAdapter(ArrayAdapter(this, R.layout.dropdown_item, items3))
     }
 
     companion object {

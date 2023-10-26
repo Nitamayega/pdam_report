@@ -47,12 +47,17 @@
     <string name="nomor_k_l">Nomor K/L</string>
     <string name="nama_pelanggan">Nama Pelanggan</string>
     <string name="alamat_pelanggan">Alamat Pelanggan</string>
+    <string name="kelurahan">Kelurahan</string>
+    <string name="kecamatan">Kecamatan</string>
+    <string name="rt">RT</string>
+    <string name="rw">RW</string>
     <string name="keterangan">Keterangan</string>
     <string name="dokumentasi">Dokumentasi</string>
     <string name="dokumentasiDokumen">Dokumentasi Dokumen Survei Kelayakan</string>
     <string name="dokumentasiSekitar">Dokumentasi Kondisi Sekitar</string>
     <string name="dokumentasiKonstruksi">Dokumentasi Konstruksi</string>
     <string name="dokumentasiMeter">Dokumentasi Nomor dan Segel Meter</string>
+    <string name="dokumentasiPerspektif">Dokumentasi Perspektif Wilayah</string>
 
     <string name="meter">Meter</string>
     <string name="merk">Merk</string>
@@ -79,9 +84,56 @@
         <item>Pemasangan kembali</item>
     </string-array>
 
+    <string-array name="type_of_pw">
+        <item>1</item>
+        <item>4</item>
+    </string-array>
+
     <string-array name="type_of_ket">
         <item>Layak</item>
         <item>Tidak layak</item>
+    </string-array>
+
+    <string-array name="type_of_merk">
+        <item>ITR</item>
+        <item>LIN</item>
+        <item>PAM</item>
+        <item>AQ</item>
+        <item>BAR</item>
+        <item>ACT</item>
+        <item>ADR</item>
+        <item>AI</item>
+        <item>AQN</item>
+        <item>AQV</item>
+        <item>ARM</item>
+        <item>AT</item>
+        <item>BR</item>
+        <item>FUJ</item>
+        <item>I</item>
+        <item>INC</item>
+        <item>LIB</item>
+        <item>M</item>
+        <item>MM</item>
+        <item>MT</item>
+        <item>MUL</item>
+        <item>PUJ</item>
+        <item>RVT</item>
+        <item>SB</item>
+        <item>SEN</item>
+        <item>SG</item>
+        <item>SSS</item>
+        <item>YG</item>
+        <item>YT</item>
+    </string-array>
+
+    <string-array name="type_of_diameter">
+        <item>1/2</item>
+        <item>3/4</item>
+        <item>1</item>
+        <item>1 1/2</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
     </string-array>
 
     <string name="pemasangan_sambungan_baru">Pemasangan Sambungan Baru</string>
@@ -98,7 +150,8 @@
     <string name="save_failed">Data gagal disimpan</string>
     <string name="save_success">Data berhasil disimpan</string>
 
-    <string name="fill_all_data">Isi semua data dan unggah semua gambar</string>
+    <string name="fill_all_dataImage">Isi semua data dan unggah semua gambar</string>
+    <string name="fill_all_data">Isi semua data</string>
 
     <string name="delete_data">Konfirmasi Hapus Data"</string>
     <string name="delete_confirmation">Apakah anda yakin ingin menghapus data ini?</string>
