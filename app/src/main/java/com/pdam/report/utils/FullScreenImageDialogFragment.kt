@@ -24,6 +24,10 @@ class FullScreenImageDialogFragment(private val imageUrl: String) : DialogFragme
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.btnBack.setOnClickListener {
+            dismiss()
+        }
+
         // Load and display the image using Glide
         Glide.with(this).load(imageUrl).into(binding.fullScreenImageView)
 

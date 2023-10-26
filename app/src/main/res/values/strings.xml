@@ -112,6 +112,9 @@
 
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="compressing_image">Foto sedang diproses…</string>
+    <string name="compressing_image_success">Foto telah berhasil diproses. Silakan tunggu proses unggah.</string>
+    <string name="compressing_image_failed">Memproses foto gagal</string>
 
 
 </resources>

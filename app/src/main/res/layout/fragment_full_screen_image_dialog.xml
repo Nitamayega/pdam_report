@@ -14,5 +14,14 @@
         android:layout_gravity="center"
         android:scaleType="fitCenter"/>
 
+    <ImageView
+        android:id="@+id/btn_back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|start"
+        android:layout_margin="16dp"
+        android:background="@drawable/ic_back"
+        tools:ignore="ContentDescription" />
+
 
 </FrameLayout>

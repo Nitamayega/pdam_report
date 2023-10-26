@@ -55,9 +55,6 @@ class MainActivity : AppCompatActivity() {
         // Add the onPageChangeListener to the ViewPager
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
-                // The "position" variable contains the index of the selected fragment
-                // You can use it to update the UI or take any action you need
-                // For example, you can update the title of the toolbar
                 if (position == 0) {
                     index.value = 0
                 } else {
@@ -174,7 +171,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_logout -> {
                     showToast(applicationContext, R.string.logged_out)
                     auth.signOut()
-                    navigatePage(this, LoginActivity::class.java)
+                    navigatePage(this, LoginActivity::class.java, true)
                     finish()
                 }
             }

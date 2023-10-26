@@ -13,7 +13,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 private const val FILENAME_FORMAT = "dd-MM-yyyy"
-private const val MAXIMAL_SIZE = 1000000
+private const val MAXIMAL_SIZE = 1_000_000
 
 fun getCurrentTimeStamp(): String {
     return SimpleDateFormat(

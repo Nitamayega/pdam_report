@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.MenuItem
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -45,13 +46,18 @@ import com.pdam.report.utils.showToast
 import kotlinx.coroutines.launch
 import java.io.File
 
+@Suppress("DEPRECATION")
 class OfficerPresenceActivity : AppCompatActivity() {
 
     private var getFile: File? = null
     private val storageReference = FirebaseStorage.getInstance().reference
     private val databaseReference = FirebaseDatabase.getInstance().reference
 
-    private val fuse: FusedLocationProviderClient by lazy { LocationServices.getFusedLocationProviderClient(this) }
+    private val fuse: FusedLocationProviderClient by lazy {
+        LocationServices.getFusedLocationProviderClient(
+            this
+        )
+    }
 
     private var latLng: LatLng? = null
     private val geocoderHelper = GeocoderHelper(this)
@@ -61,12 +67,24 @@ class OfficerPresenceActivity : AppCompatActivity() {
     private val currentUser = auth.currentUser
 
     private var isToastShown = false
+    private var isUploading = false // State variable to track if the upload is in progress
 
-    private val binding: ActivityOfficerPresenceBinding by lazy { ActivityOfficerPresenceBinding.inflate(layoutInflater) }
+    private val binding: ActivityOfficerPresenceBinding by lazy {
+        ActivityOfficerPresenceBinding.inflate(
+            layoutInflater
+        )
+    }
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            navigatePage(this@OfficerPresenceActivity, MainActivity::class.java)
+            finish()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
@@ -107,15 +125,19 @@ class OfficerPresenceActivity : AppCompatActivity() {
 
     // Navigasi kembali ke halaman utama (MainActivity)
     private fun navigateToMainActivity() {
-        if (PermissionHelper.hasLocationPermission(this@OfficerPresenceActivity)) { fuse.removeLocationUpdates(locationCallback) }
+        if (PermissionHelper.hasLocationPermission(this@OfficerPresenceActivity)) {
+            fuse.removeLocationUpdates(locationCallback)
+        }
         navigatePage(this, MainActivity::class.java, true)
         finish()
     }
 
     // Menangani tindakan saat tombol kembali di ActionBar ditekan
+    @Suppress("DEPRECATION")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            navigateToMainActivity()
+            onBackPressed()
+            finish()
             return true
         }
         return super.onOptionsItemSelected(item)
@@ -132,13 +154,6 @@ class OfficerPresenceActivity : AppCompatActivity() {
                 showToast(this, R.string.enable_location)
             }
         }
-    }
-
-    // Menangani tindakan saat tombol kembali perangkat ditekan
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        navigateToMainActivity()
-        super.onBackPressed()
     }
 
     // Metode untuk memulai pengambilan foto
@@ -177,6 +192,11 @@ class OfficerPresenceActivity : AppCompatActivity() {
 
     // Fungsi untuk mengunggah gambar
     private fun uploadImage() {
+        if (isUploading) {
+            // Don't initiate another upload if one is already in progress
+            return
+        }
+
         if (getFile != null) {
             val uid = currentUser?.uid
 
@@ -189,43 +209,96 @@ class OfficerPresenceActivity : AppCompatActivity() {
                             if (userData != null) {
                                 val username = userData.username
 
-                                showLoading(true, binding.progressBar, binding.cameraButton, binding.uploadButton)
+                                showLoading(
+                                    true,
+                                    binding.progressBar,
+                                    binding.cameraButton,
+                                    binding.uploadButton
+                                )
 
                                 lifecycleScope.launch {
-                                    getFile = getFile?.reduceFileImageInBackground()
-                                }
+                                    try {
+                                        isUploading =
+                                            true // Set the state variable to indicate that an upload is in progress
 
-                                // Menentukan referensi untuk penyimpanan gambar
-                                val photoRef = storageReference.child("images/presence/${System.currentTimeMillis()}.jpg")
-
-                                // Mengunggah gambar ke Firebase Storage
-                                photoRef.putFile(Uri.fromFile(getFile)).addOnSuccessListener { uploadTask ->
-                                    uploadTask.storage.downloadUrl.addOnSuccessListener { downloadUri ->
-                                        showLoading(false, binding.progressBar, binding.cameraButton, binding.uploadButton)
-
-                                        // Membuat objek data presensi
-                                        val data = PresenceData(
-                                            System.currentTimeMillis(),
-                                            username,
-                                            latLng?.let { geocoderHelper.getAddressFromLatLng(it).toString() } ?: "",
-                                            downloadUri.toString(),
+                                        showToast(
+                                            this@OfficerPresenceActivity,
+                                            R.string.compressing_image
                                         )
+                                        getFile = getFile?.reduceFileImageInBackground()
+                                        showToast(
+                                            this@OfficerPresenceActivity,
+                                            R.string.compressing_image_success
+                                        )
+                                    } catch (e: Exception) {
+                                        showToast(
+                                            this@OfficerPresenceActivity,
+                                            R.string.compressing_image_failed
+                                        )
+                                    } finally {
+                                        isUploading =
+                                            false // Reset the state variable after the upload attempt, whether it succeeds or fails
+                                    }
 
-                                        // Mengunggah data presensi ke database
-                                        databaseReference.child("listPresence")
-                                            .child(uid).push().setValue(data)
-                                            .addOnCompleteListener { task ->
-                                                if (task.isSuccessful) {
-                                                    userData.lastPresence = getCurrentTimeStamp()
-                                                    showToast(this@OfficerPresenceActivity, R.string.upload_success)
-                                                    navigateToMainActivity()
-                                                } else {
-                                                    showToast(this@OfficerPresenceActivity, R.string.upload_failed)
+                                    if (!isUploading) {
+                                        // Menentukan referensi untuk penyimpanan gambar
+                                        val photoRef =
+                                            storageReference.child("images/presence/${System.currentTimeMillis()}.jpg")
+                                            // Mengunggah gambar ke Firebase Storage
+                                        photoRef.putFile(Uri.fromFile(getFile))
+                                            .addOnSuccessListener { uploadTask ->
+                                                uploadTask.storage.downloadUrl.addOnSuccessListener { downloadUri ->
+                                                    showLoading(
+                                                        false,
+                                                        binding.progressBar,
+                                                        binding.cameraButton,
+                                                        binding.uploadButton
+                                                    )
+
+                                                    // Membuat objek data presensi
+                                                    val data = PresenceData(
+                                                        System.currentTimeMillis(),
+                                                        username,
+                                                        latLng?.let {
+                                                            geocoderHelper.getAddressFromLatLng(it)
+                                                                .toString()
+                                                        } ?: "",
+                                                        downloadUri.toString(),
+                                                    )
+
+                                                    // Mengunggah data presensi ke database
+                                                    databaseReference.child("listPresence")
+                                                        .child(uid).push().setValue(data)
+                                                        .addOnCompleteListener { task ->
+                                                            if (task.isSuccessful) {
+                                                                userData.lastPresence =
+                                                                    getCurrentTimeStamp()
+                                                                showToast(
+                                                                    this@OfficerPresenceActivity,
+                                                                    R.string.upload_success
+                                                                )
+                                                                navigateToMainActivity()
+                                                            } else {
+                                                                showToast(
+                                                                    this@OfficerPresenceActivity,
+                                                                    R.string.upload_failed
+                                                                )
+                                                            }
+                                                        }
+                                                }.addOnFailureListener {
+                                                    showLoading(
+                                                        false,
+                                                        binding.progressBar,
+                                                        binding.cameraButton,
+                                                        binding.uploadButton
+                                                    )
+                                                    showToast(
+                                                        this@OfficerPresenceActivity,
+                                                        it.message.toString().toInt()
+                                                    )
                                                 }
                                             }
-                                    }.addOnFailureListener {
-                                        showLoading(false, binding.progressBar, binding.cameraButton, binding.uploadButton)
-                                        showToast(this@OfficerPresenceActivity, it.message.toString().toInt())
+
                                     }
                                 }
                             }
@@ -233,7 +306,12 @@ class OfficerPresenceActivity : AppCompatActivity() {
                     }
 
                     override fun onCancelled(error: DatabaseError) {
-                        showLoading(false, binding.progressBar, binding.cameraButton, binding.uploadButton)
+                        showLoading(
+                            false,
+                            binding.progressBar,
+                            binding.cameraButton,
+                            binding.uploadButton
+                        )
                         showToast(this@OfficerPresenceActivity, "Error: ${error.message}".toInt())
                     }
                 })
