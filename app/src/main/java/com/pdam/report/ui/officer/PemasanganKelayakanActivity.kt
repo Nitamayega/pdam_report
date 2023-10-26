@@ -14,7 +14,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
-import com.bumptech.glide.Glide
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -168,22 +167,24 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
         val dokumentasi2Ref = storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi2_kondisi.jpg")
 
         lifecycleScope.launch {
-            firstImageFile = firstImageFile?.reduceFileImageInBackground()
-            secondImageFile = secondImageFile?.reduceFileImageInBackground()
-        }
+            showToast(this@PemasanganKelayakanActivity, R.string.compressing_image)
+            val firstImageFile = firstImageFile?.reduceFileImageInBackground()
+            val secondImageFile = secondImageFile?.reduceFileImageInBackground()
+            showToast(this@PemasanganKelayakanActivity, R.string.compressing_image_success)
 
-        // Upload image 1
-        dokumentasi1Ref.putFile(Uri.fromFile(firstImageFile)).addOnSuccessListener {
-            dokumentasi1Ref.downloadUrl.addOnSuccessListener { uri1 ->
-                val dokumentasi1 = uri1.toString()
+            // Upload image 1
+            dokumentasi1Ref.putFile(Uri.fromFile(firstImageFile)).addOnSuccessListener {
+                dokumentasi1Ref.downloadUrl.addOnSuccessListener { uri1 ->
+                    val dokumentasi1 = uri1.toString()
 
-                // Upload image 2
-                dokumentasi2Ref.putFile(Uri.fromFile(secondImageFile)).addOnSuccessListener {
-                    dokumentasi2Ref.downloadUrl.addOnSuccessListener { uri2 ->
-                        val dokumentasi2 = uri2.toString()
+                    // Upload image 2
+                    dokumentasi2Ref.putFile(Uri.fromFile(secondImageFile)).addOnSuccessListener {
+                        dokumentasi2Ref.downloadUrl.addOnSuccessListener { uri2 ->
+                            val dokumentasi2 = uri2.toString()
 
-                        // After successfully obtaining image URLs, save the data to Firebase
-                        saveCustomerData(currentDate, jenisPekerjaan, pw, nomorRegistrasi, name, address, rt, rw, kelurahan, kecamatan, keterangan, dokumentasi1, dokumentasi2)
+                            // After successfully obtaining image URLs, save the data to Firebase
+                            saveCustomerData(currentDate, jenisPekerjaan, pw, nomorRegistrasi, name, address, keterangan, dokumentasi1, dokumentasi2)
+                        }
                     }
                 }
             }
