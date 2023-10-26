@@ -1,6 +1,5 @@
 package com.pdam.report.utils
 
-import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -8,7 +7,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.pdam.report.data.UserData
 
-class UserManager(private val context: Context) {
+class UserManager {
 
     private val auth by lazy { FirebaseAuth.getInstance() }
     private val currentUser = auth.currentUser

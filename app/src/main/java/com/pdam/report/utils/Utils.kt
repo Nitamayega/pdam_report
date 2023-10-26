@@ -80,6 +80,6 @@ fun milisToDate(milis: Long): String {
 }
 
 fun milisToDateTime(milis: Long): String {
-    val formatter = SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.US)
+    val formatter = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.US)
     return formatter.format(milis)
 }

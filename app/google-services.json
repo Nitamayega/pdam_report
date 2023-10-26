@@ -1,13 +1,14 @@
 {
   "project_info": {
-    "project_number": "874458061144",
-    "project_id": "pdam-report-2023",
-    "storage_bucket": "pdam-report-2023.appspot.com"
+    "project_number": "277319114723",
+    "firebase_url": "https://report-pdam-2023-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "report-pdam-2023",
+    "storage_bucket": "report-pdam-2023.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:874458061144:android:555f9dc54418fc01df6d2d",
+        "mobilesdk_app_id": "1:277319114723:android:bb5905527ec1eab6770ad6",
         "android_client_info": {
           "package_name": "com.pdam.report"
         }
@@ -15,7 +16,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAxBRAYt9upcAqJtuUfa6loAUGZLU2ZL-M"
+          "current_key": "AIzaSyCcbukPMgGGOddeOdW_9jVusNqaS0RdrCw"
         }
       ],
       "services": {

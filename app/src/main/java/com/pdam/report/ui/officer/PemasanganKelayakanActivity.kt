@@ -27,6 +27,7 @@ import com.pdam.report.databinding.ActivityPemasanganKelayakanBinding
 import com.pdam.report.utils.FullScreenImageDialogFragment
 import com.pdam.report.utils.UserManager
 import com.pdam.report.utils.createCustomTempFile
+import com.pdam.report.utils.milisToDateTime
 import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.parsingNameImage
 import com.pdam.report.utils.reduceFileImageInBackground
@@ -41,7 +42,7 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
     private val databaseReference = FirebaseDatabase.getInstance().reference
 
 
-    private val userManager by lazy { UserManager(this) }
+    private val userManager by lazy { UserManager() }
     private lateinit var user: UserData
 
     private val firebaseKey by lazy {
@@ -57,6 +58,7 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             navigatePage(this@PemasanganKelayakanActivity, MainActivity::class.java)
+            finish()
         }
     }
 
@@ -246,7 +248,7 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
         }
 
         binding.addedby.apply {
-            text = "Added by " + dataCustomer.petugas + " at " + dataCustomer.currentDate.toString()
+            text = "Added by " + dataCustomer.petugas + " at " + milisToDateTime(dataCustomer.currentDate)
             isEnabled = false
             isFocusable = false
             visibility = android.view.View.VISIBLE
@@ -365,10 +367,10 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
         }
     }
 
+    @Suppress("DEPRECATION")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            navigatePage(this, MainActivity::class.java, true)
-            finish()
+            onBackPressed()
             return true
         }
         return super.onOptionsItemSelected(item)

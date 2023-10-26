@@ -43,7 +43,7 @@ class PemasanganGPSActivity : AppCompatActivity() {
     private val firebaseKey by lazy { intent.getStringExtra(PemasanganKelayakanActivity.EXTRA_FIREBASE_KEY) }
     private val customerData by lazy { intent.getIntExtra(PemasanganKelayakanActivity.EXTRA_CUSTOMER_DATA, 0) }
 
-    private val userManager by lazy { UserManager(this) }
+    private val userManager by lazy { UserManager() }
     private lateinit var user: UserData
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
@@ -235,12 +235,10 @@ class PemasanganGPSActivity : AppCompatActivity() {
         }
     }
 
+    @Suppress("DEPRECATION")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            val intent = Intent(this@PemasanganGPSActivity, PemasanganSambunganActivity::class.java)
-            intent.putExtra(PemasanganSambunganActivity.EXTRA_FIREBASE_KEY, firebaseKey)
-            startActivity(intent)
-            finish()
+            onBackPressed()
             return true
         }
         return super.onOptionsItemSelected(item)
@@ -339,6 +337,7 @@ class PemasanganGPSActivity : AppCompatActivity() {
             binding.btnSimpan.text = getString(R.string.finish)
             binding.btnSimpan.setOnClickListener {
                 navigatePage(this@PemasanganGPSActivity, MainActivity::class.java, true)
+                finish()
             }
         }
     }

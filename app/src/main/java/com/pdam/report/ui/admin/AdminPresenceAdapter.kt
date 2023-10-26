@@ -1,7 +1,6 @@
 package com.pdam.report.ui.admin
 
 import android.content.Intent
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +12,6 @@ import com.pdam.report.data.PresenceData
 import com.pdam.report.databinding.PresenceItemRowBinding
 import com.pdam.report.utils.milisToDate
 import com.pdam.report.utils.milisToDateTime
-import com.pdam.report.utils.showToast
 
 class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>) :
     RecyclerView.Adapter<AdminPresenceAdapter.PresenceViewHolder>() {

@@ -1,11 +1,16 @@
 package com.pdam.report.data
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+
+@Parcelize
 data class UserData (
     val username: String = "",
     val team: Int = 0,
     val dailyTeam: Int = 0,
     var lastPresence: String = "",
-)
+) : Parcelable
 
 data class PresenceData(
     val currentDate: Long = 0,

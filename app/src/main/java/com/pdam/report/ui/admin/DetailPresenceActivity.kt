@@ -3,6 +3,7 @@ package com.pdam.report.ui.admin
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.pdam.report.databinding.ActivityDetailPresenceBinding
@@ -15,10 +16,19 @@ class DetailPresenceActivity : AppCompatActivity() {
         ActivityDetailPresenceBinding.inflate(layoutInflater)
     }
 
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            navigatePage(this@DetailPresenceActivity, AdminPresenceActivity::class.java)
+            finish()
+        }
+    }
+
+
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
@@ -46,18 +56,13 @@ class DetailPresenceActivity : AppCompatActivity() {
         }
     }
 
+    @Suppress("DEPRECATION")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            navigatePage(this, AdminPresenceActivity::class.java, true)
+            onBackPressed()
             return true
         }
         return super.onOptionsItemSelected(item)
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        navigatePage(this, AdminPresenceActivity::class.java, true)
-        super.onBackPressed()
     }
 
     companion object {

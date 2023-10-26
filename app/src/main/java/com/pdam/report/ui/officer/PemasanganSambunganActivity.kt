@@ -43,7 +43,7 @@ class PemasanganSambunganActivity : AppCompatActivity() {
     private val firebaseKey by lazy { intent.getStringExtra(PemasanganKelayakanActivity.EXTRA_FIREBASE_KEY) }
     private val customerData by lazy { intent.getIntExtra(PemasanganKelayakanActivity.EXTRA_CUSTOMER_DATA, 0) }
 
-    private val userManager by lazy { UserManager(this) }
+    private val userManager by lazy { UserManager() }
     private lateinit var user: UserData
 
     private var imageNumber: Int = 0
@@ -279,12 +279,10 @@ class PemasanganSambunganActivity : AppCompatActivity() {
         }
     }
 
+    @Suppress("DEPRECATION")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            val intent = Intent(this@PemasanganSambunganActivity, PemasanganKelayakanActivity::class.java)
-            intent.putExtra(PemasanganKelayakanActivity.EXTRA_FIREBASE_KEY, firebaseKey.toString())
-            startActivity(intent)
-            finish()
+            onBackPressed()
             return true
         }
         return super.onOptionsItemSelected(item)
@@ -398,6 +396,7 @@ class PemasanganSambunganActivity : AppCompatActivity() {
                 text = getString(R.string.finish)
                 setOnClickListener {
                     navigatePage(this@PemasanganSambunganActivity, MainActivity::class.java, true)
+                    finish()
                 }
             } else {
                 text = getString(R.string.next)
@@ -417,7 +416,6 @@ class PemasanganSambunganActivity : AppCompatActivity() {
                     )
 
                     startActivity(intent)
-                    finish()
                 }
             }
         }

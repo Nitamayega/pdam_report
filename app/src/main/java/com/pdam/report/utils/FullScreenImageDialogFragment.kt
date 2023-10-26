@@ -36,4 +36,9 @@ class FullScreenImageDialogFragment(private val imageUrl: String) : DialogFragme
         // Close the dialog when tapping outside
         dialog?.setCanceledOnTouchOutside(true)
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

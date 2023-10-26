@@ -2,23 +2,35 @@ package com.pdam.report.ui.admin
 
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.pdam.report.MainActivity
 import com.pdam.report.data.PresenceData
 import com.pdam.report.databinding.ActivityAdminPresenceBinding
+import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.setRecyclerViewVisibility
 
 class AdminPresenceActivity : AppCompatActivity() {
     private val binding by lazy { ActivityAdminPresenceBinding.inflate(layoutInflater) }
     private val adapter by lazy { AdminPresenceAdapter(ArrayList()) }
 
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            navigatePage(this@AdminPresenceActivity, MainActivity::class.java)
+            finish()
+        }
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         setupRecyclerView()
@@ -33,7 +45,7 @@ class AdminPresenceActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            onBackPressed()
+            onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
             return true
         }
         return super.onOptionsItemSelected(item)

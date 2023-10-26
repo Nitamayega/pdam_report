@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.pdam.report.data.CustomerData
 import com.pdam.report.databinding.ReportItemRowBinding
 import com.pdam.report.ui.officer.PemasanganKelayakanActivity
-import com.pdam.report.ui.officer.PemutusanActivity
 
 class MainAdapter(
     private val customerList: ArrayList<CustomerData>
