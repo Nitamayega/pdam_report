@@ -17,6 +17,7 @@
 
         <ProgressBar
             android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleLarge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:elevation="3dp"
@@ -29,7 +30,7 @@
             tools:visibility="visible" />
 
         <LinearLayout
-            android:id="@+id/linearLayout2"
+            android:id="@+id/linearLayout1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
@@ -45,10 +46,7 @@
                 android:layout_marginEnd="8dp"
                 app:boxStrokeColor="@color/funblue"
                 app:boxStrokeWidth="2dp"
-                android:layout_weight="4"
-                app:layout_constraintEnd_toStartOf="@+id/ed_pw"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                android:layout_weight="4">
 
                 <EditText
                     android:id="@+id/edt_pemasangan_sambungan"
@@ -67,9 +65,7 @@
                 android:layout_height="wrap_content"
                 app:boxStrokeColor="@color/funblue"
                 app:boxStrokeWidth="2dp"
-                android:layout_weight="1"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                android:layout_weight="1">
 
                 <EditText
                     android:id="@+id/edt_pw"
@@ -95,7 +91,7 @@
             android:layout_marginTop="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/linearLayout2">
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout1">
 
             <EditText
                 android:id="@+id/edt_nomor_kl"
@@ -115,8 +111,8 @@
             android:layout_marginTop="16dp"
             app:boxStrokeColor="@color/funblue"
             app:boxStrokeWidth="2dp"
-            app:layout_constraintEnd_toEndOf="@+id/linearLayout2"
-            app:layout_constraintStart_toStartOf="@+id/linearLayout2"
+            app:layout_constraintEnd_toEndOf="@+id/linearLayout1"
+            app:layout_constraintStart_toStartOf="@+id/linearLayout1"
             app:layout_constraintTop_toBottomOf="@+id/ed_nomor_kl">
 
             <EditText
@@ -129,88 +125,194 @@
                 tools:ignore="SpeakableTextPresentCheck" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/ed_alamat_pelanggan"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:id="@+id/linearLayout2"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:boxBackgroundMode="outline"
-            app:boxStrokeColor="@color/funblue"
-            app:boxStrokeWidth="2dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ed_nama_pelanggan">
+            app:layout_constraintTop_toBottomOf="@id/ed_nama_pelanggan"
+            android:baselineAligned="false">
 
-            <EditText
-                android:id="@+id/edt_alamat_pelanggan"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/ed_alamat_pelanggan"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:boxBackgroundMode="outline"
+                app:boxStrokeColor="@color/funblue"
+                app:boxStrokeWidth="2dp"
+                android:layout_weight="3"
+                android:layout_marginEnd="8dp">
+
+                <EditText
+                    android:id="@+id/edt_alamat_pelanggan"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:hint="@string/alamat_pelanggan"
+                    android:inputType="textMultiLine"
+                    tools:ignore="SpeakableTextPresentCheck" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/ed_rt"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:boxBackgroundMode="outline"
+                app:boxStrokeColor="@color/funblue"
+                app:boxStrokeWidth="2dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp">
+
+                <EditText
+                    android:id="@+id/edt_rt"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:hint="@string/rt"
+                    android:gravity="center"
+                    android:maxLength="2"
+                    android:inputType="number"
+                    tools:ignore="SpeakableTextPresentCheck" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/ed_rw"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:boxBackgroundMode="outline"
+                app:boxStrokeColor="@color/funblue"
+                app:boxStrokeWidth="2dp"
+                android:layout_weight="1">
+
+                <EditText
+                    android:id="@+id/edt_rw"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:hint="@string/rw"
+                    android:gravity="center"
+                    android:inputType="number"
+                    android:maxLength="2"
+                    tools:ignore="SpeakableTextPresentCheck" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/linearLayout2"
+            android:baselineAligned="false">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/ed_kelurahan"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:boxBackgroundMode="outline"
+                app:boxStrokeColor="@color/funblue"
+                app:boxStrokeWidth="2dp"
+                android:layout_weight="2"
+                android:layout_marginEnd="8dp">
+
+                <EditText
+                    android:id="@+id/edt_kelurahan"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:hint="@string/kelurahan"
+                    android:inputType="textMultiLine"
+                    tools:ignore="SpeakableTextPresentCheck" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/ed_kecamatan"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:boxBackgroundMode="outline"
+                app:boxStrokeColor="@color/funblue"
+                app:boxStrokeWidth="2dp"
+                android:layout_weight="2">
+
+                <EditText
+                    android:id="@+id/edt_kecamatan"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:hint="@string/kecamatan"
+                    android:inputType="textMultiLine"
+                    tools:ignore="SpeakableTextPresentCheck" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/ed_merk"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:focusableInTouchMode="true"
+            android:hint="@string/merk"
+            app:boxStrokeColor="@color/funblue"
+            app:boxStrokeWidth="2dp"
+            android:layout_marginTop="8dp"
+            android:layout_weight="2"
+            app:layout_constraintEnd_toEndOf="@+id/linearLayout1"
+            app:layout_constraintStart_toStartOf="@+id/linearLayout1"
+            app:layout_constraintTop_toBottomOf="@+id/tv_meter">
+
+            <AutoCompleteTextView
+                android:id="@+id/dropdown_merk"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ems="10"
-                android:hint="@string/alamat_pelanggan"
-                android:inputType="textMultiLine"
-                tools:ignore="SpeakableTextPresentCheck" />
+                android:layout_weight="1"
+                android:inputType="none"
+                tools:ignore="LabelFor" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <LinearLayout
-            android:id="@+id/linearLayout"
+            android:id="@+id/linearLayout4"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:baselineAligned="false"
             android:gravity="center"
             android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="@+id/ed_alamat_pelanggan"
-            app:layout_constraintStart_toStartOf="@+id/ed_alamat_pelanggan"
-            app:layout_constraintTop_toBottomOf="@+id/tv_meter">
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/ed_merk"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
-                app:boxBackgroundMode="outline"
-                app:boxStrokeColor="@color/funblue"
-                app:boxStrokeWidth="2dp"
-                app:layout_constraintEnd_toStartOf="@+id/ed_diameter"
-                app:layout_constraintStart_toStartOf="@+id/ed_alamat_pelanggan"
-                app:layout_constraintTop_toBottomOf="@+id/tv_meter">
-
-                <EditText
-                    android:id="@+id/edt_merk"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:gravity="center"
-                    android:hint="@string/merk"
-                    android:inputType="text"
-                    tools:ignore="SpeakableTextPresentCheck" />
-            </com.google.android.material.textfield.TextInputLayout>
+            app:layout_constraintEnd_toEndOf="@+id/linearLayout3"
+            app:layout_constraintStart_toStartOf="@+id/linearLayout3"
+            app:layout_constraintTop_toBottomOf="@+id/ed_merk">
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/ed_diameter"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="wrap_content"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                app:boxBackgroundMode="outline"
+                android:focusableInTouchMode="true"
+                android:layout_marginEnd="8dp"
+                android:hint="@string/diameter"
                 app:boxStrokeColor="@color/funblue"
                 app:boxStrokeWidth="2dp"
-                app:layout_constraintEnd_toEndOf="@+id/ed_alamat_pelanggan"
-                app:layout_constraintStart_toStartOf="@+id/ed_alamat_pelanggan"
-                app:layout_constraintTop_toBottomOf="@+id/tv_meter">
+                android:layout_weight="2">
 
-                <EditText
-                    android:id="@+id/edt_diameter"
+                <AutoCompleteTextView
+                    android:id="@+id/dropdown_diameter"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:gravity="center"
-                    android:hint="@string/diameter"
-                    android:inputType="text"
-                    tools:ignore="SpeakableTextPresentCheck" />
+                    android:layout_weight="1"
+                    android:inputType="none"
+                    tools:ignore="LabelFor" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -222,10 +324,7 @@
                 android:layout_weight="1"
                 app:boxBackgroundMode="outline"
                 app:boxStrokeColor="@color/funblue"
-                app:boxStrokeWidth="2dp"
-                app:layout_constraintEnd_toEndOf="@+id/ed_alamat_pelanggan"
-                app:layout_constraintStart_toEndOf="@+id/ed_diameter"
-                app:layout_constraintTop_toBottomOf="@+id/tv_meter">
+                app:boxStrokeWidth="2dp">
 
                 <EditText
                     android:id="@+id/edt_stand"
@@ -237,7 +336,6 @@
                     android:inputType="text"
                     tools:ignore="SpeakableTextPresentCheck" />
             </com.google.android.material.textfield.TextInputLayout>
-
         </LinearLayout>
 
 
@@ -252,7 +350,7 @@
             app:boxStrokeWidth="2dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout4">
 
             <EditText
                 android:id="@+id/edt_nomor_meter"
@@ -318,78 +416,20 @@
             android:layout_marginTop="16dp"
             android:text="@string/meter"
             android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="@+id/ed_alamat_pelanggan"
-            app:layout_constraintTop_toBottomOf="@+id/ed_alamat_pelanggan" />
+            app:layout_constraintStart_toStartOf="@+id/linearLayout3"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout3" />
 
         <TextView
             android:id="@+id/updatedby"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="Updated By Kepala Suku"
             android:visibility="gone"
+            tools:visibility="visible"
             android:gravity="end"
-            app:layout_constraintTop_toBottomOf="@+id/item_image_1"
-            app:layout_constraintStart_toStartOf="@+id/item_image_1"
-            app:layout_constraintEnd_toEndOf="@+id/item_image_1" />
-
-        <TextView
-            android:id="@+id/dokumentasiKonstruksi"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="16dp"
-            android:text="@string/dokumentasiKonstruksi"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="@+id/ed_keterangan"
-            app:layout_constraintTop_toBottomOf="@+id/ed_keterangan" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/item_image_1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:drawableStart="@drawable/preview_upload_photo"
-            android:textCursorDrawable="@null"
-            android:drawablePadding="5dp"
-            android:text="@string/take_photo"
-            android:clickable="true"
-            android:padding="5dp"
-            android:background="@drawable/field"
-            android:gravity="center"
-            app:layout_constraintEnd_toEndOf="@+id/ed_keterangan"
-            app:layout_constraintStart_toStartOf="@+id/ed_keterangan"
-            app:layout_constraintTop_toBottomOf="@+id/dokumentasiKonstruksi"
-            android:focusable="true" />
-
-        <TextView
-            android:id="@+id/dokumentasiMeter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="16dp"
-            android:text="@string/dokumentasiMeter"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="@+id/ed_keterangan"
-            app:layout_constraintTop_toBottomOf="@+id/item_image_1" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/item_image_2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/field"
-            android:clickable="true"
-            android:drawableStart="@drawable/preview_upload_photo"
-            android:drawablePadding="5dp"
-            android:focusable="true"
-            android:gravity="center"
-            android:padding="5dp"
-            android:text="@string/take_photo"
-            android:textCursorDrawable="@null"
-            app:layout_constraintEnd_toEndOf="@+id/ed_keterangan"
-            app:layout_constraintStart_toStartOf="@+id/ed_keterangan"
-            app:layout_constraintTop_toBottomOf="@+id/dokumentasiMeter" />
+            app:layout_constraintTop_toBottomOf="@+id/ed_keterangan"
+            app:layout_constraintEnd_toEndOf="@+id/ed_keterangan" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_hapus"
@@ -401,7 +441,7 @@
             android:text="@string/hapus"
             app:backgroundTint="@color/cognac"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/item_image_2"
+            app:layout_constraintStart_toStartOf="@+id/ed_keterangan"
             app:layout_constraintTop_toBottomOf="@id/updatedby"
             app:layout_constraintVertical_bias="1.0" />
 
@@ -414,7 +454,7 @@
             android:layout_marginBottom="16dp"
             android:text="@string/simpan"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/item_image_2"
+            app:layout_constraintEnd_toEndOf="@+id/ed_keterangan"
             app:layout_constraintTop_toBottomOf="@+id/updatedby"
             app:layout_constraintVertical_bias="1.0" />
 
