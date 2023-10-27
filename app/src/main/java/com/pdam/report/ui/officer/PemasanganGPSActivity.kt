@@ -252,18 +252,22 @@ class PemasanganGPSActivity : AppCompatActivity() {
             // After successfully capturing an image, assign it to the appropriate file
             val myFile = File(currentPhotoPath)
             myFile.let { file ->
-                if (imageNumber == 1) {
-                    firstImageFile = file
-                    binding.itemImage1.text =
-                        System.currentTimeMillis().toString() + "_konstruksi.jpg"
-                } else if (imageNumber == 2) {
-                    secondImageFile = file
-                    binding.itemImage2.text =
-                        System.currentTimeMillis().toString() + "_meter.jpg"
-                } else if (imageNumber == 3) {
-                    thirdImageFile = file
-                    binding.itemImage2.text =
-                        System.currentTimeMillis().toString() + "_perspektif.jpg"
+                when (imageNumber) {
+                    1 -> {
+                        firstImageFile = file
+                        binding.itemImage1.text =
+                            System.currentTimeMillis().toString() + "_konstruksi.jpg"
+                    }
+                    2 -> {
+                        secondImageFile = file
+                        binding.itemImage2.text =
+                            System.currentTimeMillis().toString() + "_meter.jpg"
+                    }
+                    3 -> {
+                        thirdImageFile = file
+                        binding.itemImage2.text =
+                            System.currentTimeMillis().toString() + "_perspektif.jpg"
+                    }
                 }
             }
         }

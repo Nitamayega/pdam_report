@@ -1,5 +1,6 @@
 package com.pdam.report.ui.admin
 
+import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
@@ -8,12 +9,14 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.DiffUtil.calculateDiff
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.android.gms.maps.model.LatLng
 import com.pdam.report.data.PresenceData
 import com.pdam.report.databinding.PresenceItemRowBinding
+import com.pdam.report.utils.GeocoderHelper
 import com.pdam.report.utils.milisToDate
 import com.pdam.report.utils.milisToDateTime
 
-class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>) :
+class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>, private val context: Context) :
     RecyclerView.Adapter<AdminPresenceAdapter.PresenceViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PresenceViewHolder {
@@ -31,10 +34,7 @@ class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>) :
         holder.itemView.setOnClickListener {
             // Menavigasi ke halaman detail presensi saat item diklik
             val intent = Intent(holder.itemView.context, DetailPresenceActivity::class.java)
-            intent.putExtra(DetailPresenceActivity.EXTRA_DATE, milisToDate(presence.currentDate))
-            intent.putExtra(DetailPresenceActivity.EXTRA_LOCATION, presence.location)
-            intent.putExtra(DetailPresenceActivity.EXTRA_PHOTOURL, presence.photoUrl)
-            intent.putExtra(DetailPresenceActivity.EXTRA_USERNAME, presence.username)
+            intent.putExtra(DetailPresenceActivity.EXTRA_DATA, presence)
             holder.itemView.context.startActivity(intent)
         }
     }
@@ -62,7 +62,7 @@ class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>) :
                     .sizeMultiplier(0.5f)
                     .into(imgPhoto)
                 tvName.text = presence.username
-                tvLocation.text = presence.location
+                tvLocation.text = GeocoderHelper(context).getAddressFromLatLng(LatLng(presence.lat, presence.lng))
                 tvTimestampe.text = milisToDateTime(presence.currentDate)
 
                 // Mengelola tampilan tanggal untuk menghindari duplikasi

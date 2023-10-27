@@ -17,7 +17,7 @@ import com.pdam.report.utils.setRecyclerViewVisibility
 
 class AdminPresenceActivity : AppCompatActivity() {
     private val binding by lazy { ActivityAdminPresenceBinding.inflate(layoutInflater) }
-    private val adapter by lazy { AdminPresenceAdapter(ArrayList()) }
+    private val adapter by lazy { AdminPresenceAdapter(ArrayList(),this@AdminPresenceActivity) }
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {

@@ -12,12 +12,14 @@ data class UserData (
     var lastPresence: String = "",
 ) : Parcelable
 
+@Parcelize
 data class PresenceData(
     val currentDate: Long = 0,
     val username: String = "",
-    val location: String = "",
+    val lat: Double = 0.0,
+    val lng: Double = 0.0,
     val photoUrl: String = "",
-)
+) : Parcelable
 
 data class CustomerData(
     val firebaseKey: String = "",

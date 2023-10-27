@@ -1,20 +1,39 @@
 package com.pdam.report.ui.admin
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
+import com.google.android.gms.maps.model.LatLng
+import com.pdam.report.R
+import com.pdam.report.data.PresenceData
 import com.pdam.report.databinding.ActivityDetailPresenceBinding
 import com.pdam.report.utils.FullScreenImageDialogFragment
+import com.pdam.report.utils.GeocoderHelper
+import com.pdam.report.utils.milisToDateTime
 import com.pdam.report.utils.navigatePage
+import org.osmdroid.config.Configuration
+import org.osmdroid.events.MapListener
+import org.osmdroid.events.ScrollEvent
+import org.osmdroid.events.ZoomEvent
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapController
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
 
-class DetailPresenceActivity : AppCompatActivity() {
+class DetailPresenceActivity : AppCompatActivity(), MapListener {
 
     private val binding: ActivityDetailPresenceBinding by lazy {
         ActivityDetailPresenceBinding.inflate(layoutInflater)
     }
+    private lateinit var mMap: MapView
+    private lateinit var mController: MapController
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
@@ -25,36 +44,59 @@ class DetailPresenceActivity : AppCompatActivity() {
 
 
     @SuppressLint("SetTextI18n")
+    @Suppress("DEPRECATION")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        Configuration.getInstance().load(applicationContext, getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE))
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         // Mengambil data tambahan yang dikirim melalui Intent
-        val itemDate = intent.getStringExtra(EXTRA_DATE)
-        val itemLocation = intent.getStringExtra(EXTRA_LOCATION)
-        val itemPhotoUrl = intent.getStringExtra(EXTRA_PHOTOURL)
-        val itemUsername = intent.getStringExtra(EXTRA_USERNAME)
+        val presence = intent.getParcelableExtra<PresenceData>(EXTRA_DATA) as PresenceData
+
+        initializeMap(presence.lat, presence.lng)
 
         binding.apply {
-            tvName.text = itemUsername
-            tvTimestampe.text = "Diambil pada $itemDate"
-            tvLocation.text = itemLocation
-
+            tvName.text = presence.username
+            tvTimestampe.text = "Diambil pada ${milisToDateTime(presence.currentDate)}"
             Glide.with(this@DetailPresenceActivity)
-                .load(itemPhotoUrl)
+                .load(presence.photoUrl)
                 .into(imgPhoto)
-
             imgPhoto.setOnClickListener {
                 supportFragmentManager.beginTransaction()
-                    .add(FullScreenImageDialogFragment(itemPhotoUrl!!), "FullScreenImageDialogFragment")
+                    .add(FullScreenImageDialogFragment(presence.photoUrl), "FullScreenImageDialogFragment")
                     .addToBackStack(null)
                     .commit()
             }
         }
     }
+
+    private fun initializeMap(lat: Double, lng: Double) {
+        // Konfigurasi MapView
+        mMap = binding.osmmap
+        mController = mMap.controller as MapController
+        mMap.setTileSource(TileSourceFactory.MAPNIK)
+        mMap.setMultiTouchControls(true)
+        mMap.setBuiltInZoomControls(true)
+        mMap.setMinZoomLevel(2.0)
+        mMap.setMaxZoomLevel(20.0)
+
+        // Kontroler peta
+        mController.setZoom(15.0)
+        mController.setCenter(GeoPoint(lat, lng))
+
+        // Tambahkan marker
+        val startPoint = GeoPoint(lat, lng)
+        val startMarker = Marker(mMap)
+        startMarker.position = startPoint
+        startMarker.title = GeocoderHelper(this).getAddressFromLatLng(LatLng(lat, lng))
+        startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+        mMap.overlays.add(startMarker)
+    }
+
+
 
     @Suppress("DEPRECATION")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -65,11 +107,25 @@ class DetailPresenceActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
+    override fun onScroll(event: ScrollEvent?): Boolean {
+        // event?.source?.getMapCenter()
+        Log.e("TAG", "onCreate:la ${event?.source?.getMapCenter()?.latitude}")
+        Log.e("TAG", "onCreate:lo ${event?.source?.getMapCenter()?.longitude}")
+        //  Log.e("TAG", "onScroll   x: ${event?.x}  y: ${event?.y}", )
+        return true
+    }
+
+    override fun onZoom(event: ZoomEvent?): Boolean {
+        //  event?.zoomLevel?.let { controller.setZoom(it) }
+
+
+        Log.e("TAG", "onZoom zoom level: ${event?.zoomLevel}   source:  ${event?.source}")
+        return false;
+    }
+
     companion object {
         // Konstanta yang digunakan untuk mengirim data tambahan melalui Intent
-        const val EXTRA_DATE = "extra_date"
-        const val EXTRA_LOCATION = "extra_location"
-        const val EXTRA_PHOTOURL = "extra_photourl"
-        const val EXTRA_USERNAME = "extra_username"
+        const val EXTRA_DATA = "extra_data"
     }
+
 }

@@ -30,7 +30,7 @@
 
     <string name="first_data">Status Kelayakan</string>
     <string name="second_data">Status Pemasangan</string>
-    <string name="third_data">GPS</string>
+    <string name="third_data">Status GPS</string>
 
     <string name="empty_list">Belum Ada Data Pelanggan</string>
     <string name="empty_list_presence">Belum Ada Data Presensi</string>

@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.database.DataSnapshot
@@ -16,6 +18,7 @@ import com.pdam.report.data.CustomerData
 import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ActivityPemasanganSambunganBinding
 import com.pdam.report.utils.UserManager
+import com.pdam.report.utils.milisToDateTime
 import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.showDeleteConfirmationDialog
 import com.pdam.report.utils.showLoading
@@ -58,6 +61,7 @@ class PemasanganSambunganActivity : AppCompatActivity() {
 
         loadDataFromFirebase(firebaseKey.toString())
 
+        setupDropdownField()
         setupButtons()
         setUser()
     }
@@ -149,7 +153,7 @@ class PemasanganSambunganActivity : AppCompatActivity() {
 
         val data = mapOf(
             "petugas" to petugas,
-            "updateVerifDate" to currentDate,
+            "updateInstallDate" to currentDate,
             "nomorKL" to nomorKL,
             "merkMeter" to merk,
             "diameterMeter" to diameter,
@@ -265,7 +269,7 @@ class PemasanganSambunganActivity : AppCompatActivity() {
         }
 
         binding.updatedby.apply {
-            text = "Update by " + dataCustomer.petugas + " at " + dataCustomer.updateInstallDate.toString()
+            text = "Update by " + dataCustomer.petugas + " at " + milisToDateTime(dataCustomer.updateInstallDate)
             isEnabled = false
             isFocusable = false
             visibility = android.view.View.VISIBLE
@@ -275,12 +279,14 @@ class PemasanganSambunganActivity : AppCompatActivity() {
             setText(dataCustomer.merkMeter)
             isEnabled = false
             isFocusable = false
+            setAdapter(null)
         }
 
         binding.dropdownDiameter.apply {
             setText(dataCustomer.diameterMeter)
             isEnabled = false
             isFocusable = false
+            setAdapter(null)
         }
 
         binding.edtStand.apply {
@@ -336,6 +342,18 @@ class PemasanganSambunganActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun setupDropdownField() {
+        // Populate a dropdown field with data from resources
+        val items1 = resources.getStringArray(R.array.type_of_merk)
+        val items2 = resources.getStringArray(R.array.type_of_diameter)
+
+        val dropdownField1: AutoCompleteTextView = binding.dropdownMerk
+        val dropdownField2: AutoCompleteTextView = binding.dropdownDiameter
+
+        dropdownField1.setAdapter(ArrayAdapter(this, R.layout.dropdown_item, items1))
+        dropdownField2.setAdapter(ArrayAdapter(this, R.layout.dropdown_item, items2))
     }
 
     companion object {

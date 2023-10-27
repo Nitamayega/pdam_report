@@ -259,10 +259,8 @@ class OfficerPresenceActivity : AppCompatActivity() {
                                                     val data = PresenceData(
                                                         System.currentTimeMillis(),
                                                         username,
-                                                        latLng?.let {
-                                                            geocoderHelper.getAddressFromLatLng(it)
-                                                                .toString()
-                                                        } ?: "",
+                                                        latLng?.latitude ?: 0.0,
+                                                        latLng?.longitude ?: 0.0,
                                                         downloadUri.toString(),
                                                     )
 

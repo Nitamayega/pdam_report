@@ -14,6 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -183,7 +184,7 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
                             val dokumentasi2 = uri2.toString()
 
                             // After successfully obtaining image URLs, save the data to Firebase
-                            saveCustomerData(currentDate, jenisPekerjaan, pw, nomorRegistrasi, name, address, keterangan, dokumentasi1, dokumentasi2)
+                            saveCustomerData(currentDate, jenisPekerjaan, pw, nomorRegistrasi, name, address, rt, rw, kelurahan, kecamatan, keterangan, dokumentasi1, dokumentasi2)
                         }
                     }
                 }
@@ -262,6 +263,7 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
             setText(dataCustomer.jenisPekerjaan)
             isEnabled = false
             isFocusable = false
+            setAdapter(null)
         }
 
         binding.addedby.apply {
@@ -275,6 +277,7 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
                 setText(dataCustomer.pw.toString())
                 isEnabled = false
                 isFocusable = false
+                setAdapter(null)
             }
 
 
@@ -324,6 +327,8 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
                 setText(dataCustomer.keterangan1)
                 isEnabled = false
                 isFocusable = false
+                isClickable = false
+                setAdapter(null)
             }
 
             binding.itemImage1.apply {
@@ -334,6 +339,22 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
                         .addToBackStack(null)
                         .commit()
                 }
+            }
+
+            binding.imageView1.apply {
+                Glide.with(this@PemasanganKelayakanActivity)
+                    .load(dataCustomer.dokumentasi1)
+                    .placeholder(R.drawable.preview_upload_photo)
+                    .sizeMultiplier(0.3f)
+                    .into(this)
+            }
+
+            binding.imageView2.apply {
+                Glide.with(this@PemasanganKelayakanActivity)
+                    .load(dataCustomer.dokumentasi2)
+                    .placeholder(R.drawable.preview_upload_photo)
+                    .sizeMultiplier(0.3f)
+                    .into(this)
             }
 
             binding.itemImage2.apply {
@@ -347,10 +368,10 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
             }
 
 
-        if (dataCustomer.keterangan1 == "Tidak Layak") {
+        if (dataCustomer.keterangan1 == "Tidak layak") {
             binding.btnSimpan.text = getString(R.string.finish)
             binding.btnSimpan.setOnClickListener {
-                navigatePage(this@PemasanganKelayakanActivity, MainActivity::class.java, true)
+                navigatePage(this@PemasanganKelayakanActivity, MainActivity::class.java)
                 finish()
             }
         } else {
