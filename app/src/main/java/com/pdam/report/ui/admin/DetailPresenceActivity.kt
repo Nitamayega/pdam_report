@@ -1,8 +1,6 @@
 package com.pdam.report.ui.admin
 
 import android.annotation.SuppressLint
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
@@ -48,7 +46,10 @@ class DetailPresenceActivity : AppCompatActivity(), MapListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        Configuration.getInstance().load(applicationContext, getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE))
+        Configuration.getInstance().load(
+            applicationContext,
+            getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE)
+        )
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -66,13 +67,17 @@ class DetailPresenceActivity : AppCompatActivity(), MapListener {
                 .into(imgPhoto)
             imgPhoto.setOnClickListener {
                 supportFragmentManager.beginTransaction()
-                    .add(FullScreenImageDialogFragment(presence.photoUrl), "FullScreenImageDialogFragment")
+                    .add(
+                        FullScreenImageDialogFragment(presence.photoUrl),
+                        "FullScreenImageDialogFragment"
+                    )
                     .addToBackStack(null)
                     .commit()
             }
         }
     }
 
+    @Suppress("DEPRECATION")
     private fun initializeMap(lat: Double, lng: Double) {
         // Konfigurasi MapView
         mMap = binding.osmmap
@@ -80,8 +85,8 @@ class DetailPresenceActivity : AppCompatActivity(), MapListener {
         mMap.setTileSource(TileSourceFactory.MAPNIK)
         mMap.setMultiTouchControls(true)
         mMap.setBuiltInZoomControls(true)
-        mMap.setMinZoomLevel(2.0)
-        mMap.setMaxZoomLevel(20.0)
+        mMap.minZoomLevel = 2.0
+        mMap.maxZoomLevel = 20.0
 
         // Kontroler peta
         mController.setZoom(15.0)
@@ -120,7 +125,7 @@ class DetailPresenceActivity : AppCompatActivity(), MapListener {
 
 
         Log.e("TAG", "onZoom zoom level: ${event?.zoomLevel}   source:  ${event?.source}")
-        return false;
+        return false
     }
 
     companion object {

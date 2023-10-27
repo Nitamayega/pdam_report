@@ -14,6 +14,7 @@ import com.pdam.report.data.CustomerData
 import com.pdam.report.data.UserData
 import com.pdam.report.databinding.FragmentReportBinding
 import com.pdam.report.utils.setRecyclerViewVisibility
+import com.pdam.report.utils.showLoading
 
 class ReportFragment : Fragment(R.layout.fragment_report) {
     private var _binding: FragmentReportBinding? = null
@@ -50,6 +51,7 @@ class ReportFragment : Fragment(R.layout.fragment_report) {
     }
 
     private fun setContentPemutusan(user: UserData) {
+        showLoading(true, binding.progressBar)
         val listPemutusanRef = FirebaseDatabase.getInstance().getReference("listPemutusan")
 
         listPemutusanRef.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -79,22 +81,26 @@ class ReportFragment : Fragment(R.layout.fragment_report) {
                     }
 
                     binding.rvCusts.adapter = adapter
+                    showLoading(false, binding.progressBar)
 
                     if (binding.rvCusts.adapter?.itemCount == 0) {
                         setRecyclerViewVisibility(binding.emptyView, binding.rvCusts, true)
+                        showLoading(false, binding.progressBar)
                     }
                 } else {
                     setRecyclerViewVisibility(binding.emptyView, binding.rvCusts, true)
+                    showLoading(false, binding.progressBar)
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // Handle onCancelled event
+                showLoading(false, binding.progressBar)
             }
         })
     }
 
     private fun setContentPemasangan(user: UserData) {
+        showLoading(true, binding.progressBar)
         val listPemasanganRef = FirebaseDatabase.getInstance().getReference("listCustomer")
 
         listPemasanganRef.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -124,21 +130,24 @@ class ReportFragment : Fragment(R.layout.fragment_report) {
                     }
 
                     binding.rvCusts.adapter = adapter
+                    showLoading(false, binding.progressBar)
 
                     if (binding.rvCusts.adapter?.itemCount == 0) {
                         setRecyclerViewVisibility(binding.emptyView, binding.rvCusts, true)
+                        showLoading(false, binding.progressBar)
                     }
 
 
                 } else {
                     setRecyclerViewVisibility(binding.emptyView, binding.rvCusts, true)
+                    showLoading(false, binding.progressBar)
                 }
 
 
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // Handle onCancelled event
+                showLoading(false, binding.progressBar)
             }
         })
     }

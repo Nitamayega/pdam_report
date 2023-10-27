@@ -5,6 +5,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -32,7 +34,6 @@ import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.showToast
 import kotlinx.coroutines.runBlocking
 import java.text.SimpleDateFormat
-import java.util.Calendar
 
 class MainActivity : AppCompatActivity() {
 
@@ -94,6 +95,9 @@ class MainActivity : AppCompatActivity() {
                     tab.text = getString(TAB_TITLES[position])
                 }.attach()
                 supportActionBar?.elevation = 0f
+
+                // Jika admin maka FAB hilang
+                fabAdd.visibility = if (user.team == 0) GONE else VISIBLE
             }
         }
     }
@@ -154,9 +158,9 @@ class MainActivity : AppCompatActivity() {
                         return@setNavigationItemSelectedListener false
                     }
 
-                    val moveIntent = when {
-                        user.team == 0 -> Intent(this@MainActivity, AdminPresenceActivity::class.java)
-                        user.team == daysDifference -> Intent(this@MainActivity, OfficerPresenceActivity::class.java)
+                    val moveIntent = when (user.team) {
+                        0 -> Intent(this@MainActivity, AdminPresenceActivity::class.java)
+                        daysDifference -> Intent(this@MainActivity, OfficerPresenceActivity::class.java)
                         else -> {
                             showToast(this@MainActivity, R.string.presence_denied)
                             null
