@@ -55,6 +55,22 @@ fun showDeleteConfirmationDialog(customerRef: DatabaseReference, context: Contex
     }.create().show()
 }
 
+fun showDialogDenied(context: Context) {
+    val dialog = AlertDialog.Builder(context)
+    dialog.setTitle("Aplikasi perlu izin!")
+    dialog.setMessage(context.getString(R.string.must_allow_permission))
+    dialog.setPositiveButton("Pengaturan") { _, _ ->
+        intentSetting(context)
+    }
+
+    dialog.setNegativeButton("Keluar") { _, _ ->
+        (context as Activity).finish()
+    }
+
+    dialog.setCancelable(false)
+    dialog.show()
+}
+
 fun navigatePage(context: Context, destination: Class<*>, clearTask: Boolean = false) {
     val intent = Intent(context, destination)
     if (clearTask) {

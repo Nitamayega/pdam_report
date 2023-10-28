@@ -5,7 +5,11 @@ import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.MenuItem
@@ -62,6 +66,9 @@ class OfficerPresenceActivity : AppCompatActivity() {
     private var latLng: LatLng? = null
     private val geocoderHelper = GeocoderHelper(this)
     private lateinit var locationRequest: LocationRequest
+    private val locationManager: LocationManager? by lazy {
+        getSystemService(Context.LOCATION_SERVICE) as? LocationManager
+    }
 
     private val auth by lazy { FirebaseAuth.getInstance() }
     private val currentUser = auth.currentUser
@@ -245,7 +252,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
                                         // Menentukan referensi untuk penyimpanan gambar
                                         val photoRef =
                                             storageReference.child("images/presence/${System.currentTimeMillis()}.jpg")
-                                        // Mengunggah gambar ke Firebase Storage
+                                            // Mengunggah gambar ke Firebase Storage
                                         photoRef.putFile(Uri.fromFile(getFile))
                                             .addOnSuccessListener { uploadTask ->
                                                 uploadTask.storage.downloadUrl.addOnSuccessListener { downloadUri ->
@@ -364,7 +371,35 @@ class OfficerPresenceActivity : AppCompatActivity() {
         }
     }
 
-    // Menangani pembaruan lokasi perangkat
+    // Memulai permintaan lokasi
+    private fun getLocation() {
+        if (latLng == null && !isToastShown) {
+            showToast(this@OfficerPresenceActivity, R.string.initialize_location)
+        }
+        if (PermissionHelper.hasLocationPermission(this)) {
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    // Menggunakan FusedLocationProviderClient untuk Android 12+
+                    fuse.requestLocationUpdates(locationRequest, locationCallback, mainLooper)
+                } else {
+                    // Menggunakan LocationManager untuk Android di bawah 12
+                    val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+                    locationManager.requestLocationUpdates(
+                        LocationManager.GPS_PROVIDER, // Gunakan provider yang sesuai
+                        5000L, // Minimum waktu antara pembaruan lokasi (ms)
+                        0f, // Jarak minimum antara pembaruan lokasi (meter)
+                        locationListener // Listener untuk menangani pembaruan lokasi
+                    )
+                }
+            } catch (e: SecurityException) {
+                showToast(this@OfficerPresenceActivity, R.string.permission_denied)
+            }
+        } else {
+            PermissionHelper.requestLocationPermission(this@OfficerPresenceActivity)
+        }
+    }
+
+    // Menangani pembaruan lokasi perangkat untuk android 12+
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             locationResult.lastLocation?.let { location ->
@@ -380,19 +415,36 @@ class OfficerPresenceActivity : AppCompatActivity() {
         }
     }
 
-    // Memulai permintaan lokasi
-    private fun getLocation() {
-        if (latLng != null && !isToastShown) {
-            showToast(this@OfficerPresenceActivity, R.string.initialize_location)
-        }
-        if (PermissionHelper.hasLocationPermission(this)) {
-            try {
-                fuse.requestLocationUpdates(locationRequest, locationCallback, null)
-            } catch (e: SecurityException) {
-                showToast(this@OfficerPresenceActivity, R.string.permission_denied)
+
+    // Listener untuk menangani pembaruan lokasi perangkat untuk android di bawah 12
+    private val locationListener = object : LocationListener {
+        override fun onLocationChanged(location: Location) {
+            // Lokasi baru tersedia di sini
+            latLng = LatLng(location.latitude, location.longitude)
+            if (latLng != null && !isToastShown) {
+                showToast(this@OfficerPresenceActivity, R.string.location_found)
+                binding.uploadButton.isEnabled = true
+                isToastShown = true
+            } else if (latLng == null) {
+                showToast(this@OfficerPresenceActivity, R.string.location_not_found)
             }
+        }
+
+        override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
+            return
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        // Hentikan pembaruan lokasi saat Activity di-destroy
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            // Hentikan pembaruan lokasi menggunakan FusedLocationProviderClient (untuk Android 12+)
+            fuse.removeLocationUpdates(locationCallback)
         } else {
-            PermissionHelper.requestLocationPermission(this@OfficerPresenceActivity)
+            // Hentikan pembaruan lokasi menggunakan LocationManager (untuk Android di bawah 12)
+            locationManager?.removeUpdates(locationListener)
         }
     }
 
@@ -400,7 +452,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
-        grantResults: IntArray,
+        grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
