@@ -40,7 +40,6 @@ import com.pdam.report.R
 import com.pdam.report.data.PresenceData
 import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ActivityOfficerPresenceBinding
-import com.pdam.report.utils.GeocoderHelper
 import com.pdam.report.utils.PermissionHelper
 import com.pdam.report.utils.createCustomTempFile
 import com.pdam.report.utils.getCurrentTimeStamp
@@ -65,7 +64,6 @@ class OfficerPresenceActivity : AppCompatActivity() {
     }
 
     private var latLng: LatLng? = null
-    private val geocoderHelper = GeocoderHelper(this)
     private lateinit var locationRequest: LocationRequest
     private val locationManager: LocationManager? by lazy {
         getSystemService(Context.LOCATION_SERVICE) as? LocationManager
@@ -449,11 +447,14 @@ class OfficerPresenceActivity : AppCompatActivity() {
         }
     }
 
+
+
+
     // Menangani hasil permintaan izin
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
-        grantResults: IntArray,
+        grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {

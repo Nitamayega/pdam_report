@@ -115,6 +115,10 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        onBackPressedCallback.remove()
+    }
     private fun setUser() {
 
         // Memperoleh data pengguna melalui userManager dan menginisialisasi variabel user

@@ -30,7 +30,6 @@ import com.pdam.report.ui.officer.PemutusanActivity
 import com.pdam.report.utils.PermissionHelper
 import com.pdam.report.utils.PermissionHelper.checkAndRequestPermissions
 import com.pdam.report.utils.UserManager
-import com.pdam.report.utils.getCurrentTimeStamp
 import com.pdam.report.utils.getInitialDate
 import com.pdam.report.utils.getNetworkTime
 import com.pdam.report.utils.milisToDate
@@ -271,6 +270,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         }
         return super.onOptionsItemSelected(item)
     }
+
 
     companion object {
         private val TAB_TITLES = arrayOf(
