@@ -188,7 +188,6 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
             )
         } else {
             showLoading(false, binding.progressBar, binding.btnSimpan, binding.btnHapus)
-            Log.d("AYAPI", "$currentDate $jenisPekerjaan $pw $nomorRegistrasi $name $address $rt $rw $kelurahan $kecamatan $keterangan")
             showToast(this, R.string.fill_all_dataImage)
         }
     }
@@ -656,8 +655,7 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
             myFile.let { file ->
                 if (imageNumber == 1) {
                     firstImageFile = file
-                    binding.itemImage1.text =
-                        System.currentTimeMillis().toString() + "_dokumen.jpg"
+                    binding.itemImage1.text = System.currentTimeMillis().toString() + "_dokumen.jpg"
 
                     Glide.with(this@PemasanganKelayakanActivity)
                         .load(firstImageFile)
@@ -665,18 +663,14 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
 
                     binding.imageView1.setOnClickListener {
                         supportFragmentManager.beginTransaction()
-                            .add(
-                                FullScreenImageDialogFragment(firstImageFile.toString()),
-                                "FullScreenImageDialogFragment"
-                            )
+                            .add(FullScreenImageDialogFragment(firstImageFile.toString()), "FullScreenImageDialogFragment")
                             .addToBackStack(null)
                             .commit()
                     }
 
                 } else if (imageNumber == 2) {
                     secondImageFile = file
-                    binding.itemImage2.text =
-                        System.currentTimeMillis().toString() + "_kondisi.jpg"
+                    binding.itemImage2.text = System.currentTimeMillis().toString() + "_kondisi.jpg"
 
                     Glide.with(this@PemasanganKelayakanActivity)
                         .load(secondImageFile)
@@ -684,10 +678,7 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
 
                     binding.imageView2.setOnClickListener {
                         supportFragmentManager.beginTransaction()
-                            .add(
-                                FullScreenImageDialogFragment(secondImageFile.toString()),
-                                "FullScreenImageDialogFragment"
-                            )
+                            .add(FullScreenImageDialogFragment(secondImageFile.toString()), "FullScreenImageDialogFragment")
                             .addToBackStack(null)
                             .commit()
                     }

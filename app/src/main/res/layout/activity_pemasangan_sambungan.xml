@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:scrollbars="vertical">
+    android:scrollbars="vertical"
+    android:fillViewport="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -32,10 +33,10 @@
             android:id="@+id/linearLayout1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:baselineAligned="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            android:baselineAligned="false">
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/ed_pemasangan_sambungan"
@@ -43,9 +44,9 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
-                android:layout_weight="4"
                 app:boxStrokeColor="@color/funblue"
-                app:boxStrokeWidth="2dp">
+                app:boxStrokeWidth="2dp"
+                android:layout_weight="4">
 
                 <EditText
                     android:id="@+id/edt_pemasangan_sambungan"
@@ -62,9 +63,9 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 app:boxStrokeColor="@color/funblue"
-                app:boxStrokeWidth="2dp">
+                app:boxStrokeWidth="2dp"
+                android:layout_weight="1">
 
                 <EditText
                     android:id="@+id/edt_pw"
@@ -85,9 +86,9 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             app:boxStrokeColor="@color/funblue"
             app:boxStrokeWidth="2dp"
+            android:layout_marginTop="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/linearLayout1">
@@ -128,10 +129,10 @@
             android:id="@+id/linearLayout2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:baselineAligned="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/ed_nama_pelanggan">
+            app:layout_constraintTop_toBottomOf="@id/ed_nama_pelanggan"
+            android:baselineAligned="false">
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/ed_alamat_pelanggan"
@@ -139,11 +140,11 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="3"
                 app:boxBackgroundMode="outline"
                 app:boxStrokeColor="@color/funblue"
-                app:boxStrokeWidth="2dp">
+                app:boxStrokeWidth="2dp"
+                android:layout_weight="3"
+                android:layout_marginEnd="8dp">
 
                 <EditText
                     android:id="@+id/edt_alamat_pelanggan"
@@ -161,21 +162,21 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
                 app:boxBackgroundMode="outline"
                 app:boxStrokeColor="@color/funblue"
-                app:boxStrokeWidth="2dp">
+                app:boxStrokeWidth="2dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp">
 
                 <EditText
                     android:id="@+id/edt_rt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ems="10"
-                    android:gravity="center"
                     android:hint="@string/rt"
-                    android:inputType="number"
+                    android:gravity="center"
                     android:maxLength="2"
+                    android:inputType="number"
                     tools:ignore="SpeakableTextPresentCheck" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -185,18 +186,18 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:layout_weight="1"
                 app:boxBackgroundMode="outline"
                 app:boxStrokeColor="@color/funblue"
-                app:boxStrokeWidth="2dp">
+                app:boxStrokeWidth="2dp"
+                android:layout_weight="1">
 
                 <EditText
                     android:id="@+id/edt_rw"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ems="10"
-                    android:gravity="center"
                     android:hint="@string/rw"
+                    android:gravity="center"
                     android:inputType="number"
                     android:maxLength="2"
                     tools:ignore="SpeakableTextPresentCheck" />
@@ -207,10 +208,10 @@
             android:id="@+id/linearLayout3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:baselineAligned="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/linearLayout2">
+            app:layout_constraintTop_toBottomOf="@id/linearLayout2"
+            android:baselineAligned="false">
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/ed_kelurahan"
@@ -218,11 +219,11 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="2"
                 app:boxBackgroundMode="outline"
                 app:boxStrokeColor="@color/funblue"
-                app:boxStrokeWidth="2dp">
+                app:boxStrokeWidth="2dp"
+                android:layout_weight="2"
+                android:layout_marginEnd="8dp">
 
                 <EditText
                     android:id="@+id/edt_kelurahan"
@@ -240,10 +241,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:layout_weight="2"
                 app:boxBackgroundMode="outline"
                 app:boxStrokeColor="@color/funblue"
-                app:boxStrokeWidth="2dp">
+                app:boxStrokeWidth="2dp"
+                android:layout_weight="2">
 
                 <EditText
                     android:id="@+id/edt_kecamatan"
@@ -262,12 +263,12 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_weight="2"
             android:focusableInTouchMode="true"
             android:hint="@string/merk"
             app:boxStrokeColor="@color/funblue"
             app:boxStrokeWidth="2dp"
+            android:layout_marginTop="8dp"
+            android:layout_weight="2"
             app:layout_constraintEnd_toEndOf="@+id/linearLayout1"
             app:layout_constraintStart_toStartOf="@+id/linearLayout1"
             app:layout_constraintTop_toBottomOf="@+id/tv_meter">
@@ -298,12 +299,12 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="2"
                 android:focusableInTouchMode="true"
+                android:layout_marginEnd="8dp"
                 android:hint="@string/diameter"
                 app:boxStrokeColor="@color/funblue"
-                app:boxStrokeWidth="2dp">
+                app:boxStrokeWidth="2dp"
+                android:layout_weight="2">
 
                 <AutoCompleteTextView
                     android:id="@+id/dropdown_diameter"
@@ -423,12 +424,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:gravity="end"
             android:text="Updated By Kepala Suku"
             android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="@+id/ed_keterangan"
+            tools:visibility="visible"
+            android:gravity="end"
             app:layout_constraintTop_toBottomOf="@+id/ed_keterangan"
-            tools:visibility="visible" />
+            app:layout_constraintEnd_toEndOf="@+id/ed_keterangan" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_hapus"
