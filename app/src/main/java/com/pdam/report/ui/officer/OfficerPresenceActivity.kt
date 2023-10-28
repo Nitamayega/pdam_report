@@ -252,7 +252,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
                                         // Menentukan referensi untuk penyimpanan gambar
                                         val photoRef =
                                             storageReference.child("images/presence/${System.currentTimeMillis()}.jpg")
-                                            // Mengunggah gambar ke Firebase Storage
+                                        // Mengunggah gambar ke Firebase Storage
                                         photoRef.putFile(Uri.fromFile(getFile))
                                             .addOnSuccessListener { uploadTask ->
                                                 uploadTask.storage.downloadUrl.addOnSuccessListener { downloadUri ->
@@ -452,7 +452,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
-        grantResults: IntArray
+        grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {

@@ -31,7 +31,12 @@ class PemasanganSambunganActivity : AppCompatActivity() {
     private val databaseReference = FirebaseDatabase.getInstance().reference
 
     private val firebaseKey by lazy { intent.getStringExtra(PemasanganKelayakanActivity.EXTRA_FIREBASE_KEY) }
-    private val customerData by lazy { intent.getIntExtra(PemasanganKelayakanActivity.EXTRA_CUSTOMER_DATA, 0) }
+    private val customerData by lazy {
+        intent.getIntExtra(
+            PemasanganKelayakanActivity.EXTRA_CUSTOMER_DATA,
+            0
+        )
+    }
 
     private val userManager by lazy { UserManager() }
     private lateinit var user: UserData
@@ -39,7 +44,8 @@ class PemasanganSambunganActivity : AppCompatActivity() {
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
 //            navigatePage(this@UpdateCustomerInstallationActivity, AddFirstDataActivity::class.java, true)
-            val intent = Intent(this@PemasanganSambunganActivity, PemasanganKelayakanActivity::class.java)
+            val intent =
+                Intent(this@PemasanganSambunganActivity, PemasanganKelayakanActivity::class.java)
             intent.putExtra(PemasanganKelayakanActivity.EXTRA_FIREBASE_KEY, firebaseKey.toString())
             startActivity(intent)
             finish()
@@ -93,7 +99,10 @@ class PemasanganSambunganActivity : AppCompatActivity() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                showToast(this@PemasanganSambunganActivity, "${R.string.failed_access_data}: ${error.message}".toInt())
+                showToast(
+                    this@PemasanganSambunganActivity,
+                    "${R.string.failed_access_data}: ${error.message}".toInt()
+                )
             }
         })
     }
@@ -243,7 +252,10 @@ class PemasanganSambunganActivity : AppCompatActivity() {
 
             override fun onCancelled(error: DatabaseError) {
                 // Menampilkan pesan kesalahan jika mengakses data gagal
-                showToast(this@PemasanganSambunganActivity, "${R.string.failed_access_data}: ${error.message}".toInt())
+                showToast(
+                    this@PemasanganSambunganActivity,
+                    "${R.string.failed_access_data}: ${error.message}".toInt()
+                )
             }
         })
     }
