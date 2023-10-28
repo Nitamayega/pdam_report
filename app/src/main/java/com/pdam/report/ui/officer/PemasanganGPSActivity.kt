@@ -1,6 +1,7 @@
 package com.pdam.report.ui.officer
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -833,9 +834,9 @@ class PemasanganGPSActivity : AppCompatActivity() {
 
                 // Menetapkan teks pada itemImage3 yang menunjukkan gambar yang dipilih
                 binding.itemImage3.text = System.currentTimeMillis().toString() + "_perspektif.jpg"
+                }
             }
         }
-    }
 
     companion object {
         const val EXTRA_FIREBASE_KEY = "firebase_key"
