@@ -22,7 +22,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.pdam.report.MainActivity
 import com.pdam.report.R
-import com.pdam.report.data.CustomerData
+import com.pdam.report.data.SambunganData
 import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ActivityPemasanganKelayakanBinding
 import com.pdam.report.utils.FullScreenImageDialogFragment
@@ -69,6 +69,8 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setBackgroundDrawable(resources.getDrawable(R.color.tropical_blue))
+
         setupDropdownField()
         setupButtons()
         setUser()
@@ -98,7 +100,7 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
     }
 
     private fun deleteData() {
-        val listCustomerRef = databaseReference.child("listCustomer")
+        val listCustomerRef = databaseReference.child("listPemasangan")
         val customerRef = firebaseKey?.let { listCustomerRef.child(it) }
 
         customerRef?.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -193,12 +195,12 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
     }
 
     private fun saveCustomerData(currentDate: Long, jenisPekerjaan: String, pw: String, nomorRegistrasi: String, name: String, address: String, rt: String, rw: String, kelurahan: String, kecamatan: String, keterangan: String, dokumentasi1: String, dokumentasi2: String) {
-        val newCustomerRef = databaseReference.child("listCustomer").push()
+        val newCustomerRef = databaseReference.child("listPemasangan").push()
         val newCustomerId = newCustomerRef.key
 
 
         if (newCustomerId != null) {
-            val data = CustomerData(
+            val data = SambunganData(
                 firebaseKey = newCustomerId,
                 currentDate = currentDate,
                 petugas =  user.username,
@@ -236,12 +238,12 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
     }
 
     private fun loadDataFromFirebase(firebaseKey: String) {
-        val customerRef = databaseReference.child("listCustomer").child(firebaseKey)
+        val customerRef = databaseReference.child("listPemasangan").child(firebaseKey)
 
         customerRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
-                    val dataCustomer = snapshot.getValue(CustomerData::class.java)
+                    val dataCustomer = snapshot.getValue(SambunganData::class.java)
                     if (dataCustomer != null) {
                         // Jika data pelanggan ditemukan, tampilkan datanya
                         displayCustomerData(dataCustomer)
@@ -257,7 +259,7 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
     }
 
     @SuppressLint("SetTextI18n")
-    private fun displayCustomerData(dataCustomer: CustomerData) {
+    private fun displayCustomerData(dataCustomer: SambunganData) {
         // Mengisi tampilan dengan data pelanggan yang ditemukan dari Firebase
         binding.dropdownJenisPekerjaan.apply {
             setText(dataCustomer.jenisPekerjaan)
@@ -273,31 +275,31 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
             visibility = android.view.View.VISIBLE
         }
 
-            binding.dropdownPw.apply {
-                setText(dataCustomer.pw.toString())
-                isEnabled = false
-                isFocusable = false
-                setAdapter(null)
-            }
+        binding.dropdownPw.apply {
+            setText(dataCustomer.pw.toString())
+            isEnabled = false
+            isFocusable = false
+            setAdapter(null)
+        }
 
 
-            binding.edtNomorRegistrasi.apply {
-                setText(dataCustomer.nomorRegistrasi)
-                isEnabled = false
-                isFocusable = false
-            }
+        binding.edtNomorRegistrasi.apply {
+            setText(dataCustomer.nomorRegistrasi)
+            isEnabled = false
+            isFocusable = false
+        }
 
-            binding.edtNamaPelanggan.apply {
-                setText(dataCustomer.name)
-                isEnabled = false
-                isFocusable = false
-            }
+        binding.edtNamaPelanggan.apply {
+            setText(dataCustomer.name)
+            isEnabled = false
+            isFocusable = false
+        }
 
-            binding.edtAlamatPelanggan.apply {
-                setText(dataCustomer.address)
-                isEnabled = false
-                isFocusable = false
-            }
+        binding.edtAlamatPelanggan.apply {
+            setText(dataCustomer.address)
+            isEnabled = false
+            isFocusable = false
+        }
 
         binding.edtRt.apply {
             setText(dataCustomer.rt)
@@ -323,49 +325,49 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
             isFocusable = false
         }
 
-            binding.dropdownKeterangan.apply {
-                setText(dataCustomer.keterangan1)
-                isEnabled = false
-                isFocusable = false
-                isClickable = false
-                setAdapter(null)
-            }
+        binding.dropdownKeterangan.apply {
+            setText(dataCustomer.keterangan1)
+            isEnabled = false
+            isFocusable = false
+            isClickable = false
+            setAdapter(null)
+        }
 
-            binding.itemImage1.apply {
-                text = parsingNameImage(dataCustomer.dokumentasi1)
-                setOnClickListener {
-                    supportFragmentManager.beginTransaction()
-                        .add(FullScreenImageDialogFragment(dataCustomer.dokumentasi1), "FullScreenImageDialogFragment")
-                        .addToBackStack(null)
-                        .commit()
-                }
+        binding.itemImage1.apply {
+            text = parsingNameImage(dataCustomer.dokumentasi1)
+            setOnClickListener {
+                supportFragmentManager.beginTransaction()
+                    .add(FullScreenImageDialogFragment(dataCustomer.dokumentasi1), "FullScreenImageDialogFragment")
+                    .addToBackStack(null)
+                    .commit()
             }
+        }
 
-            binding.imageView1.apply {
-                Glide.with(this@PemasanganKelayakanActivity)
-                    .load(dataCustomer.dokumentasi1)
-                    .placeholder(R.drawable.preview_upload_photo)
-                    .sizeMultiplier(0.3f)
-                    .into(this)
-            }
+        binding.imageView1.apply {
+            Glide.with(this@PemasanganKelayakanActivity)
+                .load(dataCustomer.dokumentasi1)
+                .placeholder(R.drawable.preview_upload_photo)
+                .sizeMultiplier(0.3f)
+                .into(this)
+        }
 
-            binding.imageView2.apply {
-                Glide.with(this@PemasanganKelayakanActivity)
-                    .load(dataCustomer.dokumentasi2)
-                    .placeholder(R.drawable.preview_upload_photo)
-                    .sizeMultiplier(0.3f)
-                    .into(this)
-            }
+        binding.imageView2.apply {
+            Glide.with(this@PemasanganKelayakanActivity)
+                .load(dataCustomer.dokumentasi2)
+                .placeholder(R.drawable.preview_upload_photo)
+                .sizeMultiplier(0.3f)
+                .into(this)
+        }
 
-            binding.itemImage2.apply {
-                text = parsingNameImage(dataCustomer.dokumentasi2)
-                setOnClickListener {
-                    supportFragmentManager.beginTransaction()
-                        .add(FullScreenImageDialogFragment(dataCustomer.dokumentasi2), "FullScreenImageDialogFragment")
-                        .addToBackStack(null)
-                        .commit()
-                }
+        binding.itemImage2.apply {
+            text = parsingNameImage(dataCustomer.dokumentasi2)
+            setOnClickListener {
+                supportFragmentManager.beginTransaction()
+                    .add(FullScreenImageDialogFragment(dataCustomer.dokumentasi2), "FullScreenImageDialogFragment")
+                    .addToBackStack(null)
+                    .commit()
             }
+        }
 
 
         if (dataCustomer.keterangan1 == "Tidak layak") {
@@ -377,29 +379,29 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
         } else {
 
 
-        // Mengganti teks tombol Simpan untuk melanjutkan ke halaman berikutnya
-        binding.btnSimpan.apply {
-            binding.btnSimpan.text = getString(R.string.next)
-            binding.btnSimpan.setOnClickListener {
-                val intent = Intent(
-                    this@PemasanganKelayakanActivity,
-                    PemasanganSambunganActivity::class.java
-                )
+            // Mengganti teks tombol Simpan untuk melanjutkan ke halaman berikutnya
+            binding.btnSimpan.apply {
+                binding.btnSimpan.text = getString(R.string.next)
+                binding.btnSimpan.setOnClickListener {
+                    val intent = Intent(
+                        this@PemasanganKelayakanActivity,
+                        PemasanganSambunganActivity::class.java
+                    )
 
-                // Mengirim kunci Firebase ke AddFirstDataActivity
-                intent.putExtra(
-                    PemasanganSambunganActivity.EXTRA_FIREBASE_KEY,
-                    dataCustomer.firebaseKey
-                )
-                intent.putExtra(
-                    PemasanganSambunganActivity.EXTRA_CUSTOMER_DATA,
-                    dataCustomer.data
-                )
+                    // Mengirim kunci Firebase ke AddFirstDataActivity
+                    intent.putExtra(
+                        PemasanganSambunganActivity.EXTRA_FIREBASE_KEY,
+                        dataCustomer.firebaseKey
+                    )
+                    intent.putExtra(
+                        PemasanganSambunganActivity.EXTRA_CUSTOMER_DATA,
+                        dataCustomer.data
+                    )
 
-                startActivity(intent)
-                finish()
+                    startActivity(intent)
+                    finish()
+                }
             }
-        }
         }
     }
 

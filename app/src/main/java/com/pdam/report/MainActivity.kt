@@ -19,12 +19,14 @@ import com.bumptech.glide.Glide
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.auth.FirebaseAuth
+import com.pdam.report.data.PemutusanData
 import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ActivityMainBinding
 import com.pdam.report.ui.admin.AdminPresenceActivity
 import com.pdam.report.ui.common.LoginActivity
 import com.pdam.report.ui.officer.OfficerPresenceActivity
 import com.pdam.report.ui.officer.PemasanganKelayakanActivity
+import com.pdam.report.ui.officer.PemutusanActivity
 import com.pdam.report.utils.PermissionHelper
 import com.pdam.report.utils.UserManager
 import com.pdam.report.utils.getCurrentTimeStamp
@@ -51,7 +53,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        supportActionBar?.hide()
+        supportActionBar?.setBackgroundDrawable(resources.getDrawable(R.color.tropical_blue))
 
         // Add the onPageChangeListener to the ViewPager
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
@@ -72,8 +74,7 @@ class MainActivity : AppCompatActivity() {
                 }
             } else {
                 binding.fabAdd.setOnClickListener {
-//                    navigatePage(this, PemasanganKelayakanActivity::class.java)
-                    Toast.makeText(this, "Di Fragment Pemutusan", Toast.LENGTH_SHORT).show()
+                    navigatePage(this, PemutusanActivity::class.java)
                 }
             }
         }

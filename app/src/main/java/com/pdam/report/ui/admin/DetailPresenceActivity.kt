@@ -53,6 +53,7 @@ class DetailPresenceActivity : AppCompatActivity(), MapListener {
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setBackgroundDrawable(resources.getDrawable(R.color.tropical_blue))
 
         // Mengambil data tambahan yang dikirim melalui Intent
         val presence = intent.getParcelableExtra<PresenceData>(EXTRA_DATA) as PresenceData

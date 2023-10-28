@@ -87,6 +87,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setBackgroundDrawable(resources.getDrawable(R.color.tropical_blue))
 
         // Membuat permintaan lokasi
         locationRequest = createLocationRequest()
@@ -269,8 +270,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
                                                         .child(uid).push().setValue(data)
                                                         .addOnCompleteListener { task ->
                                                             if (task.isSuccessful) {
-                                                                userData.lastPresence =
-                                                                    getCurrentTimeStamp()
+                                                                databaseReference.child("users").child(uid).child("lastPresence").setValue(getCurrentTimeStamp())
                                                                 showToast(
                                                                     this@OfficerPresenceActivity,
                                                                     R.string.upload_success

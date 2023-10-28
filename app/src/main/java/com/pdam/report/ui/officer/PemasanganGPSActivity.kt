@@ -1,6 +1,7 @@
 package com.pdam.report.ui.officer
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -8,9 +9,11 @@ import android.provider.MediaStore
 import android.view.MenuItem
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -18,7 +21,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.pdam.report.MainActivity
 import com.pdam.report.R
-import com.pdam.report.data.CustomerData
+import com.pdam.report.data.SambunganData
 import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ActivityPemasanganGpsBinding
 import com.pdam.report.utils.FullScreenImageDialogFragment
@@ -30,6 +33,7 @@ import com.pdam.report.utils.reduceFileImageInBackground
 import com.pdam.report.utils.showDeleteConfirmationDialog
 import com.pdam.report.utils.showLoading
 import com.pdam.report.utils.showToast
+import com.pdam.report.utils.uriToFile
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -65,6 +69,8 @@ class PemasanganGPSActivity : AppCompatActivity() {
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setBackgroundDrawable(resources.getDrawable(R.color.tropical_blue))
+
         firebaseKey?.let {
             loadDataFromFirebase(it)
         }
@@ -82,7 +88,24 @@ class PemasanganGPSActivity : AppCompatActivity() {
     private fun setupButtons() {
         binding.itemImage1.setOnClickListener { imageNumber = 1; startTakePhoto() }
         binding.itemImage2.setOnClickListener { imageNumber = 2; startTakePhoto() }
-        binding.itemImage3.setOnClickListener { imageNumber = 3; startTakePhoto() }
+        binding.itemImage3.setOnClickListener {
+            imageNumber = 3;
+            AlertDialog.Builder(this).apply {
+                setTitle("Pilih Sumber Gambar")
+                setItems(arrayOf("Kamera", "Galeri")) { dialog, which ->
+                    when (which) {
+                        0 -> {
+                            startTakePhoto()
+                        }
+                        1 -> {
+                            startGallery()
+                        }
+                    }
+                    dialog.dismiss()
+                }
+                setNegativeButton(R.string.cancel, null)
+            }.create().show()
+        }
         binding.btnSimpan.setOnClickListener { saveData() }
         binding.btnHapus.setOnClickListener {
             if (customerData == 2) {
@@ -94,7 +117,7 @@ class PemasanganGPSActivity : AppCompatActivity() {
     }
 
     private fun deleteData() {
-        val listCustomerRef = databaseReference.child("listCustomer")
+        val listCustomerRef = databaseReference.child("listPemasangan")
         val customerRef = firebaseKey?.let { listCustomerRef.child(it) }
 
         customerRef?.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -177,7 +200,7 @@ class PemasanganGPSActivity : AppCompatActivity() {
     }
 
     private fun saveCustomerData(petugas: String, currentDate: Long, koorX: String, koorY: String, koorZ: String, dokumentasi3: String, dokumentasi4: String, dokumentasi5: String) {
-        val customerRef = databaseReference.child("listCustomer").child(firebaseKey.toString())
+        val customerRef = databaseReference.child("listPemasangan").child(firebaseKey.toString())
 
         val data = mapOf(
             "petugas" to petugas,
@@ -204,12 +227,12 @@ class PemasanganGPSActivity : AppCompatActivity() {
     }
 
     private fun loadDataFromFirebase(firebaseKey: String) {
-        val customerRef = databaseReference.child("listCustomer").child(firebaseKey)
+        val customerRef = databaseReference.child("listPemasangan").child(firebaseKey)
 
         customerRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
-                    val dataCustomer = snapshot.getValue(CustomerData::class.java)
+                    val dataCustomer = snapshot.getValue(SambunganData::class.java)
                     if (dataCustomer != null) {
                         // Jika data pelanggan ditemukan, tampilkan datanya
                         displayCustomerData(dataCustomer)
@@ -244,6 +267,12 @@ class PemasanganGPSActivity : AppCompatActivity() {
         }
     }
 
+    private fun startGallery() {
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        intent.type = "image/*"
+        launcherIntentGallery.launch(intent)
+    }
+
     @SuppressLint("SetTextI18n")
     private val launcherIntentCamera = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -256,15 +285,62 @@ class PemasanganGPSActivity : AppCompatActivity() {
                     firstImageFile = file
                     binding.itemImage1.text =
                         System.currentTimeMillis().toString() + "_konstruksi.jpg"
+
+                    Glide.with(this@PemasanganGPSActivity)
+                        .load(firstImageFile)
+                        .into(binding.imageView1)
+
+                    binding.imageView1.setOnClickListener {
+                        supportFragmentManager.beginTransaction()
+                            .add(FullScreenImageDialogFragment(firstImageFile.toString()), "FullScreenImageDialogFragment")
+                            .addToBackStack(null)
+                            .commit()
+                    }
                 } else if (imageNumber == 2) {
                     secondImageFile = file
                     binding.itemImage2.text =
                         System.currentTimeMillis().toString() + "_meter.jpg"
+
+                    Glide.with(this@PemasanganGPSActivity)
+                        .load(secondImageFile)
+                        .into(binding.imageView2)
+
+                    binding.imageView2.setOnClickListener {
+                        supportFragmentManager.beginTransaction()
+                            .add(FullScreenImageDialogFragment(secondImageFile.toString()), "FullScreenImageDialogFragment")
+                            .addToBackStack(null)
+                            .commit()
+                    }
                 } else if (imageNumber == 3) {
                     thirdImageFile = file
-                    binding.itemImage2.text =
+                    binding.itemImage3.text =
                         System.currentTimeMillis().toString() + "_perspektif.jpg"
+
+                    Glide.with(this@PemasanganGPSActivity)
+                        .load(thirdImageFile)
+                        .into(binding.imageView3)
+
+                    binding.imageView3.setOnClickListener {
+                        supportFragmentManager.beginTransaction()
+                            .add(FullScreenImageDialogFragment(thirdImageFile.toString()), "FullScreenImageDialogFragment")
+                            .addToBackStack(null)
+                            .commit()
+                    }
                 }
+            }
+        }
+    }
+
+    private val launcherIntentGallery = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val selectedImg = result.data?.data as Uri
+            selectedImg.let { uri ->
+                val myFile = uriToFile(uri, this@PemasanganGPSActivity)
+                thirdImageFile = myFile
+                binding.itemImage3.text =
+                    System.currentTimeMillis().toString() + "_perspektif.jpg"
             }
         }
     }
@@ -278,7 +354,7 @@ class PemasanganGPSActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    private fun displayCustomerData(dataCustomer: CustomerData) {
+    private fun displayCustomerData(dataCustomer: SambunganData) {
         // Mengisi tampilan dengan data pelanggan yang ditemukan dari Firebase
         binding.edtVerifikasiPemasangan.apply {
             setText(dataCustomer.jenisPekerjaan)
@@ -372,7 +448,7 @@ class PemasanganGPSActivity : AppCompatActivity() {
     }
 
     @SuppressLint("SetTextI18n")
-    private fun displayAnotherData(dataCustomer: CustomerData) {
+    private fun displayAnotherData(dataCustomer: SambunganData) {
         binding.edtNomorKl.apply {
             setText(dataCustomer.nomorKL)
             isEnabled = false
@@ -414,6 +490,14 @@ class PemasanganGPSActivity : AppCompatActivity() {
             }
         }
 
+        binding.imageView1.apply {
+            Glide.with(this@PemasanganGPSActivity)
+                .load(dataCustomer.dokumentasi3)
+                .placeholder(R.drawable.preview_upload_photo)
+                .sizeMultiplier(0.3f)
+                .into(this)
+        }
+
         binding.itemImage2.apply {
             text = parsingNameImage(dataCustomer.dokumentasi4)
             setOnClickListener {
@@ -424,6 +508,14 @@ class PemasanganGPSActivity : AppCompatActivity() {
             }
         }
 
+        binding.imageView2.apply {
+            Glide.with(this@PemasanganGPSActivity)
+                .load(dataCustomer.dokumentasi4)
+                .placeholder(R.drawable.preview_upload_photo)
+                .sizeMultiplier(0.3f)
+                .into(this)
+        }
+
         binding.itemImage3.apply {
             text = parsingNameImage(dataCustomer.dokumentasi5)
             setOnClickListener {
@@ -432,6 +524,14 @@ class PemasanganGPSActivity : AppCompatActivity() {
                     .addToBackStack(null)
                     .commit()
             }
+        }
+
+        binding.imageView3.apply {
+            Glide.with(this@PemasanganGPSActivity)
+                .load(dataCustomer.dokumentasi5)
+                .placeholder(R.drawable.preview_upload_photo)
+                .sizeMultiplier(0.3f)
+                .into(this)
         }
 
         // Mengganti teks tombol Simpan untuk melanjutkan ke halaman berikutnya

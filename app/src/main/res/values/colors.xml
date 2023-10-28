@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="mtrl_textinput_default_box_stroke_color">@color/funblue</color>
+
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="light_gray">#c4c4c4</color>
+    <color name="light_gray">#FFC4C4C4</color>
 
     <color name="cognac">#FF96391C</color>
     <color name="funblue">#FF1C6996</color>
-    <color name="palecerulean">#FF9CC5E2</color>
+    <color name="tropical_blue">#FFC4DCEA</color>
+    <color name="green_white">#FFDAEED8</color>
     <color name="palegold">#FFD8B980</color>
 </resources>

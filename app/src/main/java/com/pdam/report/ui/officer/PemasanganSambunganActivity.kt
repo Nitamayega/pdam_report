@@ -14,7 +14,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.pdam.report.MainActivity
 import com.pdam.report.R
-import com.pdam.report.data.CustomerData
+import com.pdam.report.data.SambunganData
 import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ActivityPemasanganSambunganBinding
 import com.pdam.report.utils.UserManager
@@ -58,6 +58,7 @@ class PemasanganSambunganActivity : AppCompatActivity() {
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setBackgroundDrawable(resources.getDrawable(R.color.tropical_blue))
 
         loadDataFromFirebase(firebaseKey.toString())
 
@@ -78,7 +79,7 @@ class PemasanganSambunganActivity : AppCompatActivity() {
     }
 
     private fun deleteData() {
-        val listCustomerRef = databaseReference.child("listCustomer")
+        val listCustomerRef = databaseReference.child("listPemasangan")
         val customerRef = firebaseKey?.let { listCustomerRef.child(it) }
 
         customerRef?.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -149,7 +150,7 @@ class PemasanganSambunganActivity : AppCompatActivity() {
     }
 
     private fun saveCustomerData(petugas: String, currentDate: Long, nomorKL: String, merk: String, diameter: String, stand: String, nomorMeter: String, nomorSegel: String, keterangan: String) {
-        val customerRef = databaseReference.child("listCustomer").child(firebaseKey.toString())
+        val customerRef = databaseReference.child("listPemasangan").child(firebaseKey.toString())
 
         val data = mapOf(
             "petugas" to petugas,
@@ -177,12 +178,12 @@ class PemasanganSambunganActivity : AppCompatActivity() {
     }
 
     private fun loadDataFromFirebase(firebaseKey: String) {
-        val customerRef = databaseReference.child("listCustomer").child(firebaseKey)
+        val customerRef = databaseReference.child("listPemasangan").child(firebaseKey)
 
         customerRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
-                    val dataCustomer = snapshot.getValue(CustomerData::class.java)
+                    val dataCustomer = snapshot.getValue(SambunganData::class.java)
                     if (dataCustomer != null) {
                         // Jika data pelanggan ditemukan, tampilkan datanya
                         displayCustomerData(dataCustomer)
@@ -209,7 +210,7 @@ class PemasanganSambunganActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    private fun displayCustomerData(dataCustomer: CustomerData) {
+    private fun displayCustomerData(dataCustomer: SambunganData) {
         // Mengisi tampilan dengan data pelanggan yang ditemukan dari Firebase
         binding.edtPemasanganSambungan.apply {
             setText(dataCustomer.jenisPekerjaan)
@@ -261,7 +262,7 @@ class PemasanganSambunganActivity : AppCompatActivity() {
     }
 
     @SuppressLint("SetTextI18n")
-    private fun displayAnotherData(dataCustomer: CustomerData) {
+    private fun displayAnotherData(dataCustomer: SambunganData) {
         binding.edtNomorKl.apply {
             setText(dataCustomer.nomorKL)
             isEnabled = false

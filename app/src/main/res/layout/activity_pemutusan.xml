@@ -52,7 +52,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ems="10"
-                    android:hint="@string/pemasangan_sambungan_baru"
+                    android:hint="@string/pemutusan_sementara"
                     android:inputType="textPersonName"
                     tools:ignore="SpeakableTextPresentCheck" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -309,7 +309,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
-            android:text="@string/dokumentasiDokumen"
+            android:text="@string/dokumentasi"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="@+id/ed_keterangan"
             app:layout_constraintTop_toBottomOf="@+id/ed_keterangan" />
@@ -343,7 +343,7 @@
             app:layout_constraintStart_toStartOf="@id/item_image_1" />
 
         <TextView
-            android:id="@+id/updatedby"
+            android:id="@+id/addedby"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -365,7 +365,7 @@
             app:backgroundTint="@color/cognac"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@+id/ed_keterangan"
-            app:layout_constraintTop_toBottomOf="@id/updatedby"
+            app:layout_constraintTop_toBottomOf="@id/addedby"
             app:layout_constraintVertical_bias="1.0" />
 
         <Button
@@ -378,7 +378,7 @@
             android:text="@string/simpan"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/ed_keterangan"
-            app:layout_constraintTop_toBottomOf="@+id/updatedby"
+            app:layout_constraintTop_toBottomOf="@+id/addedby"
             app:layout_constraintVertical_bias="1.0" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

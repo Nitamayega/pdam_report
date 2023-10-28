@@ -21,7 +21,7 @@ data class PresenceData(
     val photoUrl: String = "",
 ) : Parcelable
 
-data class CustomerData(
+data class SambunganData(
     val firebaseKey: String = "",
     val currentDate: Long = 0,
     val updateVerifDate: Long = 0,
@@ -54,4 +54,24 @@ data class CustomerData(
     val dokumentasi4: String = "",
     val dokumentasi5: String = "",
     val data: Int = 0,
+)
+
+data class PemutusanData(
+    val firebaseKey: String = "",
+    val currentDate: Long = 0,
+    val petugas: String = "",
+    val dailyTeam: Int = 0,
+    val jenisPekerjaan: String = "",
+    val pw: Int = 0,
+    val nomorRegistrasi: String = "",
+    val nomorKL: String = "",
+    val name: String = "",
+    val address: String = "",
+    val rt: String = "",
+    val rw: String = "",
+    val kelurahan: String = "",
+    val kecamatan: String = "",
+    val nomorMeter: String = "",
+    val keterangan: String = "",
+    val dokumentasi: String = "",
 )

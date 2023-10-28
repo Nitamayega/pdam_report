@@ -10,7 +10,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.pdam.report.MainAdapter
 import com.pdam.report.R
-import com.pdam.report.data.CustomerData
+import com.pdam.report.data.SambunganData
 import com.pdam.report.data.UserData
 import com.pdam.report.databinding.FragmentReportBinding
 import com.pdam.report.utils.setRecyclerViewVisibility
@@ -65,7 +65,7 @@ class ReportFragment : Fragment(R.layout.fragment_report) {
                     }
 
                     val customerList = snapshot.children.mapNotNull { customerSnapshot ->
-                        customerSnapshot.getValue(CustomerData::class.java)
+                        customerSnapshot.getValue(SambunganData::class.java)
                     }
 
                     // Check if user.dailyTeam is 0
@@ -101,7 +101,7 @@ class ReportFragment : Fragment(R.layout.fragment_report) {
 
     private fun setContentPemasangan(user: UserData) {
         showLoading(true, binding.progressBar)
-        val listPemasanganRef = FirebaseDatabase.getInstance().getReference("listCustomer")
+        val listPemasanganRef = FirebaseDatabase.getInstance().getReference("listPemasangan")
 
         listPemasanganRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -114,7 +114,7 @@ class ReportFragment : Fragment(R.layout.fragment_report) {
                     }
 
                     val customerList = snapshot.children.mapNotNull { customerSnapshot ->
-                        customerSnapshot.getValue(CustomerData::class.java)
+                        customerSnapshot.getValue(SambunganData::class.java)
                     }
 
                     // Check if user.dailyTeam is 0

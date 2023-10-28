@@ -138,6 +138,7 @@
 
     <string name="pemasangan_sambungan_baru">Pemasangan Sambungan Baru</string>
     <string name="verifikasi_pemasangan">Verifikasi Pemasangan</string>
+    <string name="pemutusan_sementara">Pemutusan Sementara</string>
 
     <string name="location_found">Lokasi ditemukan</string>
     <string name="initialize_location">Sedang Mencari Lokasi…</string>
