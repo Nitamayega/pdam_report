@@ -2,6 +2,7 @@ package com.pdam.report
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
@@ -26,16 +27,27 @@ import com.pdam.report.ui.common.LoginActivity
 import com.pdam.report.ui.officer.OfficerPresenceActivity
 import com.pdam.report.ui.officer.PemasanganKelayakanActivity
 import com.pdam.report.utils.PermissionHelper
+import com.pdam.report.utils.PermissionHelper.checkAndRequestPermissions
 import com.pdam.report.utils.UserManager
-import com.pdam.report.utils.getCurrentTimeStamp
 import com.pdam.report.utils.getInitialDate
+import com.pdam.report.utils.getNetworkTime
 import com.pdam.report.utils.milisToDate
 import com.pdam.report.utils.navigatePage
+import com.pdam.report.utils.showDialogDenied
 import com.pdam.report.utils.showToast
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
+import java.util.Calendar
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
     private lateinit var toggle: ActionBarDrawerToggle
@@ -51,16 +63,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        supportActionBar?.hide()
-
+//        supportActionBar?.setBackgroundDrawable(resources.getDrawable(R.color.tropical_blue))
         // Add the onPageChangeListener to the ViewPager
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
-                if (position == 0) {
-                    index.value = 0
-                } else {
-                    index.value = 1
-                }
+                index.value = if (position == 0) 0 else 1
             }
         })
 
@@ -80,6 +87,16 @@ class MainActivity : AppCompatActivity() {
 
         setupView()
         setupData()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        cancel()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        checkAndRequestPermissions(this)
     }
 
 
@@ -116,16 +133,47 @@ class MainActivity : AppCompatActivity() {
             setupDrawerLayout()
         }
 
-        checkAndRequestPermissions()
+        checkAndRequestPermissions(this)
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        Log.d("MainActivity", "onRequestPermissionsResult: $requestCode")
         PermissionHelper.handlePermissionResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            30 -> {
+                // Handle camera and location permission result
+                for (i in permissions.indices) {
+                    if (grantResults[i] == PackageManager.PERMISSION_DENIED) {
+                        // Izin kamera atau lokasi ditolak, mungkin ingin menampilkan penjelasan kepada pengguna
+                        showDialogDenied(this)
+                        return
+                    }
+                }
+                // Izin kamera dan lokasi diizinkan, lanjutkan dengan tindakan yang diinginkan
+            }
+            PermissionHelper.REQUEST_CAMERA_PERMISSION -> {
+                // Handle camera permission result
+                for (i in permissions.indices) {
+                    if (grantResults[i] == PackageManager.PERMISSION_DENIED) {
+                        // Izin kamera ditolak, mungkin ingin menampilkan penjelasan kepada pengguna
+                        showDialogDenied(this)
+                        return
+                    }
+                }
+                // Izin kamera diizinkan, lanjutkan dengan tindakan yang diinginkan
+            }
+            PermissionHelper.REQUEST_LOCATION_PERMISSION -> {
+                // Handle location permission result
+                for (i in permissions.indices) {
+                    if (grantResults[i] == PackageManager.PERMISSION_DENIED) {
+                        showDialogDenied(this)
+                        return
+                    }
+                }
+                // Izin lokasi diizinkan, lanjutkan dengan tindakan yang diinginkan
+            }
+        }
     }
 
     private fun setupDrawerLayout() {
@@ -135,6 +183,7 @@ class MainActivity : AppCompatActivity() {
         toggle.syncState()
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("SimpleDateFormat")
     private fun setupNavigationMenu() {
         binding.navView.setNavigationItemSelectedListener { menuItem ->
@@ -144,33 +193,46 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 R.id.nav_presence -> {
+                    GlobalScope.launch(Dispatchers.Default) {
+                        val initialDate = runBlocking { getInitialDate() }
+                        val currentDate = runBlocking { getNetworkTime() }
+                        val referenceDate = SimpleDateFormat("dd-MM-yyyy").parse(initialDate.toString())?.time
+                        var daysDifference = ((currentDate - referenceDate!!) / (1000L * 60 * 60 * 24) % 5).toInt()
+                        if (daysDifference == 0) { daysDifference = 5 }
 
-                    val initialDate = runBlocking { getInitialDate() }
-                    val currentDate = SimpleDateFormat("dd-MM-yyyy").parse(getCurrentTimeStamp())?.time
-                    val referenceDate = SimpleDateFormat("dd-MM-yyyy").parse(initialDate.toString())?.time
-                    var daysDifference = ((currentDate!! - referenceDate!!) / (1000L * 60 * 60 * 24) % 5).toInt()
-                    if (daysDifference == 0) { daysDifference = 5 }
+                        // convert current time to int with format 24 hours
+                        val calendar = Calendar.getInstance()
+                        calendar.timeInMillis = currentDate
+                        val currentTime = calendar.get(Calendar.HOUR_OF_DAY)
 
-//                    val currentTime = Calendar.getInstance().get(Calendar.HOUR_OF_DAY) && currentTime in 19..23
+                        Log.d("MainActivity", "setupNavigationMenu: $initialDate $currentDate $referenceDate $daysDifference $currentTime")
 
-                    if (user.lastPresence == milisToDate(currentDate)) {
-                        showToast(this, R.string.presence_already_done)
-                        return@setNavigationItemSelectedListener false
-                    }
+                        if (user.lastPresence == milisToDate(currentDate)) {
+                            withContext(Dispatchers.Main) {
+                                showToast(this@MainActivity, R.string.presence_already_done)
+                            }
+                            return@launch
+                        } else {
+                            val moveIntent = when {
+                                user.team == 0 -> Intent(this@MainActivity, AdminPresenceActivity::class.java)
+                                user.team == daysDifference && currentTime in 19..23 -> Intent(this@MainActivity, OfficerPresenceActivity::class.java)
+                                else -> {
+                                    withContext(Dispatchers.Main) {
+                                        showToast(this@MainActivity, R.string.presence_denied)
+                                    }
+                                    return@launch
+                                }
+                            }
 
-                    val moveIntent = when (user.team) {
-                        0 -> Intent(this@MainActivity, AdminPresenceActivity::class.java)
-                        daysDifference -> Intent(this@MainActivity, OfficerPresenceActivity::class.java)
-                        else -> {
-                            showToast(this@MainActivity, R.string.presence_denied)
-                            null
+                            withContext(Dispatchers.Main) {
+                                startActivity(moveIntent)
+                            }
                         }
                     }
-
-                    moveIntent?.let {
-                        startActivity(it)
-                    }
+                    return@setNavigationItemSelectedListener false
                 }
+
+
 
                 R.id.nav_logout -> {
                     showToast(applicationContext, R.string.logged_out)
@@ -207,14 +269,6 @@ class MainActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    private fun checkAndRequestPermissions() {
-        if (!PermissionHelper.hasCameraPermission(this)) {
-            PermissionHelper.requestCameraPermission(this)
-        }
-        if (!PermissionHelper.hasLocationPermission(this)) {
-            PermissionHelper.requestLocationPermission(this)
-        }
-    }
 
     companion object {
         private val TAB_TITLES = arrayOf(

@@ -2,7 +2,6 @@ package com.pdam.report.ui.admin
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
@@ -113,18 +112,10 @@ class DetailPresenceActivity : AppCompatActivity(), MapListener {
     }
 
     override fun onScroll(event: ScrollEvent?): Boolean {
-        // event?.source?.getMapCenter()
-        Log.e("TAG", "onCreate:la ${event?.source?.getMapCenter()?.latitude}")
-        Log.e("TAG", "onCreate:lo ${event?.source?.getMapCenter()?.longitude}")
-        //  Log.e("TAG", "onScroll   x: ${event?.x}  y: ${event?.y}", )
         return true
     }
 
     override fun onZoom(event: ZoomEvent?): Boolean {
-        //  event?.zoomLevel?.let { controller.setZoom(it) }
-
-
-        Log.e("TAG", "onZoom zoom level: ${event?.zoomLevel}   source:  ${event?.source}")
         return false
     }
 

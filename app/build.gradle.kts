@@ -84,4 +84,6 @@ dependencies {
 
     implementation ("com.github.chrisbanes:PhotoView:2.3.0")
     implementation ("org.osmdroid:osmdroid-android:6.1.17")
+    implementation ("commons-net:commons-net:3.6") // Dependensi untuk Java NTP Client
+
 }

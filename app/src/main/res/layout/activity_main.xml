@@ -37,6 +37,7 @@
             android:backgroundTint="@color/funblue"
             android:src="@drawable/button_add"
             android:tintMode="@color/white"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             tools:ignore="ContentDescription"/>

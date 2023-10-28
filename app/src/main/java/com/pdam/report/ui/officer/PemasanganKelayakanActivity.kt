@@ -76,6 +76,10 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
         Log.d("firebaseKeyOnAddFirst", firebaseKey.toString())
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        onBackPressedCallback.remove()
+    }
     private fun setUser() {
         userManager.fetchUserAndSetupData {
             user = userManager.getUser()
