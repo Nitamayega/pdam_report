@@ -11,13 +11,22 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.database.DatabaseReference
 import com.pdam.report.R
 
-fun showLoading(isLoading: Boolean, view: View, firstButton: Button? = null, secondButton: Button? = null) {
+fun showLoading(
+    isLoading: Boolean,
+    view: View,
+    firstButton: Button? = null,
+    secondButton: Button? = null,
+) {
     view.visibility = if (isLoading) View.VISIBLE else View.GONE
     firstButton?.isEnabled = !isLoading
     secondButton?.isEnabled = !isLoading
 }
 
-fun setRecyclerViewVisibility(emptyView: View, recyclerView: RecyclerView, emptyViewVisible: Boolean) {
+fun setRecyclerViewVisibility(
+    emptyView: View,
+    recyclerView: RecyclerView,
+    emptyViewVisible: Boolean,
+) {
     emptyView.visibility = if (emptyViewVisible) View.VISIBLE else View.GONE
     recyclerView.visibility = if (emptyViewVisible) View.GONE else View.VISIBLE
 }

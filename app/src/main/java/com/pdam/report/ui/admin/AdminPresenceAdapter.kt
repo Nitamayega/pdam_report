@@ -16,7 +16,10 @@ import com.pdam.report.utils.GeocoderHelper
 import com.pdam.report.utils.milisToDate
 import com.pdam.report.utils.milisToDateTime
 
-class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>, private val context: Context) :
+class AdminPresenceAdapter(
+    private val presenceList: ArrayList<PresenceData>,
+    private val context: Context,
+) :
     RecyclerView.Adapter<AdminPresenceAdapter.PresenceViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PresenceViewHolder {
@@ -52,7 +55,8 @@ class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>, pr
 
     override fun getItemCount(): Int = presenceList.size
 
-    inner class PresenceViewHolder(private var binding: PresenceItemRowBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class PresenceViewHolder(private var binding: PresenceItemRowBinding) :
+        RecyclerView.ViewHolder(binding.root) {
         fun bind(presence: PresenceData) {
             val date = milisToDate(presence.currentDate)
 
@@ -62,7 +66,8 @@ class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>, pr
                     .sizeMultiplier(0.5f)
                     .into(imgPhoto)
                 tvName.text = presence.username
-                tvLocation.text = GeocoderHelper(context).getAddressFromLatLng(LatLng(presence.lat, presence.lng))
+                tvLocation.text =
+                    GeocoderHelper(context).getAddressFromLatLng(LatLng(presence.lat, presence.lng))
                 tvTimestampe.text = milisToDateTime(presence.currentDate)
 
                 // Mengelola tampilan tanggal untuk menghindari duplikasi
@@ -79,7 +84,7 @@ class AdminPresenceAdapter(private val presenceList: ArrayList<PresenceData>, pr
     // Kelas yang digunakan oleh DiffUtil untuk menghitung perubahan data
     class PresenceDataDiffCallback(
         private val oldList: List<PresenceData>,
-        private val newList: List<PresenceData>
+        private val newList: List<PresenceData>,
     ) : DiffUtil.Callback() {
 
         override fun getOldListSize(): Int {

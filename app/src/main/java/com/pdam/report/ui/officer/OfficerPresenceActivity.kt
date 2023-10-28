@@ -245,7 +245,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
                                         // Menentukan referensi untuk penyimpanan gambar
                                         val photoRef =
                                             storageReference.child("images/presence/${System.currentTimeMillis()}.jpg")
-                                            // Mengunggah gambar ke Firebase Storage
+                                        // Mengunggah gambar ke Firebase Storage
                                         photoRef.putFile(Uri.fromFile(getFile))
                                             .addOnSuccessListener { uploadTask ->
                                                 uploadTask.storage.downloadUrl.addOnSuccessListener { downloadUri ->
@@ -270,7 +270,10 @@ class OfficerPresenceActivity : AppCompatActivity() {
                                                         .child(uid).push().setValue(data)
                                                         .addOnCompleteListener { task ->
                                                             if (task.isSuccessful) {
-                                                                databaseReference.child("users").child(uid).child("lastPresence").setValue(getCurrentTimeStamp())
+                                                                databaseReference.child("users")
+                                                                    .child(uid)
+                                                                    .child("lastPresence")
+                                                                    .setValue(getCurrentTimeStamp())
                                                                 showToast(
                                                                     this@OfficerPresenceActivity,
                                                                     R.string.upload_success
@@ -397,7 +400,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
-        grantResults: IntArray
+        grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {

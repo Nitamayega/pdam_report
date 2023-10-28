@@ -31,21 +31,24 @@ class LoginActivity : AppCompatActivity() {
             val uname = binding.edtUsername.text.toString()
             val password = binding.passwordEditText.text.toString()
 
-            binding.edtUsername.error = if (uname.isEmpty()) getString(R.string.empty_field) else null
-            binding.passwordEditText.error = if (password.isEmpty()) getString(R.string.empty_field) else null
+            binding.edtUsername.error =
+                if (uname.isEmpty()) getString(R.string.empty_field) else null
+            binding.passwordEditText.error =
+                if (password.isEmpty()) getString(R.string.empty_field) else null
 
             if (uname.isNotEmpty() && password.isNotEmpty()) {
                 showLoading(true, binding.progressBar, binding.buttonLogin)
                 val email = "$uname@pdam.com"
-                firebaseAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
-                    showLoading(false, binding.progressBar, binding.buttonLogin)
+                firebaseAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener { task ->
+                        showLoading(false, binding.progressBar, binding.buttonLogin)
 
-                    if (task.isSuccessful) {
-                        onLoginSuccess()
-                    } else {
-                        onLoginFailed()
+                        if (task.isSuccessful) {
+                            onLoginSuccess()
+                        } else {
+                            onLoginFailed()
+                        }
                     }
-                }
             }
         }
     }

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/swipe_refresh_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:layout_gravity="center"
-    android:id="@+id/swipe_refresh_layout"
+    android:orientation="vertical"
     android:paddingHorizontal="16dp"
     android:paddingTop="16dp"
     tools:context=".ui.admin.AdminPresenceActivity">
@@ -14,13 +14,13 @@
         android:id="@+id/rv_presence"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="16dp"
         android:layout_marginHorizontal="16dp"
-        tools:listitem="@layout/presence_item_row"/>
+        android:layout_marginTop="16dp"
+        tools:listitem="@layout/presence_item_row" />
 
     <TextView
         android:id="@+id/tv_empty_items"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/empty_list_presence"/>
+        android:text="@string/empty_list_presence" />
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

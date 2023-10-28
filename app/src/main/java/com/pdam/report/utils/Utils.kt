@@ -67,9 +67,13 @@ suspend fun File.reduceFileImageInBackground(): File = withContext(Dispatchers.D
 fun parsingNameImage(url: String): String {
     val startIndex = url.indexOf("%2F")
     if (startIndex != -1) { // Pastikan "%2F" ditemukan dalam URL
-        val endIndex = url.indexOf(".jpg") + 4 // Mencari posisi akhir ekstensi ".jpg" dan menambahkan 4 karakter untuk menyertakan ".jpg"
+        val endIndex =
+            url.indexOf(".jpg") + 4 // Mencari posisi akhir ekstensi ".jpg" dan menambahkan 4 karakter untuk menyertakan ".jpg"
         if (endIndex != -1) { // Pastikan ekstensi ".jpg" ditemukan dalam URL
-            return url.substring(startIndex + 3, endIndex) // Mengambil potongan string dari "%2F" hingga ekstensi ".jpg" (termasuk ".jpg")
+            return url.substring(
+                startIndex + 3,
+                endIndex
+            ) // Mengambil potongan string dari "%2F" hingga ekstensi ".jpg" (termasuk ".jpg")
         }
     }
     return ""

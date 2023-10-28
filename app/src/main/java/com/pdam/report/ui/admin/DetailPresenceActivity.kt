@@ -103,7 +103,6 @@ class DetailPresenceActivity : AppCompatActivity(), MapListener {
     }
 
 
-
     @Suppress("DEPRECATION")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {

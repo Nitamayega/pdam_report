@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
     android:background="@drawable/gradient_background"
+    android:padding="16dp"
     tools:context=".ui.common.LoginActivity">
 
     <ProgressBar
@@ -32,11 +32,11 @@
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/ed_username"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
         app:boxStrokeColor="@color/funblue"
         app:boxStrokeWidth="2dp"
-        android:layout_width="0dp"
-        android:layout_marginTop="24dp"
-        android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/logo1">
@@ -46,33 +46,33 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:inputType="text"
             android:hint="@string/uname"
+            android:inputType="text"
             tools:ignore="SpeakableTextPresentCheck" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/ed_login_password"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
         app:boxStrokeColor="@color/funblue"
         app:boxStrokeWidth="2dp"
-        android:layout_marginTop="12dp"
-        android:layout_width="0dp"
-        app:passwordToggleEnabled="true"
-        android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ed_username">
+        app:layout_constraintTop_toBottomOf="@+id/ed_username"
+        app:passwordToggleEnabled="true">
 
         <EditText
             android:id="@+id/passwordEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:paddingEnd="40dp"
-            android:inputType="textPassword"
-            app:passwordToggleEnabled="true"
             android:hint="@string/password"
+            android:inputType="textPassword"
+            android:paddingEnd="40dp"
+            app:passwordToggleEnabled="true"
             tools:ignore="SpeakableTextPresentCheck" />
     </com.google.android.material.textfield.TextInputLayout>
 

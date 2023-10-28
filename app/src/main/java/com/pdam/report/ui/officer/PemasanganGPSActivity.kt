@@ -1,7 +1,6 @@
 package com.pdam.report.ui.officer
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -44,7 +43,12 @@ class PemasanganGPSActivity : AppCompatActivity() {
     private val databaseReference = FirebaseDatabase.getInstance().reference
 
     private val firebaseKey by lazy { intent.getStringExtra(PemasanganKelayakanActivity.EXTRA_FIREBASE_KEY) }
-    private val customerData by lazy { intent.getIntExtra(PemasanganKelayakanActivity.EXTRA_CUSTOMER_DATA, 0) }
+    private val customerData by lazy {
+        intent.getIntExtra(
+            PemasanganKelayakanActivity.EXTRA_CUSTOMER_DATA,
+            0
+        )
+    }
 
     private val userManager by lazy { UserManager() }
     private lateinit var user: UserData
@@ -97,6 +101,7 @@ class PemasanganGPSActivity : AppCompatActivity() {
                         0 -> {
                             startTakePhoto()
                         }
+
                         1 -> {
                             startGallery()
                         }
@@ -131,7 +136,10 @@ class PemasanganGPSActivity : AppCompatActivity() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                showToast(this@PemasanganGPSActivity, "${R.string.failed_access_data}: ${error.message}".toInt())
+                showToast(
+                    this@PemasanganGPSActivity,
+                    "${R.string.failed_access_data}: ${error.message}".toInt()
+                )
             }
         })
     }
@@ -165,11 +173,20 @@ class PemasanganGPSActivity : AppCompatActivity() {
         return koorX.isNotEmpty() && koorY.isNotEmpty() && koorZ.isNotEmpty() && (firstImageFile != null) && (secondImageFile != null) && (thirdImageFile != null)
     }
 
-    private fun uploadImagesAndSaveData(petugas: String, currentDate: Long, koorX: String, koorY: String, koorZ: String) {
+    private fun uploadImagesAndSaveData(
+        petugas: String,
+        currentDate: Long,
+        koorX: String,
+        koorY: String,
+        koorZ: String,
+    ) {
         val storageReference = FirebaseStorage.getInstance().reference
-        val dokumentasi3Ref = storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi3_konstruksi.jpg")
-        val dokumentasi4Ref = storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi4_meter.jpg")
-        val dokumentasi5Ref = storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi5_perspektif.jpg")
+        val dokumentasi3Ref =
+            storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi3_konstruksi.jpg")
+        val dokumentasi4Ref =
+            storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi4_meter.jpg")
+        val dokumentasi5Ref =
+            storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi5_perspektif.jpg")
 
 
         lifecycleScope.launch {
@@ -190,7 +207,16 @@ class PemasanganGPSActivity : AppCompatActivity() {
                             dokumentasi5Ref.downloadUrl.addOnSuccessListener { uri3 ->
                                 val dokumentasi5 = uri3.toString()
 
-                                saveCustomerData(petugas, currentDate, koorX, koorY, koorZ, dokumentasi3, dokumentasi4, dokumentasi5)
+                                saveCustomerData(
+                                    petugas,
+                                    currentDate,
+                                    koorX,
+                                    koorY,
+                                    koorZ,
+                                    dokumentasi3,
+                                    dokumentasi4,
+                                    dokumentasi5
+                                )
                             }
                         }
                     }
@@ -199,7 +225,16 @@ class PemasanganGPSActivity : AppCompatActivity() {
         }
     }
 
-    private fun saveCustomerData(petugas: String, currentDate: Long, koorX: String, koorY: String, koorZ: String, dokumentasi3: String, dokumentasi4: String, dokumentasi5: String) {
+    private fun saveCustomerData(
+        petugas: String,
+        currentDate: Long,
+        koorX: String,
+        koorY: String,
+        koorZ: String,
+        dokumentasi3: String,
+        dokumentasi4: String,
+        dokumentasi5: String,
+    ) {
         val customerRef = databaseReference.child("listPemasangan").child(firebaseKey.toString())
 
         val data = mapOf(
@@ -245,7 +280,10 @@ class PemasanganGPSActivity : AppCompatActivity() {
 
             override fun onCancelled(error: DatabaseError) {
                 // Menampilkan pesan kesalahan jika mengakses data gagal
-                showToast(this@PemasanganGPSActivity, "${R.string.failed_access_data}: ${error.message}".toInt())
+                showToast(
+                    this@PemasanganGPSActivity,
+                    "${R.string.failed_access_data}: ${error.message}".toInt()
+                )
             }
         })
     }
@@ -292,7 +330,10 @@ class PemasanganGPSActivity : AppCompatActivity() {
 
                     binding.imageView1.setOnClickListener {
                         supportFragmentManager.beginTransaction()
-                            .add(FullScreenImageDialogFragment(firstImageFile.toString()), "FullScreenImageDialogFragment")
+                            .add(
+                                FullScreenImageDialogFragment(firstImageFile.toString()),
+                                "FullScreenImageDialogFragment"
+                            )
                             .addToBackStack(null)
                             .commit()
                     }
@@ -307,7 +348,10 @@ class PemasanganGPSActivity : AppCompatActivity() {
 
                     binding.imageView2.setOnClickListener {
                         supportFragmentManager.beginTransaction()
-                            .add(FullScreenImageDialogFragment(secondImageFile.toString()), "FullScreenImageDialogFragment")
+                            .add(
+                                FullScreenImageDialogFragment(secondImageFile.toString()),
+                                "FullScreenImageDialogFragment"
+                            )
                             .addToBackStack(null)
                             .commit()
                     }
@@ -322,7 +366,10 @@ class PemasanganGPSActivity : AppCompatActivity() {
 
                     binding.imageView3.setOnClickListener {
                         supportFragmentManager.beginTransaction()
-                            .add(FullScreenImageDialogFragment(thirdImageFile.toString()), "FullScreenImageDialogFragment")
+                            .add(
+                                FullScreenImageDialogFragment(thirdImageFile.toString()),
+                                "FullScreenImageDialogFragment"
+                            )
                             .addToBackStack(null)
                             .commit()
                     }
@@ -356,190 +403,198 @@ class PemasanganGPSActivity : AppCompatActivity() {
 
     private fun displayCustomerData(dataCustomer: SambunganData) {
         // Mengisi tampilan dengan data pelanggan yang ditemukan dari Firebase
-        binding.edtVerifikasiPemasangan.apply {
-            setText(dataCustomer.jenisPekerjaan)
-            isEnabled = false
-            isFocusable = false
-        }
+        binding.apply {
+            edtVerifikasiPemasangan.setText(dataCustomer.jenisPekerjaan).apply {
+                edVerifikasiPemasangan.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
+            }
 
-        binding.edtPw.apply {
-            setText(dataCustomer.pw.toString())
-            isEnabled = false
-            isFocusable = false
-        }
+            edtPw.setText(dataCustomer.pw.toString()).apply {
+                edPw.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
+            }
 
-        binding.edtNamaPelanggan.apply {
-            setText(dataCustomer.name)
-            isEnabled = false
-            isFocusable = false
-        }
+            edtNamaPelanggan.setText(dataCustomer.name).apply {
+                edNamaPelanggan.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
+            }
 
-        binding.edtAlamatPelanggan.apply {
-            setText(dataCustomer.address)
-            isEnabled = false
-            isFocusable = false
-        }
+            edtAlamatPelanggan.setText(dataCustomer.address).apply {
+                edAlamatPelanggan.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
+            }
 
-        binding.edtRt.apply {
-            setText(dataCustomer.rt)
-            isEnabled = false
-            isFocusable = false
-        }
+            edtRt.setText(dataCustomer.rt).apply {
+                edRt.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
+            }
 
-        binding.edtRw.apply {
-            setText(dataCustomer.rw)
-            isEnabled = false
-            isFocusable = false
-        }
+            edtRw.setText(dataCustomer.rw).apply {
+                edRw.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
+            }
 
-        binding.edtKelurahan.apply {
-            setText(dataCustomer.kelurahan)
-            isEnabled = false
-            isFocusable = false
-        }
+            edtKelurahan.setText(dataCustomer.kelurahan).apply {
+                edKelurahan.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
+            }
 
-        binding.edtKecamatan.apply {
-            setText(dataCustomer.kecamatan)
-            isEnabled = false
-            isFocusable = false
-        }
+            edtKecamatan.setText(dataCustomer.kecamatan).apply {
+                edKecamatan.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
+            }
 
-        binding.edtRt.apply {
-            setText(dataCustomer.rt)
-            isEnabled = false
-            isFocusable = false
-        }
+            edtNomorKl.setText(dataCustomer.nomorKL).apply {
+                edNomorKl.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
+            }
 
-        binding.edtRw.apply {
-            setText(dataCustomer.rw)
-            isEnabled = false
-            isFocusable = false
-        }
+            edtNomorMeter.setText(dataCustomer.nomorMeter).apply {
+                edNomorMeter.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
+            }
 
-        binding.edtKelurahan.apply {
-            setText(dataCustomer.kelurahan)
-            isEnabled = false
-            isFocusable = false
-        }
-
-        binding.edtKecamatan.apply {
-            setText(dataCustomer.kecamatan)
-            isEnabled = false
-            isFocusable = false
-        }
-
-        binding.edtNomorKl.apply {
-            setText(dataCustomer.nomorKL)
-            isEnabled = false
-            isFocusable = false
-        }
-
-        binding.edtNomorMeter.apply {
-            setText(dataCustomer.nomorMeter)
-            isEnabled = false
-            isFocusable = false
-        }
-
-        binding.edtNomorSegel.apply {
-            setText(dataCustomer.nomorSegel)
-            isEnabled = false
-            isFocusable = false
+            edtNomorSegel.setText(dataCustomer.nomorSegel).apply {
+                edNomorSegel.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
+            }
         }
     }
 
     @SuppressLint("SetTextI18n")
     private fun displayAnotherData(dataCustomer: SambunganData) {
-        binding.edtNomorKl.apply {
-            setText(dataCustomer.nomorKL)
-            isEnabled = false
-            isFocusable = false
-        }
-
-        binding.updatedby.apply {
-            text = "Update by " + dataCustomer.petugas + " at " + dataCustomer.updateVerifDate.toString()
-            isEnabled = false
-            isFocusable = false
-            visibility = android.view.View.VISIBLE
-        }
-
-        binding.edtX.apply {
-            setText(dataCustomer.xkoordinat)
-            isEnabled = false
-            isFocusable = false
-        }
-
-        binding.edtY.apply {
-            setText(dataCustomer.ykoordinat)
-            isEnabled = false
-            isFocusable = false
-        }
-
-        binding.edtZ.apply {
-            setText(dataCustomer.zkoordinat)
-            isEnabled = false
-            isFocusable = false
-        }
-
-        binding.itemImage1.apply {
-            text = parsingNameImage(dataCustomer.dokumentasi3)
-            setOnClickListener {
-                supportFragmentManager.beginTransaction()
-                    .add(FullScreenImageDialogFragment(dataCustomer.dokumentasi1), "FullScreenImageDialogFragment")
-                    .addToBackStack(null)
-                    .commit()
+        binding.apply {
+            edtNomorKl.setText(dataCustomer.nomorKL).apply {
+                edNomorKl.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
             }
-        }
 
-        binding.imageView1.apply {
-            Glide.with(this@PemasanganGPSActivity)
-                .load(dataCustomer.dokumentasi3)
-                .placeholder(R.drawable.preview_upload_photo)
-                .sizeMultiplier(0.3f)
-                .into(this)
-        }
-
-        binding.itemImage2.apply {
-            text = parsingNameImage(dataCustomer.dokumentasi4)
-            setOnClickListener {
-                supportFragmentManager.beginTransaction()
-                    .add(FullScreenImageDialogFragment(dataCustomer.dokumentasi2), "FullScreenImageDialogFragment")
-                    .addToBackStack(null)
-                    .commit()
+            updatedby.apply {
+                text =
+                    "Update by " + dataCustomer.petugas + " at " + dataCustomer.updateVerifDate.toString()
+                isEnabled = false
+                isFocusable = false
+                visibility = android.view.View.VISIBLE
             }
-        }
 
-        binding.imageView2.apply {
-            Glide.with(this@PemasanganGPSActivity)
-                .load(dataCustomer.dokumentasi4)
-                .placeholder(R.drawable.preview_upload_photo)
-                .sizeMultiplier(0.3f)
-                .into(this)
-        }
-
-        binding.itemImage3.apply {
-            text = parsingNameImage(dataCustomer.dokumentasi5)
-            setOnClickListener {
-                supportFragmentManager.beginTransaction()
-                    .add(FullScreenImageDialogFragment(dataCustomer.dokumentasi3), "FullScreenImageDialogFragment")
-                    .addToBackStack(null)
-                    .commit()
+            edtX.setText(dataCustomer.xkoordinat).apply {
+                edX.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
             }
-        }
 
-        binding.imageView3.apply {
-            Glide.with(this@PemasanganGPSActivity)
-                .load(dataCustomer.dokumentasi5)
-                .placeholder(R.drawable.preview_upload_photo)
-                .sizeMultiplier(0.3f)
-                .into(this)
-        }
+            edtY.setText(dataCustomer.ykoordinat).apply {
+                edY.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
+            }
 
-        // Mengganti teks tombol Simpan untuk melanjutkan ke halaman berikutnya
-        binding.btnSimpan.apply {
-            binding.btnSimpan.text = getString(R.string.finish)
-            binding.btnSimpan.setOnClickListener {
-                navigatePage(this@PemasanganGPSActivity, MainActivity::class.java, true)
-                finish()
+            edtZ.setText(dataCustomer.zkoordinat).apply {
+                edZ.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
+            }
+
+            itemImage1.apply {
+                text = parsingNameImage(dataCustomer.dokumentasi3)
+                background = resources.getDrawable(R.drawable.field_disable)
+                setOnClickListener {
+                    supportFragmentManager.beginTransaction()
+                        .add(
+                            FullScreenImageDialogFragment(dataCustomer.dokumentasi1),
+                            "FullScreenImageDialogFragment"
+                        )
+                        .addToBackStack(null)
+                        .commit()
+                }
+            }
+
+            imageView1.apply {
+                Glide.with(this@PemasanganGPSActivity)
+                    .load(dataCustomer.dokumentasi3)
+                    .placeholder(R.drawable.preview_upload_photo)
+                    .sizeMultiplier(0.3f)
+                    .into(this)
+            }
+
+            itemImage2.apply {
+                text = parsingNameImage(dataCustomer.dokumentasi4)
+                background = resources.getDrawable(R.drawable.field_disable)
+                setOnClickListener {
+                    supportFragmentManager.beginTransaction()
+                        .add(
+                            FullScreenImageDialogFragment(dataCustomer.dokumentasi2),
+                            "FullScreenImageDialogFragment"
+                        )
+                        .addToBackStack(null)
+                        .commit()
+                }
+            }
+
+            imageView2.apply {
+                Glide.with(this@PemasanganGPSActivity)
+                    .load(dataCustomer.dokumentasi4)
+                    .placeholder(R.drawable.preview_upload_photo)
+                    .sizeMultiplier(0.3f)
+                    .into(this)
+            }
+
+            itemImage3.apply {
+                text = parsingNameImage(dataCustomer.dokumentasi5)
+                background = resources.getDrawable(R.drawable.field_disable)
+                setOnClickListener {
+                    supportFragmentManager.beginTransaction()
+                        .add(
+                            FullScreenImageDialogFragment(dataCustomer.dokumentasi3),
+                            "FullScreenImageDialogFragment"
+                        )
+                        .addToBackStack(null)
+                        .commit()
+                }
+            }
+
+            imageView3.apply {
+                Glide.with(this@PemasanganGPSActivity)
+                    .load(dataCustomer.dokumentasi5)
+                    .placeholder(R.drawable.preview_upload_photo)
+                    .sizeMultiplier(0.3f)
+                    .into(this)
+            }
+
+            // Mengganti teks tombol Simpan untuk melanjutkan ke halaman berikutnya
+            btnSimpan.apply {
+                text = getString(R.string.finish)
+                setOnClickListener {
+                    navigatePage(this@PemasanganGPSActivity, MainActivity::class.java, true)
+                    finish()
+                }
             }
         }
     }

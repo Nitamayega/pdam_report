@@ -52,7 +52,7 @@ object PermissionHelper {
     fun handlePermissionResult(
         requestCode: Int,
         permissions: Array<out String>,
-        grantResults: IntArray
+        grantResults: IntArray,
     ) {
         if (requestCode == REQUEST_CODE_PERMISSION) {
             // Handle camera permission result

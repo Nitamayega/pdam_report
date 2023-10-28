@@ -8,9 +8,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.pdam.report.data.SambunganData
 import com.pdam.report.databinding.ReportItemRowBinding
 import com.pdam.report.ui.officer.PemasanganKelayakanActivity
+import com.pdam.report.ui.officer.PemutusanActivity
 
 class MainAdapter(
-    private val customerList: ArrayList<SambunganData>
+    private val customerList: ArrayList<SambunganData>,
+    private val fragmentType: Int,
 ) :
     RecyclerView.Adapter<MainAdapter.CustomerViewHolder>() {
 
@@ -23,17 +25,20 @@ class MainAdapter(
     override fun onBindViewHolder(holder: CustomerViewHolder, position: Int) {
         val customer = customerList[position]
         holder.bind(customer)
-            holder.itemView.setOnClickListener {
-                val intent =
-                    Intent(holder.itemView.context, PemasanganKelayakanActivity::class.java)
-                // Mengirim kunci Firebase ke AddFirstDataActivity
-                intent.putExtra(
-                    PemasanganKelayakanActivity.EXTRA_FIREBASE_KEY,
-                    customer.firebaseKey
-                )
-                holder.itemView.context.startActivity(intent)
-            }
+        holder.itemView.setOnClickListener {
+            val intent = Intent(
+                holder.itemView.context,
+                if (fragmentType == 0) {
+                    PemasanganKelayakanActivity::class.java
+                } else {
+                    PemutusanActivity::class.java
+                }
+            )
+
+            intent.putExtra(PemasanganKelayakanActivity.EXTRA_FIREBASE_KEY, customer.firebaseKey)
+            holder.itemView.context.startActivity(intent)
         }
+    }
 
     fun updateData(newData: List<SambunganData>) {
         val diffResult = DiffUtil.calculateDiff(
@@ -47,7 +52,8 @@ class MainAdapter(
 
     override fun getItemCount(): Int = customerList.size
 
-    inner class CustomerViewHolder(private var binding: ReportItemRowBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class CustomerViewHolder(private var binding: ReportItemRowBinding) :
+        RecyclerView.ViewHolder(binding.root) {
         fun bind(customer: SambunganData) {
             binding.apply {
                 tvName.text = customer.name
@@ -59,7 +65,7 @@ class MainAdapter(
 
     class CustomerDataDiffCallback(
         private val oldList: List<SambunganData>,
-        private val newList: List<SambunganData>
+        private val newList: List<SambunganData>,
     ) : DiffUtil.Callback() {
 
         override fun getOldListSize(): Int {
@@ -79,5 +85,8 @@ class MainAdapter(
         }
     }
 
-
+    enum class FragmentType {
+        FRAGMENT_A,
+        FRAGMENT_B
+    }
 }

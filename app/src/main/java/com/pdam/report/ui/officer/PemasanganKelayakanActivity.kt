@@ -11,12 +11,14 @@ import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
@@ -114,7 +116,10 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                showToast(this@PemasanganKelayakanActivity, "${R.string.failed_access_data}: ${error.message}".toInt())
+                showToast(
+                    this@PemasanganKelayakanActivity,
+                    "${R.string.failed_access_data}: ${error.message}".toInt()
+                )
             }
         })
     }
@@ -150,77 +155,203 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
         val keterangan = binding.dropdownKeterangan.text.toString()
 
         // Validate input
-        if (isInputValid(jenisPekerjaan, pw, nomorRegistrasi, name, address, rt, rw, kelurahan, kecamatan, keterangan)) {
+        if (isInputValid(
+                jenisPekerjaan,
+                pw,
+                nomorRegistrasi,
+                name,
+                address,
+                rt,
+                rw,
+                kelurahan,
+                kecamatan,
+                keterangan
+            )
+        ) {
             showLoading(true, binding.progressBar, binding.btnSimpan, binding.btnHapus)
-            uploadImagesAndSaveData(currentDate, jenisPekerjaan, pw, nomorRegistrasi, name, address, rt, rw, kelurahan, kecamatan, keterangan)
+            uploadImagesAndSaveData(
+                currentDate,
+                jenisPekerjaan,
+                pw,
+                nomorRegistrasi,
+                name,
+                address,
+                rt,
+                rw,
+                kelurahan,
+                kecamatan,
+                keterangan
+            )
         } else {
             showLoading(false, binding.progressBar, binding.btnSimpan, binding.btnHapus)
+            Log.d("AYAPI", "$currentDate $jenisPekerjaan $pw $nomorRegistrasi $name $address $rt $rw $kelurahan $kecamatan $keterangan")
             showToast(this, R.string.fill_all_dataImage)
         }
     }
 
-    private fun isInputValid(jenisPekerjaan: String, pw: String, nomorRegistrasi: String, name: String, address: String, rt: String, rw: String, kelurahan: String, kecamatan: String, keterangan: String): Boolean {
+    private fun isInputValid(
+        jenisPekerjaan: String,
+        pw: String,
+        nomorRegistrasi: String,
+        name: String,
+        address: String,
+        rt: String,
+        rw: String,
+        kelurahan: String,
+        kecamatan: String,
+        keterangan: String,
+    ): Boolean {
         // Check if all required input is valid
-        return jenisPekerjaan.isNotEmpty() && pw.isNotEmpty() && nomorRegistrasi.isNotEmpty() && name.isNotEmpty() && address.isNotEmpty() && rt.isNotEmpty() && rw.isNotEmpty() && kelurahan.isNotEmpty() && kecamatan.isNotEmpty() && keterangan.isNotEmpty() && (firstImageFile != null) && (secondImageFile != null)
+        val valid = jenisPekerjaan.isNotEmpty() && pw.isNotEmpty() && nomorRegistrasi.isNotEmpty() && name.isNotEmpty() && address.isNotEmpty() && rt.isNotEmpty() && rw.isNotEmpty() && kelurahan.isNotEmpty() && kecamatan.isNotEmpty() && keterangan.isNotEmpty()
+        Log.d("AYAPI LAGI", "${jenisPekerjaan.isNotEmpty()} && ${pw.isNotEmpty()} && ${nomorRegistrasi.isNotEmpty()} && ${name.isNotEmpty()} && ${address.isNotEmpty()} && ${rt.isNotEmpty()} && ${rw.isNotEmpty()} && ${kelurahan.isNotEmpty()} && ${kecamatan.isNotEmpty()} && ${keterangan.isNotEmpty()}")
+        return if (user.team == 0) {
+            valid
+        } else {
+            valid && (firstImageFile != null) && (secondImageFile != null)
+        }
     }
 
-    private fun uploadImagesAndSaveData(currentDate: Long, jenisPekerjaan: String, pw: String, nomorRegistrasi: String, name: String, address: String, rt: String, rw: String, kelurahan: String, kecamatan: String, keterangan: String) {
-        val storageReference = FirebaseStorage.getInstance().reference
-        val dokumentasi1Ref = storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi1_dokumen.jpg")
-        val dokumentasi2Ref = storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi2_kondisi.jpg")
+    private fun uploadImagesAndSaveData(
+        currentDate: Long,
+        jenisPekerjaan: String,
+        pw: String,
+        nomorRegistrasi: String,
+        name: String,
+        address: String,
+        rt: String,
+        rw: String,
+        kelurahan: String,
+        kecamatan: String,
+        keterangan: String,
+    ) {
+        var dokumentasi1 = ""
+        var dokumentasi2 = ""
 
-        lifecycleScope.launch {
-            showToast(this@PemasanganKelayakanActivity, R.string.compressing_image)
-            val firstImageFile = firstImageFile?.reduceFileImageInBackground()
-            val secondImageFile = secondImageFile?.reduceFileImageInBackground()
-            showToast(this@PemasanganKelayakanActivity, R.string.compressing_image_success)
+        if (user.team != 0) {
 
-            // Upload image 1
-            dokumentasi1Ref.putFile(Uri.fromFile(firstImageFile)).addOnSuccessListener {
-                dokumentasi1Ref.downloadUrl.addOnSuccessListener { uri1 ->
-                    val dokumentasi1 = uri1.toString()
+            val storageReference = FirebaseStorage.getInstance().reference
+            val dokumentasi1Ref =
+                storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi1_dokumen.jpg")
+            val dokumentasi2Ref =
+                storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi2_kondisi.jpg")
 
-                    // Upload image 2
-                    dokumentasi2Ref.putFile(Uri.fromFile(secondImageFile)).addOnSuccessListener {
-                        dokumentasi2Ref.downloadUrl.addOnSuccessListener { uri2 ->
-                            val dokumentasi2 = uri2.toString()
+            lifecycleScope.launch {
+                showToast(this@PemasanganKelayakanActivity, R.string.compressing_image)
+                val firstImageFile = firstImageFile?.reduceFileImageInBackground()
+                val secondImageFile = secondImageFile?.reduceFileImageInBackground()
 
-                            // After successfully obtaining image URLs, save the data to Firebase
-                            saveCustomerData(currentDate, jenisPekerjaan, pw, nomorRegistrasi, name, address, rt, rw, kelurahan, kecamatan, keterangan, dokumentasi1, dokumentasi2)
-                        }
+                // Upload image 1
+                dokumentasi1Ref.putFile(Uri.fromFile(firstImageFile)).addOnSuccessListener {
+                    dokumentasi1Ref.downloadUrl.addOnSuccessListener { uri1 ->
+                        dokumentasi1 = uri1.toString()
+
+                        // Upload image 2
+                        dokumentasi2Ref.putFile(Uri.fromFile(secondImageFile))
+                            .addOnSuccessListener {
+                                dokumentasi2Ref.downloadUrl.addOnSuccessListener { uri2 ->
+                                    dokumentasi2 = uri2.toString()
+                                }
+                            }
                     }
                 }
             }
         }
-    }
 
-    private fun saveCustomerData(currentDate: Long, jenisPekerjaan: String, pw: String, nomorRegistrasi: String, name: String, address: String, rt: String, rw: String, kelurahan: String, kecamatan: String, keterangan: String, dokumentasi1: String, dokumentasi2: String) {
-        val newCustomerRef = databaseReference.child("listPemasangan").push()
-        val newCustomerId = newCustomerRef.key
+                            // After successfully obtaining image URLs, save the data to Firebase
+                            saveCustomerData(
+                                currentDate,
+                                jenisPekerjaan,
+                                pw,
+                                nomorRegistrasi,
+                                name,
+                                address,
+                                rt,
+                                rw,
+                                kelurahan,
+                                kecamatan,
+                                keterangan,
+                                dokumentasi1,
+                                dokumentasi2
+                            )
+                        }
+
+    private fun saveCustomerData(
+        currentDate: Long,
+        jenisPekerjaan: String,
+        pw: String,
+        nomorRegistrasi: String,
+        name: String,
+        address: String,
+        rt: String,
+        rw: String,
+        kelurahan: String,
+        kecamatan: String,
+        keterangan: String,
+        dokumentasi1: String,
+        dokumentasi2: String,
+    ) {
+        var newCustomerRef: DatabaseReference
+
+        if (user.team != 0) {
+
+            newCustomerRef = databaseReference.child("listPemasangan").push()
+            val newCustomerId = newCustomerRef.key
 
 
-        if (newCustomerId != null) {
-            val data = SambunganData(
-                firebaseKey = newCustomerId,
-                currentDate = currentDate,
-                petugas =  user.username,
-                jenisPekerjaan = jenisPekerjaan,
-                pw = pw.toInt(),
-                nomorRegistrasi = nomorRegistrasi,
-                name = name,
-                address = address,
-                rt = rt,
-                rw = rw,
-                kelurahan = kelurahan,
-                kecamatan = kecamatan,
-                keterangan1 = keterangan,
-                dokumentasi1 = dokumentasi1,
-                dokumentasi2 = dokumentasi2,
-                data = 1,
-                dailyTeam = user.dailyTeam
+            if (newCustomerId != null) {
+                val data = SambunganData(
+                    firebaseKey = newCustomerId,
+                    currentDate = currentDate,
+                    petugas = user.username,
+                    jenisPekerjaan = jenisPekerjaan,
+                    pw = pw.toInt(),
+                    nomorRegistrasi = nomorRegistrasi,
+                    name = name,
+                    address = address,
+                    rt = rt,
+                    rw = rw,
+                    kelurahan = kelurahan,
+                    kecamatan = kecamatan,
+                    keterangan1 = keterangan,
+                    dokumentasi1 = dokumentasi1,
+                    dokumentasi2 = dokumentasi2,
+                    data = 1,
+                    dailyTeam = user.dailyTeam
+                )
+
+                newCustomerRef.setValue(data).addOnCompleteListener { task ->
+                    showLoading(true, binding.progressBar, binding.btnSimpan, binding.btnHapus)
+                    if (task.isSuccessful) {
+                        showToast(this, R.string.save_success)
+                    } else {
+                        showToast(this, R.string.save_failed)
+                    }
+                    showLoading(false, binding.progressBar, binding.btnSimpan, binding.btnHapus)
+                    finish()
+                }
+            } else {
+                // Handle if images are not taken or data is incomplete
+                showLoading(false, binding.progressBar, binding.btnSimpan, binding.btnHapus)
+                showToast(this, R.string.fill_all_dataImage)
+            }
+        } else {
+            newCustomerRef =
+                databaseReference.child("listPemasangan").child(firebaseKey!!)
+
+            val updatedValues: Map<String, Any> = mapOf(
+                "jenisPekerjaan" to jenisPekerjaan,
+                "pw" to pw.toInt(),
+                "nomorRegistrasi" to nomorRegistrasi,
+                "name" to name,
+                "address" to address,
+                "rt" to rt,
+                "rw" to rw,
+                "kelurahan" to kelurahan,
+                "kecamatan" to kecamatan,
+                "keterangan1" to keterangan,
             )
 
-            newCustomerRef.setValue(data).addOnCompleteListener { task ->
+            newCustomerRef.updateChildren(updatedValues).addOnCompleteListener { task ->
                 showLoading(true, binding.progressBar, binding.btnSimpan, binding.btnHapus)
                 if (task.isSuccessful) {
                     showToast(this, R.string.save_success)
@@ -230,10 +361,6 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
                 showLoading(false, binding.progressBar, binding.btnSimpan, binding.btnHapus)
                 finish()
             }
-        } else {
-            // Handle if images are not taken or data is incomplete
-            showLoading(false, binding.progressBar, binding.btnSimpan, binding.btnHapus)
-            showToast(this, R.string.fill_all_dataImage)
         }
     }
 
@@ -246,163 +373,256 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
                     val dataCustomer = snapshot.getValue(SambunganData::class.java)
                     if (dataCustomer != null) {
                         // Jika data pelanggan ditemukan, tampilkan datanya
-                        displayCustomerData(dataCustomer)
+                        if (user.team == 0) {
+                            displayCustomerData(dataCustomer, true)
+                        } else {
+                            displayCustomerData(dataCustomer, false)
+                        }
                     }
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
                 // Menampilkan pesan kesalahan jika mengakses data gagal
-                showToast(this@PemasanganKelayakanActivity, "${R.string.failed_access_data}: ${error.message}".toInt())
+                showToast(
+                    this@PemasanganKelayakanActivity,
+                    "${R.string.failed_access_data}: ${error.message}".toInt()
+                )
             }
         })
     }
 
     @SuppressLint("SetTextI18n")
-    private fun displayCustomerData(dataCustomer: SambunganData) {
+    private fun displayCustomerData(dataCustomer: SambunganData, status: Boolean) {
         // Mengisi tampilan dengan data pelanggan yang ditemukan dari Firebase
-        binding.dropdownJenisPekerjaan.apply {
-            setText(dataCustomer.jenisPekerjaan)
-            isEnabled = false
-            isFocusable = false
-            setAdapter(null)
-        }
-
-        binding.addedby.apply {
-            text = "Added by " + dataCustomer.petugas + " at " + milisToDateTime(dataCustomer.currentDate)
-            isEnabled = false
-            isFocusable = false
-            visibility = android.view.View.VISIBLE
-        }
-
-        binding.dropdownPw.apply {
-            setText(dataCustomer.pw.toString())
-            isEnabled = false
-            isFocusable = false
-            setAdapter(null)
-        }
-
-
-        binding.edtNomorRegistrasi.apply {
-            setText(dataCustomer.nomorRegistrasi)
-            isEnabled = false
-            isFocusable = false
-        }
-
-        binding.edtNamaPelanggan.apply {
-            setText(dataCustomer.name)
-            isEnabled = false
-            isFocusable = false
-        }
-
-        binding.edtAlamatPelanggan.apply {
-            setText(dataCustomer.address)
-            isEnabled = false
-            isFocusable = false
-        }
-
-        binding.edtRt.apply {
-            setText(dataCustomer.rt)
-            isEnabled = false
-            isFocusable = false
-        }
-
-        binding.edtRw.apply {
-            setText(dataCustomer.rw)
-            isEnabled = false
-            isFocusable = false
-        }
-
-        binding.edtKelurahan.apply {
-            setText(dataCustomer.kelurahan)
-            isEnabled = false
-            isFocusable = false
-        }
-
-        binding.edtKecamatan.apply {
-            setText(dataCustomer.kecamatan)
-            isEnabled = false
-            isFocusable = false
-        }
-
-        binding.dropdownKeterangan.apply {
-            setText(dataCustomer.keterangan1)
-            isEnabled = false
-            isFocusable = false
-            isClickable = false
-            setAdapter(null)
-        }
-
-        binding.itemImage1.apply {
-            text = parsingNameImage(dataCustomer.dokumentasi1)
-            setOnClickListener {
-                supportFragmentManager.beginTransaction()
-                    .add(FullScreenImageDialogFragment(dataCustomer.dokumentasi1), "FullScreenImageDialogFragment")
-                    .addToBackStack(null)
-                    .commit()
+        binding.apply {
+            dropdownJenisPekerjaan.apply {
+                setText(dataCustomer.jenisPekerjaan)
+                if (!status) setAdapter(null)
+            }.apply {
+                edJenisPekerjaan.apply {
+                    isEnabled = status
+                    isFocusable = status
+                }
             }
-        }
 
-        binding.imageView1.apply {
-            Glide.with(this@PemasanganKelayakanActivity)
-                .load(dataCustomer.dokumentasi1)
-                .placeholder(R.drawable.preview_upload_photo)
-                .sizeMultiplier(0.3f)
-                .into(this)
-        }
-
-        binding.imageView2.apply {
-            Glide.with(this@PemasanganKelayakanActivity)
-                .load(dataCustomer.dokumentasi2)
-                .placeholder(R.drawable.preview_upload_photo)
-                .sizeMultiplier(0.3f)
-                .into(this)
-        }
-
-        binding.itemImage2.apply {
-            text = parsingNameImage(dataCustomer.dokumentasi2)
-            setOnClickListener {
-                supportFragmentManager.beginTransaction()
-                    .add(FullScreenImageDialogFragment(dataCustomer.dokumentasi2), "FullScreenImageDialogFragment")
-                    .addToBackStack(null)
-                    .commit()
+            addedby.apply {
+                text =
+                    "Added by " + dataCustomer.petugas + " at " + milisToDateTime(dataCustomer.currentDate)
+                visibility = android.view.View.VISIBLE
             }
-        }
+
+            dropdownPw.apply {
+                setText(dataCustomer.pw.toString())
+                setAdapter(null)
+            }.apply {
+                edPw.apply {
+                    isEnabled = status
+                    isFocusable = status
+                }
 
 
-        if (dataCustomer.keterangan1 == "Tidak layak") {
-            binding.btnSimpan.text = getString(R.string.finish)
-            binding.btnSimpan.setOnClickListener {
-                navigatePage(this@PemasanganKelayakanActivity, MainActivity::class.java)
-                finish()
+                edtNomorRegistrasi.setText(dataCustomer.nomorRegistrasi).apply {
+                    edNomorRegistrasi.apply {
+                        isEnabled = status
+                        isFocusable = status
+                    }
+                }
+
+                edtNamaPelanggan.setText(dataCustomer.name).apply {
+                    edNamaPelanggan.apply {
+                        isEnabled = status
+                        isFocusable = status
+                    }
+                }
+
+                edtAlamatPelanggan.setText(dataCustomer.address).apply {
+                    edAlamatPelanggan.apply {
+                        isEnabled = status
+                        isFocusable = status
+                    }
+                }
+
+                edtRt.setText(dataCustomer.rt).apply {
+                    edRt.apply {
+                        isEnabled = status
+                        isFocusable = status
+                    }
+                }
+
+                edtRw.setText(dataCustomer.rw).apply {
+                    edRw.apply {
+                        isEnabled = status
+                        isFocusable = status
+                    }
+                }
+
+                edtKelurahan.setText(dataCustomer.kelurahan).apply {
+                    edKelurahan.apply {
+                        isEnabled = status
+                        isFocusable = status
+                    }
+                }
+
+                edtKecamatan.setText(dataCustomer.kecamatan).apply {
+                    edKecamatan.apply {
+                        isEnabled = status
+                        isFocusable = status
+                    }
+                }
+
+                dropdownKeterangan.apply {
+                    setText(dataCustomer.keterangan1)
+                    setAdapter(null)
+                }.apply {
+                    edKeterangan.apply {
+                        isEnabled = status
+                        isFocusable = status
+                    }
+                }
+
+                itemImage1.apply {
+                    text = parsingNameImage(dataCustomer.dokumentasi1)
+                    background = resources.getDrawable(R.drawable.field_disable)
+                    setOnClickListener {
+                        supportFragmentManager.beginTransaction()
+                            .add(
+                                FullScreenImageDialogFragment(dataCustomer.dokumentasi1),
+                                "FullScreenImageDialogFragment"
+                            )
+                            .addToBackStack(null)
+                            .commit()
+                    }
+                }
+
+                imageView1.apply {
+                    Glide.with(this@PemasanganKelayakanActivity)
+                        .load(dataCustomer.dokumentasi1)
+                        .placeholder(R.drawable.preview_upload_photo)
+                        .sizeMultiplier(0.3f)
+                        .into(this)
+                }
+
+                imageView2.apply {
+                    Glide.with(this@PemasanganKelayakanActivity)
+                        .load(dataCustomer.dokumentasi2)
+                        .placeholder(R.drawable.preview_upload_photo)
+                        .sizeMultiplier(0.3f)
+                        .into(this)
+                }
+
+                itemImage2.apply {
+                    text = parsingNameImage(dataCustomer.dokumentasi2)
+                    background = resources.getDrawable(R.drawable.field_disable)
+                    setOnClickListener {
+                        supportFragmentManager.beginTransaction()
+                            .add(
+                                FullScreenImageDialogFragment(dataCustomer.dokumentasi2),
+                                "FullScreenImageDialogFragment"
+                            )
+                            .addToBackStack(null)
+                            .commit()
+                    }
+                }
             }
-        } else {
 
 
-            // Mengganti teks tombol Simpan untuk melanjutkan ke halaman berikutnya
-            binding.btnSimpan.apply {
-                binding.btnSimpan.text = getString(R.string.next)
+            if (dataCustomer.keterangan1 == "Tidak layak") {
+                binding.btnSimpan.text = getString(R.string.finish)
                 binding.btnSimpan.setOnClickListener {
-                    val intent = Intent(
-                        this@PemasanganKelayakanActivity,
-                        PemasanganSambunganActivity::class.java
-                    )
-
-                    // Mengirim kunci Firebase ke AddFirstDataActivity
-                    intent.putExtra(
-                        PemasanganSambunganActivity.EXTRA_FIREBASE_KEY,
-                        dataCustomer.firebaseKey
-                    )
-                    intent.putExtra(
-                        PemasanganSambunganActivity.EXTRA_CUSTOMER_DATA,
-                        dataCustomer.data
-                    )
-
-                    startActivity(intent)
+                    navigatePage(this@PemasanganKelayakanActivity, MainActivity::class.java)
                     finish()
+                }
+            } else {
+                // Mengganti teks tombol Simpan untuk melanjutkan ke halaman berikutnya
+                binding.btnSimpan.apply {
+                    binding.btnSimpan.text = getString(R.string.next)
+                    binding.btnSimpan.setOnClickListener {
+
+                        if (status) {
+                            if (isDataChange(
+                                dataCustomer,
+                                binding.dropdownJenisPekerjaan.text.toString(),
+                                binding.dropdownPw.text.toString(),
+                                binding.edtNomorRegistrasi.text.toString(),
+                                binding.edtNamaPelanggan.text.toString(),
+                                binding.edtNomorRegistrasi.text.toString(),
+                                binding.edtRt.text.toString(),
+                                binding.edtRw.text.toString(),
+                                binding.edtKelurahan.text.toString(),
+                                binding.edtKecamatan.text.toString(),
+                                binding.dropdownKeterangan.text.toString())) {
+                                AlertDialog.Builder(context).apply {
+                                    setTitle("Data Berubah!")
+                                    setMessage("Apakah yakin ingin mengubah data?")
+                                    setPositiveButton("Ubah") { _, _ ->
+                                        saveData()
+                                        Log.d("data", binding.edtNamaPelanggan.text.toString())
+                                        Log.d("data1", firstImageFile.toString())
+                                        Log.d("data2", dataCustomer.name)
+
+                                        navigatePage(
+                                            this@PemasanganKelayakanActivity,
+                                            MainActivity::class.java
+                                        )
+                                    }
+                                    setNegativeButton(R.string.cancel, null)
+                                }.create().show()
+                            } else {
+                                val intent = Intent(
+                                    this@PemasanganKelayakanActivity,
+                                    PemasanganSambunganActivity::class.java
+                                )
+
+                                // Mengirim kunci Firebase ke AddFirstDataActivity
+                                intent.putExtra(
+                                    PemasanganSambunganActivity.EXTRA_FIREBASE_KEY,
+                                    dataCustomer.firebaseKey
+                                )
+                                intent.putExtra(
+                                    PemasanganSambunganActivity.EXTRA_CUSTOMER_DATA,
+                                    dataCustomer.data
+                                )
+
+                                startActivity(intent)
+                                finish()
+                            }
+                        } else {
+                            val intent = Intent(
+                                this@PemasanganKelayakanActivity,
+                                PemasanganSambunganActivity::class.java
+                            )
+
+                            // Mengirim kunci Firebase ke AddFirstDataActivity
+                            intent.putExtra(
+                                PemasanganSambunganActivity.EXTRA_FIREBASE_KEY,
+                                dataCustomer.firebaseKey
+                            )
+                            intent.putExtra(
+                                PemasanganSambunganActivity.EXTRA_CUSTOMER_DATA,
+                                dataCustomer.data
+                            )
+
+                            startActivity(intent)
+                            finish()
+                        }
+                    }
                 }
             }
         }
+    }
+
+    fun isDataChange(data: SambunganData, jenisPekerjaan: String, pw: String, nomorRegistrasi: String, name: String, address: String, rt: String, rw: String, kelurahan: String, kecamatan: String, keterangan: String): Boolean {
+        return jenisPekerjaan == data.jenisPekerjaan &&
+                pw == data.pw.toString() &&
+                nomorRegistrasi == data.nomorRegistrasi &&
+                name == data.name &&
+                address == data.address &&
+                rt == data.rt &&
+                rw == data.rw &&
+                kelurahan == data.kelurahan &&
+                kecamatan == data.kecamatan &&
+                keterangan == data.keterangan1
     }
 
     private lateinit var currentPhotoPath: String
@@ -432,7 +652,8 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
             myFile.let { file ->
                 if (imageNumber == 1) {
                     firstImageFile = file
-                    binding.itemImage1.text = System.currentTimeMillis().toString() + "_dokumen.jpg"
+                    binding.itemImage1.text =
+                        System.currentTimeMillis().toString() + "_dokumen.jpg"
 
                     Glide.with(this@PemasanganKelayakanActivity)
                         .load(firstImageFile)
@@ -440,14 +661,18 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
 
                     binding.imageView1.setOnClickListener {
                         supportFragmentManager.beginTransaction()
-                            .add(FullScreenImageDialogFragment(firstImageFile.toString()), "FullScreenImageDialogFragment")
+                            .add(
+                                FullScreenImageDialogFragment(firstImageFile.toString()),
+                                "FullScreenImageDialogFragment"
+                            )
                             .addToBackStack(null)
                             .commit()
                     }
 
                 } else if (imageNumber == 2) {
                     secondImageFile = file
-                    binding.itemImage2.text = System.currentTimeMillis().toString() + "_kondisi.jpg"
+                    binding.itemImage2.text =
+                        System.currentTimeMillis().toString() + "_kondisi.jpg"
 
                     Glide.with(this@PemasanganKelayakanActivity)
                         .load(secondImageFile)
@@ -455,7 +680,10 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
 
                     binding.imageView2.setOnClickListener {
                         supportFragmentManager.beginTransaction()
-                            .add(FullScreenImageDialogFragment(secondImageFile.toString()), "FullScreenImageDialogFragment")
+                            .add(
+                                FullScreenImageDialogFragment(secondImageFile.toString()),
+                                "FullScreenImageDialogFragment"
+                            )
                             .addToBackStack(null)
                             .commit()
                     }

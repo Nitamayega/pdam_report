@@ -18,7 +18,8 @@ import com.pdam.report.utils.showLoading
 
 class ReportFragment : Fragment(R.layout.fragment_report) {
     private var _binding: FragmentReportBinding? = null
-    private val adapter by lazy { MainAdapter(ArrayList()) }
+    private val adapterPemasangan by lazy { MainAdapter(ArrayList(), 0) }
+    private val adapterPemutusan by lazy { MainAdapter(ArrayList(), 1) }
     private lateinit var user: UserData
     private val binding get() = _binding!!
 
@@ -71,16 +72,16 @@ class ReportFragment : Fragment(R.layout.fragment_report) {
                     // Check if user.dailyTeam is 0
                     if (user.dailyTeam == 0) {
                         // Use all data without filtering
-                        adapter.updateData(customerList.sortedByDescending { it.currentDate })
+                        adapterPemutusan.updateData(customerList.sortedByDescending { it.currentDate })
                     } else {
                         // Filter item sesuai dengan user.dailyTeam
                         val filteredCustomerList = customerList.filter { customer ->
                             customer.dailyTeam == user.dailyTeam
                         }
-                        adapter.updateData(filteredCustomerList.sortedByDescending { it.currentDate })
+                        adapterPemutusan.updateData(filteredCustomerList.sortedByDescending { it.currentDate })
                     }
 
-                    binding.rvCusts.adapter = adapter
+                    binding.rvCusts.adapter = adapterPemutusan
                     showLoading(false, binding.progressBar)
 
                     if (binding.rvCusts.adapter?.itemCount == 0) {
@@ -120,16 +121,16 @@ class ReportFragment : Fragment(R.layout.fragment_report) {
                     // Check if user.dailyTeam is 0
                     if (user.dailyTeam == 0) {
                         // Use all data without filtering
-                        adapter.updateData(customerList.sortedByDescending { it.currentDate })
+                        adapterPemasangan.updateData(customerList.sortedByDescending { it.currentDate })
                     } else {
                         // Filter item sesuai dengan user.dailyTeam
                         val filteredCustomerList = customerList.filter { customer ->
                             customer.dailyTeam == user.dailyTeam
                         }
-                        adapter.updateData(filteredCustomerList.sortedByDescending { it.currentDate })
+                        adapterPemasangan.updateData(filteredCustomerList.sortedByDescending { it.currentDate })
                     }
 
-                    binding.rvCusts.adapter = adapter
+                    binding.rvCusts.adapter = adapterPemasangan
                     showLoading(false, binding.progressBar)
 
                     if (binding.rvCusts.adapter?.itemCount == 0) {

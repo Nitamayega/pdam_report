@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:scrollbars="vertical"
-    android:fillViewport="true">
+    android:fillViewport="true"
+    android:scrollbars="vertical">
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -34,22 +33,22 @@
             android:id="@+id/linearLayout1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:baselineAligned="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:baselineAligned="false">
+            app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/ed_jenis_pekerjaan"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:focusableInTouchMode="true"
                 android:layout_marginEnd="8dp"
+                android:layout_weight="4"
+                android:focusableInTouchMode="true"
                 android:hint="@string/jenis_pekerjaan"
                 app:boxStrokeColor="@color/funblue"
-                app:boxStrokeWidth="2dp"
-                android:layout_weight="4">
+                app:boxStrokeWidth="2dp">
 
                 <AutoCompleteTextView
                     android:id="@+id/dropdown_jenis_pekerjaan"
@@ -65,12 +64,12 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:focusableInTouchMode="true"
                 android:layout_marginEnd="8dp"
+                android:layout_weight="2"
+                android:focusableInTouchMode="true"
                 android:hint="@string/pw"
                 app:boxStrokeColor="@color/funblue"
-                app:boxStrokeWidth="2dp"
-                android:layout_weight="2">
+                app:boxStrokeWidth="2dp">
 
                 <AutoCompleteTextView
                     android:id="@+id/dropdown_pw"
@@ -87,9 +86,9 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             app:boxStrokeColor="@color/funblue"
             app:boxStrokeWidth="2dp"
-            android:layout_marginTop="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/linearLayout1">
@@ -109,8 +108,8 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:boxStrokeColor="@color/funblue"
             android:layout_marginTop="16dp"
+            app:boxStrokeColor="@color/funblue"
             app:boxStrokeWidth="2dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -130,10 +129,10 @@
             android:id="@+id/linearLayout2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:baselineAligned="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/ed_nama_pelanggan"
-            android:baselineAligned="false">
+            app:layout_constraintTop_toBottomOf="@id/ed_nama_pelanggan">
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/ed_alamat_pelanggan"
@@ -141,20 +140,20 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="3"
                 app:boxBackgroundMode="outline"
                 app:boxStrokeColor="@color/funblue"
-                app:boxStrokeWidth="2dp"
-                android:layout_weight="3"
-                android:layout_marginEnd="8dp">
+                app:boxStrokeWidth="2dp">
 
                 <EditText
                     android:id="@+id/edt_alamat_pelanggan"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ems="10"
-                    android:maxLines="4"
                     android:hint="@string/alamat_pelanggan"
                     android:inputType="textMultiLine|textCapWords"
+                    android:maxLines="4"
                     tools:ignore="SpeakableTextPresentCheck" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -164,21 +163,21 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginTop="16dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
                 app:boxBackgroundMode="outline"
                 app:boxStrokeColor="@color/funblue"
-                app:boxStrokeWidth="2dp"
-                android:layout_weight="1"
-                android:layout_marginEnd="8dp">
+                app:boxStrokeWidth="2dp">
 
                 <EditText
                     android:id="@+id/edt_rt"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:ems="10"
-                    android:hint="@string/rt"
                     android:gravity="center"
-                    android:maxLength="2"
+                    android:hint="@string/rt"
                     android:inputType="number"
+                    android:maxLength="2"
                     tools:ignore="SpeakableTextPresentCheck" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -188,18 +187,18 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginTop="16dp"
+                android:layout_weight="1"
                 app:boxBackgroundMode="outline"
                 app:boxStrokeColor="@color/funblue"
-                app:boxStrokeWidth="2dp"
-                android:layout_weight="1">
+                app:boxStrokeWidth="2dp">
 
                 <EditText
                     android:id="@+id/edt_rw"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:ems="10"
-                    android:hint="@string/rw"
                     android:gravity="center"
+                    android:hint="@string/rw"
                     android:inputType="number"
                     android:maxLength="2"
                     tools:ignore="SpeakableTextPresentCheck" />
@@ -210,10 +209,10 @@
             android:id="@+id/linearLayout3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:baselineAligned="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/linearLayout2"
-            android:baselineAligned="false">
+            app:layout_constraintTop_toBottomOf="@id/linearLayout2">
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/ed_kelurahan"
@@ -221,20 +220,20 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginTop="16dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="2"
                 app:boxBackgroundMode="outline"
                 app:boxStrokeColor="@color/funblue"
-                app:boxStrokeWidth="2dp"
-                android:layout_weight="2"
-                android:layout_marginEnd="8dp">
+                app:boxStrokeWidth="2dp">
 
                 <EditText
                     android:id="@+id/edt_kelurahan"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:ems="10"
-                    android:maxLines="2"
                     android:hint="@string/kelurahan"
                     android:inputType="textMultiLine|textCapWords"
+                    android:maxLines="2"
                     tools:ignore="SpeakableTextPresentCheck" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -244,19 +243,19 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginTop="16dp"
+                android:layout_weight="2"
                 app:boxBackgroundMode="outline"
                 app:boxStrokeColor="@color/funblue"
-                app:boxStrokeWidth="2dp"
-                android:layout_weight="2">
+                app:boxStrokeWidth="2dp">
 
                 <EditText
                     android:id="@+id/edt_kecamatan"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:ems="10"
-                    android:maxLines="2"
                     android:hint="@string/kecamatan"
                     android:inputType="textMultiLine|textCapWords"
+                    android:maxLines="2"
                     tools:ignore="SpeakableTextPresentCheck" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
@@ -299,29 +298,29 @@
             android:layout_width="0dp"
             android:layout_height="50dp"
             android:layout_marginTop="8dp"
-            android:textCursorDrawable="@null"
-            android:drawablePadding="5dp"
-            android:text="@string/take_photo"
-            android:paddingStart="50dp"
-            android:clickable="true"
-            android:padding="5dp"
             android:background="@drawable/field"
+            android:clickable="true"
+            android:drawablePadding="5dp"
+            android:focusable="true"
             android:gravity="center"
+            android:padding="5dp"
+            android:paddingStart="50dp"
+            android:text="@string/take_photo"
+            android:textCursorDrawable="@null"
             app:layout_constraintEnd_toEndOf="@+id/ed_keterangan"
             app:layout_constraintStart_toStartOf="@+id/ed_keterangan"
-            app:layout_constraintTop_toBottomOf="@+id/dokumentasiDokumen"
-            android:focusable="true" />
+            app:layout_constraintTop_toBottomOf="@+id/dokumentasiDokumen" />
 
         <ImageView
             android:id="@+id/image_view_1"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:src="@drawable/preview_upload_photo"
-            android:paddingVertical="8dp"
             android:layout_marginStart="8dp"
-            app:layout_constraintTop_toTopOf="@id/item_image_1"
+            android:paddingVertical="8dp"
+            android:src="@drawable/preview_upload_photo"
             app:layout_constraintBottom_toBottomOf="@id/item_image_1"
-            app:layout_constraintStart_toStartOf="@id/item_image_1" />
+            app:layout_constraintStart_toStartOf="@id/item_image_1"
+            app:layout_constraintTop_toTopOf="@id/item_image_1" />
 
         <TextView
             android:id="@+id/dokumentasiSekitar"
@@ -345,8 +344,8 @@
             android:focusable="true"
             android:gravity="center"
             android:padding="5dp"
-            android:text="@string/take_photo"
             android:paddingStart="50dp"
+            android:text="@string/take_photo"
             android:textCursorDrawable="@null"
             app:layout_constraintEnd_toEndOf="@+id/ed_keterangan"
             app:layout_constraintStart_toStartOf="@+id/ed_keterangan"
@@ -356,23 +355,24 @@
             android:id="@+id/image_view_2"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:src="@drawable/preview_upload_photo"
+            android:layout_marginStart="8dp"
             android:paddingVertical="8dp"
-            app:layout_constraintTop_toTopOf="@id/item_image_2"
+            android:src="@drawable/preview_upload_photo"
             app:layout_constraintBottom_toBottomOf="@id/item_image_2"
-            app:layout_constraintStart_toStartOf="@id/item_image_2" />
+            app:layout_constraintStart_toStartOf="@id/item_image_2"
+            app:layout_constraintTop_toTopOf="@id/item_image_2" />
 
         <TextView
             android:id="@+id/addedby"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:gravity="end"
             android:text="Created By Kepala Suku"
             android:visibility="gone"
-            tools:visibility="visible"
-            android:gravity="end"
+            app:layout_constraintEnd_toEndOf="@+id/item_image_2"
             app:layout_constraintTop_toBottomOf="@+id/item_image_2"
-            app:layout_constraintEnd_toEndOf="@+id/item_image_2" />
+            tools:visibility="visible" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_hapus"

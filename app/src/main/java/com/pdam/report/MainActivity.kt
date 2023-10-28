@@ -9,7 +9,6 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
@@ -19,7 +18,6 @@ import com.bumptech.glide.Glide
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.auth.FirebaseAuth
-import com.pdam.report.data.PemutusanData
 import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ActivityMainBinding
 import com.pdam.report.ui.admin.AdminPresenceActivity
@@ -104,7 +102,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
     private fun setupView() {
         if (currentUser == null) {
             navigatePage(this, LoginActivity::class.java)
@@ -123,7 +120,7 @@ class MainActivity : AppCompatActivity() {
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
-        grantResults: IntArray
+        grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         PermissionHelper.handlePermissionResult(requestCode, permissions, grantResults)
@@ -147,10 +144,15 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_presence -> {
 
                     val initialDate = runBlocking { getInitialDate() }
-                    val currentDate = SimpleDateFormat("dd-MM-yyyy").parse(getCurrentTimeStamp())?.time
-                    val referenceDate = SimpleDateFormat("dd-MM-yyyy").parse(initialDate.toString())?.time
-                    var daysDifference = ((currentDate!! - referenceDate!!) / (1000L * 60 * 60 * 24) % 5).toInt()
-                    if (daysDifference == 0) { daysDifference = 5 }
+                    val currentDate =
+                        SimpleDateFormat("dd-MM-yyyy").parse(getCurrentTimeStamp())?.time
+                    val referenceDate =
+                        SimpleDateFormat("dd-MM-yyyy").parse(initialDate.toString())?.time
+                    var daysDifference =
+                        ((currentDate!! - referenceDate!!) / (1000L * 60 * 60 * 24) % 5).toInt()
+                    if (daysDifference == 0) {
+                        daysDifference = 5
+                    }
 
 //                    val currentTime = Calendar.getInstance().get(Calendar.HOUR_OF_DAY) && currentTime in 19..23
 
@@ -161,7 +163,11 @@ class MainActivity : AppCompatActivity() {
 
                     val moveIntent = when (user.team) {
                         0 -> Intent(this@MainActivity, AdminPresenceActivity::class.java)
-                        daysDifference -> Intent(this@MainActivity, OfficerPresenceActivity::class.java)
+                        daysDifference -> Intent(
+                            this@MainActivity,
+                            OfficerPresenceActivity::class.java
+                        )
+
                         else -> {
                             showToast(this@MainActivity, R.string.presence_denied)
                             null
@@ -201,6 +207,7 @@ class MainActivity : AppCompatActivity() {
             .optionalFitCenter()
             .into(photo)
     }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (toggle.onOptionsItemSelected(item)) {
             return true

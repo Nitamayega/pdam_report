@@ -31,7 +31,12 @@ class PemasanganSambunganActivity : AppCompatActivity() {
     private val databaseReference = FirebaseDatabase.getInstance().reference
 
     private val firebaseKey by lazy { intent.getStringExtra(PemasanganKelayakanActivity.EXTRA_FIREBASE_KEY) }
-    private val customerData by lazy { intent.getIntExtra(PemasanganKelayakanActivity.EXTRA_CUSTOMER_DATA, 0) }
+    private val customerData by lazy {
+        intent.getIntExtra(
+            PemasanganKelayakanActivity.EXTRA_CUSTOMER_DATA,
+            0
+        )
+    }
 
     private val userManager by lazy { UserManager() }
     private lateinit var user: UserData
@@ -39,7 +44,8 @@ class PemasanganSambunganActivity : AppCompatActivity() {
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
 //            navigatePage(this@UpdateCustomerInstallationActivity, AddFirstDataActivity::class.java, true)
-            val intent = Intent(this@PemasanganSambunganActivity, PemasanganKelayakanActivity::class.java)
+            val intent =
+                Intent(this@PemasanganSambunganActivity, PemasanganKelayakanActivity::class.java)
             intent.putExtra(PemasanganKelayakanActivity.EXTRA_FIREBASE_KEY, firebaseKey.toString())
             startActivity(intent)
             finish()
@@ -93,7 +99,10 @@ class PemasanganSambunganActivity : AppCompatActivity() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                showToast(this@PemasanganSambunganActivity, "${R.string.failed_access_data}: ${error.message}".toInt())
+                showToast(
+                    this@PemasanganSambunganActivity,
+                    "${R.string.failed_access_data}: ${error.message}".toInt()
+                )
             }
         })
     }
@@ -121,35 +130,82 @@ class PemasanganSambunganActivity : AppCompatActivity() {
         val keterangan = binding.edtKeterangan.text.toString()
 
         // Validate input
-        if (isInputValid(nomorKL, merkMeter, diameterMeter, standMeter, nomorMeter, nomorSegel, keterangan)) {
+        if (isInputValid(
+                nomorKL,
+                merkMeter,
+                diameterMeter,
+                standMeter,
+                nomorMeter,
+                nomorSegel,
+                keterangan
+            )
+        ) {
             showLoading(true, binding.progressBar, binding.btnSimpan, binding.btnHapus)
-            uploadImagesAndSaveData(user.username, currentDate, nomorKL, merkMeter, diameterMeter, standMeter, nomorMeter, nomorSegel, keterangan)
+            uploadImagesAndSaveData(
+                user.username,
+                currentDate,
+                nomorKL,
+                merkMeter,
+                diameterMeter,
+                standMeter,
+                nomorMeter,
+                nomorSegel,
+                keterangan
+            )
         } else {
             showLoading(false, binding.progressBar, binding.btnSimpan, binding.btnHapus)
             showToast(this, R.string.fill_all_data)
         }
     }
 
-    private fun isInputValid(nomorKL: String, merk: String, diameter: String, stand: String, nomorMeter: String, nomorSegel: String, keterangan: String): Boolean {
+    private fun isInputValid(
+        nomorKL: String,
+        merk: String,
+        diameter: String,
+        stand: String,
+        nomorMeter: String,
+        nomorSegel: String,
+        keterangan: String,
+    ): Boolean {
         // Check if all required input is valid
         return nomorKL.isNotEmpty() && merk.isNotEmpty() && diameter.isNotEmpty() && stand.isNotEmpty() && nomorMeter.isNotEmpty() && nomorSegel.isNotEmpty() && keterangan.isNotEmpty()
     }
 
-    private fun uploadImagesAndSaveData(petugas: String, currentDate: Long, nomorKL: String, merk: String, diameter: String, stand: String, nomorMeter: String, nomorSegel: String, keterangan: String) {
+    private fun uploadImagesAndSaveData(
+        petugas: String,
+        currentDate: Long,
+        nomorKL: String,
+        merk: String,
+        diameter: String,
+        stand: String,
+        nomorMeter: String,
+        nomorSegel: String,
+        keterangan: String,
+    ) {
         saveCustomerData(
-                            petugas,
-                            currentDate,
-                            nomorKL,
-                            merk,
-                            diameter,
-                            stand,
-                            nomorMeter,
-                            nomorSegel,
-                            keterangan
-                        )
+            petugas,
+            currentDate,
+            nomorKL,
+            merk,
+            diameter,
+            stand,
+            nomorMeter,
+            nomorSegel,
+            keterangan
+        )
     }
 
-    private fun saveCustomerData(petugas: String, currentDate: Long, nomorKL: String, merk: String, diameter: String, stand: String, nomorMeter: String, nomorSegel: String, keterangan: String) {
+    private fun saveCustomerData(
+        petugas: String,
+        currentDate: Long,
+        nomorKL: String,
+        merk: String,
+        diameter: String,
+        stand: String,
+        nomorMeter: String,
+        nomorSegel: String,
+        keterangan: String,
+    ) {
         val customerRef = databaseReference.child("listPemasangan").child(firebaseKey.toString())
 
         val data = mapOf(
@@ -196,7 +252,10 @@ class PemasanganSambunganActivity : AppCompatActivity() {
 
             override fun onCancelled(error: DatabaseError) {
                 // Menampilkan pesan kesalahan jika mengakses data gagal
-                showToast(this@PemasanganSambunganActivity, "${R.string.failed_access_data}: ${error.message}".toInt())
+                showToast(
+                    this@PemasanganSambunganActivity,
+                    "${R.string.failed_access_data}: ${error.message}".toInt()
+                )
             }
         })
     }
@@ -212,134 +271,164 @@ class PemasanganSambunganActivity : AppCompatActivity() {
 
     private fun displayCustomerData(dataCustomer: SambunganData) {
         // Mengisi tampilan dengan data pelanggan yang ditemukan dari Firebase
-        binding.edtPemasanganSambungan.apply {
-            setText(dataCustomer.jenisPekerjaan)
-            isEnabled = false
-            isFocusable = false
-        }
+        binding.apply {
+            edtPemasanganSambungan.setText(dataCustomer.jenisPekerjaan).apply {
+                edPemasanganSambungan.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
+            }
 
-        binding.edtPw.apply {
-            setText(dataCustomer.pw.toString())
-            isEnabled = false
-            isFocusable = false
-        }
+            edtPw.setText(dataCustomer.pw.toString()).apply {
+                edPw.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
+            }
 
-        binding.edtNamaPelanggan.apply {
-            setText(dataCustomer.name)
-            isEnabled = false
-            isFocusable = false
-        }
+            edtNamaPelanggan.setText(dataCustomer.name).apply {
+                edNamaPelanggan.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
+            }
 
-        binding.edtAlamatPelanggan.apply {
-            setText(dataCustomer.address)
-            isEnabled = false
-            isFocusable = false
-        }
+            edtAlamatPelanggan.setText(dataCustomer.address).apply {
+                edAlamatPelanggan.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
+            }
 
-        binding.edtRt.apply {
-            setText(dataCustomer.rt)
-            isEnabled = false
-            isFocusable = false
-        }
+            edtRt.setText(dataCustomer.rt).apply {
+                edRt.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
+            }
 
-        binding.edtRw.apply {
-            setText(dataCustomer.rw)
-            isEnabled = false
-            isFocusable = false
-        }
+            edtRw.setText(dataCustomer.rw).apply {
+                edRw.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
+            }
 
-        binding.edtKelurahan.apply {
-            setText(dataCustomer.kelurahan)
-            isEnabled = false
-            isFocusable = false
-        }
+            edtKelurahan.setText(dataCustomer.kelurahan).apply {
+                edKelurahan.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
+            }
 
-        binding.edtKecamatan.apply {
-            setText(dataCustomer.kecamatan)
-            isEnabled = false
-            isFocusable = false
+            edtKecamatan.setText(dataCustomer.kecamatan).apply {
+                edKecamatan.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
+            }
         }
     }
 
     @SuppressLint("SetTextI18n")
     private fun displayAnotherData(dataCustomer: SambunganData) {
-        binding.edtNomorKl.apply {
-            setText(dataCustomer.nomorKL)
-            isEnabled = false
-            isFocusable = false
-        }
-
-        binding.updatedby.apply {
-            text = "Update by " + dataCustomer.petugas + " at " + milisToDateTime(dataCustomer.updateInstallDate)
-            isEnabled = false
-            isFocusable = false
-            visibility = android.view.View.VISIBLE
-        }
-
-        binding.dropdownMerk.apply {
-            setText(dataCustomer.merkMeter)
-            isEnabled = false
-            isFocusable = false
-            setAdapter(null)
-        }
-
-        binding.dropdownDiameter.apply {
-            setText(dataCustomer.diameterMeter)
-            isEnabled = false
-            isFocusable = false
-            setAdapter(null)
-        }
-
-        binding.edtStand.apply {
-            setText(dataCustomer.standMeter)
-            isEnabled = false
-            isFocusable = false
-        }
-
-        binding.edtNomorMeter.apply {
-            setText(dataCustomer.nomorMeter)
-            isEnabled = false
-            isFocusable = false
-        }
-
-        binding.edtNomorSegel.apply {
-            setText(dataCustomer.nomorSegel)
-            isEnabled = false
-            isFocusable = false
-        }
-
-        binding.edtKeterangan.apply {
-            setText(dataCustomer.keterangan2)
-            isEnabled = false
-            isFocusable = false
-        }
-
-        // Mengganti teks tombol Simpan untuk melanjutkan ke halaman berikutnya
-        binding.btnSimpan.apply {
-            if (dataCustomer.jenisPekerjaan == "Pemasangan kembali") {
-                text = getString(R.string.finish)
-                setOnClickListener {
-                    navigatePage(this@PemasanganSambunganActivity, MainActivity::class.java, true)
-                    finish()
+        binding.apply {
+            edtNomorKl.setText(dataCustomer.nomorKL).apply {
+                edNomorKl.apply {
+                    isEnabled = false
+                    isFocusable = false
                 }
-            } else {
-                text = getString(R.string.next)
-                setOnClickListener {
-                    val intent = Intent(
-                        this@PemasanganSambunganActivity,
-                        PemasanganGPSActivity::class.java
-                    )
+            }
 
-                    intent.putExtra(
-                        PemasanganGPSActivity.EXTRA_FIREBASE_KEY,
-                        dataCustomer.firebaseKey
-                    )
-                    intent.putExtra(
-                        PemasanganGPSActivity.EXTRA_CUSTOMER_DATA,
-                        dataCustomer.data
-                    )
+            updatedby.apply {
+                text =
+                    "Update by " + dataCustomer.petugas + " at " + milisToDateTime(dataCustomer.updateInstallDate)
+                isEnabled = false
+                isFocusable = false
+                visibility = android.view.View.VISIBLE
+            }
 
-                    startActivity(intent)
+            dropdownMerk.apply {
+                setText(dataCustomer.merkMeter)
+                setAdapter(null)
+            }.apply {
+                edMerk.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
+            }
+
+            dropdownDiameter.apply {
+                setText(dataCustomer.diameterMeter)
+                setAdapter(null)
+            }.apply {
+                edDiameter.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
+            }
+
+            edtStand.setText(dataCustomer.standMeter).apply {
+                edStand.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
+            }
+
+            edtNomorMeter.setText(dataCustomer.nomorMeter).apply {
+                edNomorMeter.apply {
+
+                    isEnabled = false
+                    isFocusable = false
+
+                }
+            }
+
+            edtNomorSegel.setText(dataCustomer.nomorSegel).apply {
+                edNomorSegel.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
+            }
+
+            edtKeterangan.setText(dataCustomer.keterangan2).apply {
+                edKeterangan.apply {
+                    isEnabled = false
+                    isFocusable = false
+                }
+            }
+
+            // Mengganti teks tombol Simpan untuk melanjutkan ke halaman berikutnya
+            btnSimpan.apply {
+                if (dataCustomer.jenisPekerjaan == "Pemasangan kembali") {
+                    text = getString(R.string.finish)
+                    setOnClickListener {
+                        navigatePage(
+                            this@PemasanganSambunganActivity,
+                            MainActivity::class.java,
+                            true
+                        )
+                        finish()
+                    }
+                } else {
+                    text = getString(R.string.next)
+                    setOnClickListener {
+                        val intent = Intent(
+                            this@PemasanganSambunganActivity,
+                            PemasanganGPSActivity::class.java
+                        )
+
+                        intent.putExtra(
+                            PemasanganGPSActivity.EXTRA_FIREBASE_KEY,
+                            dataCustomer.firebaseKey
+                        )
+                        intent.putExtra(
+                            PemasanganGPSActivity.EXTRA_CUSTOMER_DATA,
+                            dataCustomer.data
+                        )
+
+                        startActivity(intent)
+                    }
                 }
             }
         }
