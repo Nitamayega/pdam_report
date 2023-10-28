@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Environment
 import android.provider.Settings
 import kotlinx.coroutines.Dispatchers
@@ -62,16 +61,16 @@ fun createCustomTempFile(context: Context): File {
     return File.createTempFile(getCurrentTimeStamp(), ".jpg", storageDir)
 }
 
-fun uriToFile(selectedImg: Uri, context: Context): File {
-    val contentResolver: ContentResolver = context.contentResolver
-    val myFile = createCustomTempFile(context)
-    contentResolver.openInputStream(selectedImg)?.use { inputStream ->
-        FileOutputStream(myFile).use { outputStream ->
-            inputStream.copyTo(outputStream)
-        }
-    }
-    return myFile
-}
+//fun uriToFile(selectedImg: Uri, context: Context): File {
+//    val contentResolver: ContentResolver = context.contentResolver
+//    val myFile = createCustomTempFile(context)
+//    contentResolver.openInputStream(selectedImg)?.use { inputStream ->
+//        FileOutputStream(myFile).use { outputStream ->
+//            inputStream.copyTo(outputStream)
+//        }
+//    }
+//    return myFile
+//}
 
 fun reduceFileImage(file: File): File {
     val bitmap = BitmapFactory.decodeFile(file.path)
