@@ -635,7 +635,7 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
                             binding.dropdownPw.text.toString(),
                             binding.edtNomorRegistrasi.text.toString(),
                             binding.edtNamaPelanggan.text.toString(),
-                            binding.edtNomorRegistrasi.text.toString(),
+                            binding.edtAlamatPelanggan.text.toString(),
                             binding.edtRt.text.toString(),
                             binding.edtRw.text.toString(),
                             binding.edtKelurahan.text.toString(),
