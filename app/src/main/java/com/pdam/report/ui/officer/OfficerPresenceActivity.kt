@@ -47,6 +47,7 @@ import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.reduceFileImageInBackground
 import com.pdam.report.utils.showLoading
 import com.pdam.report.utils.showToast
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -429,6 +430,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
             }
         }
 
+        @Deprecated("Deprecated in Java")
         override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
             return
         }
@@ -445,6 +447,16 @@ class OfficerPresenceActivity : AppCompatActivity() {
             // Hentikan pembaruan lokasi menggunakan LocationManager (untuk Android di bawah 12)
             locationManager?.removeUpdates(locationListener)
         }
+
+        // Hapus file gambar
+        getFile?.delete()
+
+        // Hapus file gambar yang diambil dari penyimpanan internal
+        val file = File(currentPhotoPath)
+        file.delete()
+
+        // stop coroutine
+        lifecycleScope.coroutineContext.cancel()
     }
 
 

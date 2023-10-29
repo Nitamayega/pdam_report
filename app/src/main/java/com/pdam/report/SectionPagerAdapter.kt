@@ -4,7 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.pdam.report.data.UserData
-import com.pdam.report.ui.ReportFragment
+import com.pdam.report.ui.common.ReportFragment
 
 class SectionPagerAdapter(activity: AppCompatActivity, private val user: UserData) :
     FragmentStateAdapter(activity) {

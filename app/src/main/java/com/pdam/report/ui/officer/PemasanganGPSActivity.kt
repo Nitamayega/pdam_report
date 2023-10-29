@@ -25,16 +25,7 @@ import com.pdam.report.R
 import com.pdam.report.data.SambunganData
 import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ActivityPemasanganGpsBinding
-import com.pdam.report.utils.FullScreenImageDialogFragment
-import com.pdam.report.utils.UserManager
-import com.pdam.report.utils.createCustomTempFile
-import com.pdam.report.utils.navigatePage
-import com.pdam.report.utils.parsingNameImage
-import com.pdam.report.utils.reduceFileImageInBackground
-import com.pdam.report.utils.showDeleteConfirmationDialog
-import com.pdam.report.utils.showLoading
-import com.pdam.report.utils.showToast
-import com.pdam.report.utils.uriToFile
+import com.pdam.report.utils.*
 import kotlinx.coroutines.launch
 import java.io.File
 

@@ -30,6 +30,7 @@ import com.pdam.report.ui.officer.PemutusanActivity
 import com.pdam.report.utils.PermissionHelper
 import com.pdam.report.utils.PermissionHelper.checkAndRequestPermissions
 import com.pdam.report.utils.UserManager
+import com.pdam.report.utils.getCurrentTimeStamp
 import com.pdam.report.utils.getInitialDate
 import com.pdam.report.utils.getNetworkTime
 import com.pdam.report.utils.milisToDate
@@ -41,7 +42,6 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -62,6 +62,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     private var index: MutableLiveData<Int> = MutableLiveData(0)
 
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar?.setBackgroundDrawable(resources.getDrawable(R.color.tropical_blue))
@@ -90,16 +91,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         setupData()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        cancel()
-    }
-
-    override fun onStart() {
-        super.onStart()
-        checkAndRequestPermissions(this)
-    }
-
 
     private fun setupData() {
         userManager.fetchUserAndSetupData {
@@ -121,7 +112,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     }
 
 
-
     private fun setupView() {
         if (currentUser == null) {
             navigatePage(this, LoginActivity::class.java)
@@ -139,7 +129,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        Log.d("MainActivity", "onRequestPermissionsResult: $requestCode")
         PermissionHelper.handlePermissionResult(requestCode, permissions, grantResults)
         when (requestCode) {
             30 -> {

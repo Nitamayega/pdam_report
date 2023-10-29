@@ -56,6 +56,7 @@ class PemutusanActivity : AppCompatActivity() {
 
     private var imageFile: File? = null
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -73,7 +74,7 @@ class PemutusanActivity : AppCompatActivity() {
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-            navigatePage(this@PemutusanActivity, MainActivity::class.java)
+            navigatePage(this@PemutusanActivity, MainActivity::class.java, true)
             finish()
         }
     }
@@ -503,10 +504,10 @@ class PemutusanActivity : AppCompatActivity() {
         }
     }
 
-    @Suppress("DEPRECATION")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            onBackPressed()
+            navigatePage(this, MainActivity::class.java, true)
+            finish()
             return true
         }
         return super.onOptionsItemSelected(item)

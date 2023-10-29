@@ -1,8 +1,9 @@
-package com.pdam.report.ui
+package com.pdam.report.ui.common
 
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -15,6 +16,11 @@ import com.pdam.report.data.UserData
 import com.pdam.report.databinding.FragmentReportBinding
 import com.pdam.report.utils.setRecyclerViewVisibility
 import com.pdam.report.utils.showLoading
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 class ReportFragment : Fragment(R.layout.fragment_report) {
     private var _binding: FragmentReportBinding? = null
@@ -23,25 +29,28 @@ class ReportFragment : Fragment(R.layout.fragment_report) {
     private lateinit var user: UserData
     private val binding get() = _binding!!
 
-    @Suppress("DEPRECATION")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentReportBinding.bind(view)
+    }
 
-        val args = requireArguments()
-        user = args.getParcelable("user")!!
-
-        if (args.getInt(ARG_SECTION_NUMBER) == 1) {
-            setContentPemasangan(user)
-            binding.swipeRefreshLayout.setOnRefreshListener {
+    override fun onStart() {
+        super.onStart()
+        lifecycleScope.launch {
+            val args = requireArguments()
+            user = args.getParcelable("user")!!
+            if (args.getInt(ARG_SECTION_NUMBER) == 1) {
                 setContentPemasangan(user)
-                binding.swipeRefreshLayout.isRefreshing = false
-            }
-        } else {
-            setContentPemutusan(user)
-            binding.swipeRefreshLayout.setOnRefreshListener {
+                binding.swipeRefreshLayout.setOnRefreshListener {
+                    setContentPemasangan(user)
+                    binding.swipeRefreshLayout.isRefreshing = false
+                }
+            } else {
                 setContentPemutusan(user)
-                binding.swipeRefreshLayout.isRefreshing = false
+                binding.swipeRefreshLayout.setOnRefreshListener {
+                    setContentPemutusan(user)
+                    binding.swipeRefreshLayout.isRefreshing = false
+                }
             }
         }
     }
@@ -49,6 +58,8 @@ class ReportFragment : Fragment(R.layout.fragment_report) {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        // stop coroutine
+        lifecycleScope.coroutineContext.cancel()
     }
 
     private fun setContentPemutusan(user: UserData) {
