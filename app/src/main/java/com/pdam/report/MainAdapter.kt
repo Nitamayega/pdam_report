@@ -84,9 +84,4 @@ class MainAdapter(
             return oldList[oldItemPosition] == newList[newItemPosition]
         }
     }
-
-    enum class FragmentType {
-        FRAGMENT_A,
-        FRAGMENT_B
-    }
 }

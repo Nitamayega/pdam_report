@@ -24,8 +24,8 @@ data class PresenceData(
 data class SambunganData(
     val firebaseKey: String = "",
     val currentDate: Long = 0,
-    val updateVerifDate: Long = 0,
     val updateInstallDate: Long = 0,
+    val updateVerifDate: Long = 0,
     val petugas: String = "",
     val dailyTeam: Int = 0,
     val jenisPekerjaan: String = "",

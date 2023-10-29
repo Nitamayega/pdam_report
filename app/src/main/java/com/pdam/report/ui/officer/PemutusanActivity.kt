@@ -194,7 +194,6 @@ class PemutusanActivity : AppCompatActivity() {
         lifecycleScope.launch {
             showToast(this@PemutusanActivity, R.string.compressing_image)
             val imageFile = imageFile?.reduceFileImageInBackground()
-            showToast(this@PemutusanActivity, R.string.compressing_image_success)
 
             // Upload image 1
             dokumentasi1Ref.putFile(Uri.fromFile(imageFile)).addOnSuccessListener {
