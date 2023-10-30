@@ -8,7 +8,9 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Environment
 import android.provider.Settings
+import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import org.apache.commons.net.ntp.NTPUDPClient
 import org.apache.commons.net.ntp.TimeInfo
@@ -129,4 +131,26 @@ fun intentSetting(context: Context) {
     intent.data = uri
     context.startActivity(intent)
 }
+
+// Fungsi untuk mengunggah file ke Firebase dan mengembalikan URL-nya
+suspend fun uploadImageAndGetUrl(ref: StorageReference, file: File?): String? {
+    return try {
+        if (file != null) {
+            val downloadUrl = ref.putFile(Uri.fromFile(file)).continueWithTask { task ->
+                if (!task.isSuccessful) {
+                    throw task.exception!!
+                }
+                ref.downloadUrl
+            }.await()
+            downloadUrl.toString()
+        } else {
+            null
+        }
+    } catch (e: Exception) {
+        // Handle error
+        null
+    }
+}
+
+
 

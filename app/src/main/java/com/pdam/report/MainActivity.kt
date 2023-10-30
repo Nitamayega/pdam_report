@@ -10,7 +10,6 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
@@ -30,7 +29,6 @@ import com.pdam.report.ui.officer.PemutusanActivity
 import com.pdam.report.utils.PermissionHelper
 import com.pdam.report.utils.PermissionHelper.checkAndRequestPermissions
 import com.pdam.report.utils.UserManager
-import com.pdam.report.utils.getCurrentTimeStamp
 import com.pdam.report.utils.getInitialDate
 import com.pdam.report.utils.getNetworkTime
 import com.pdam.report.utils.milisToDate
@@ -80,7 +78,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                 binding.fabAdd.setOnClickListener {
                     navigatePage(this, PemasanganKelayakanActivity::class.java)
                 }
-            } else {
+            } else if (it == 1) {
                 binding.fabAdd.setOnClickListener {
                     navigatePage(this, PemutusanActivity::class.java)
                 }

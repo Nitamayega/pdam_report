@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.database.DatabaseReference
+import com.pdam.report.MainActivity
 import com.pdam.report.R
 
 fun showLoading(
@@ -78,3 +79,19 @@ fun navigatePage(context: Context, destination: Class<*>, clearTask: Boolean = f
     }
     context.startActivity(intent)
 }
+
+fun showDataChangeDialog(context: Context, saveData: () -> Unit) {
+    //Menampilkan dialog konfirmasi jika terjadi perubahan data pada formulir
+    AlertDialog.Builder(context).apply {
+        setTitle("Data Berubah!")
+        setMessage("Apakah yakin ingin mengubah data?")
+        setPositiveButton("Ubah") { _, _ ->
+
+            // Menyimpan data baru dan mengarahkan pengguna ke halaman utama
+            saveData()
+            navigatePage(context, MainActivity::class.java)
+        }
+        setNegativeButton(R.string.cancel, null)
+    }.create().show()
+}
+

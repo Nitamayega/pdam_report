@@ -1,18 +1,20 @@
 package com.pdam.report.ui.officer
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.text.Editable
+import android.text.TextWatcher
+import android.util.Log
 import android.view.MenuItem
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.MutableLiveData
 import com.bumptech.glide.Glide
 import com.google.android.gms.tasks.Task
 import com.google.firebase.database.DataSnapshot
@@ -26,6 +28,9 @@ import com.pdam.report.data.SambunganData
 import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ActivityPemasanganGpsBinding
 import com.pdam.report.utils.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -34,13 +39,10 @@ class PemasanganGPSActivity : AppCompatActivity() {
     // Firebase Database
     private val databaseReference = FirebaseDatabase.getInstance().reference
 
-    // User Management
-    private val userManager by lazy { UserManager() }
-    private lateinit var user: UserData
-
     // Intent-related
-    private val firebaseKey by lazy {
-        intent.getStringExtra(PemasanganKelayakanActivity.EXTRA_FIREBASE_KEY)
+    private val user by lazy { intent.getParcelableExtra<UserData>(PemasanganSambunganActivity.EXTRA_USER_DATA) }
+    private val dataCustomer by lazy {
+        intent.getParcelableExtra<SambunganData>(PemasanganSambunganActivity.EXTRA_CUSTOMER_DATA)
     }
 
     // Image Handling
@@ -52,14 +54,11 @@ class PemasanganGPSActivity : AppCompatActivity() {
     // View Binding
     private val binding by lazy { ActivityPemasanganGpsBinding.inflate(layoutInflater) }
 
-    // Customer Data
-    private val customerData by lazy {
-        intent.getIntExtra(
-            PemasanganKelayakanActivity.EXTRA_CUSTOMER_DATA,
-            0
-        )
-    }
+    private val isDataChanged = MutableLiveData<Boolean>()
 
+
+
+    @SuppressLint("UseCompatLoadingForDrawables")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -74,19 +73,18 @@ class PemasanganGPSActivity : AppCompatActivity() {
         }
 
         // Persiapan tombol dan data pengguna
+        monitorDataChanges()
         setupButtons()
         setUser()
 
-        // Memuat data dari Firebase jika tersedia
-        firebaseKey?.let { loadDataFromFirebase(it) }
     }
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-
             // Menangani tombol back: Navigasi ke PemasanganSambungan dan menambahkan firebaseKey sebagai ekstra dalam Intent
             val intent = Intent(this@PemasanganGPSActivity, PemasanganSambunganActivity::class.java)
-            intent.putExtra(PemasanganSambunganActivity.EXTRA_FIREBASE_KEY, firebaseKey)
+            intent.putExtra(PemasanganSambunganActivity.EXTRA_CUSTOMER_DATA, dataCustomer)
+            intent.putExtra(PemasanganSambunganActivity.EXTRA_USER_DATA, user)
             startActivity(intent)
             finish()
         }
@@ -94,7 +92,6 @@ class PemasanganGPSActivity : AppCompatActivity() {
 
     @Suppress("DEPRECATION")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-
         // Menangani tindakan saat item di ActionBar diklik (tombol back di ActionBar)
         if (item.itemId == android.R.id.home) {
             onBackPressed()
@@ -104,10 +101,12 @@ class PemasanganGPSActivity : AppCompatActivity() {
     }
 
     private fun setUser() {
-
-        // Memperoleh data pengguna melalui userManager dan menginisialisasi variabel user
-        userManager.fetchUserAndSetupData {
-            user = userManager.getUser()
+        if (dataCustomer != null) {
+            val setRole = user?.team == 0
+            setCustomerData(dataCustomer!!, setRole)
+            if (dataCustomer?.data == 3) {
+                displayData(dataCustomer!!, setRole)
+            }
         }
     }
 
@@ -143,7 +142,7 @@ class PemasanganGPSActivity : AppCompatActivity() {
 
         // Menetapkan tindakan yang dilakukan saat tombol "Hapus" diklik
         binding.btnHapus.setOnClickListener {
-            if (customerData == 2) {
+            if (dataCustomer?.data == 2) {
                 clearData()
             } else {
                 deleteData()
@@ -173,7 +172,7 @@ class PemasanganGPSActivity : AppCompatActivity() {
 
         // Mendapatkan referensi ke lokasi data yang akan dihapus
         val listCustomerRef = databaseReference.child("listPemasangan")
-        val customerRef = firebaseKey?.let { listCustomerRef.child(it) }
+        val customerRef = dataCustomer?.firebaseKey?.let { listCustomerRef.child(it) }
 
         // Mendengarkan perubahan data pada lokasi yang akan dihapus
         customerRef?.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -216,7 +215,7 @@ class PemasanganGPSActivity : AppCompatActivity() {
         val isRequiredValid = jenisPekerjaan.isNotEmpty() && pw.isNotEmpty() && nomorKL.isNotEmpty() && name.isNotEmpty() && address.isNotEmpty() && rt.isNotEmpty() && rw.isNotEmpty() && kelurahan.isNotEmpty() && kecamatan.isNotEmpty() && x.isNotEmpty() && y.isNotEmpty() && z.isNotEmpty() && nomorMeter.isNotEmpty() && nomorSegel.isNotEmpty()
 
         // Memeriksa validitas file gambar jika pengguna adalah petugas lapangan
-        val isImageFilesValid = user.team == 0 || (firstImageFile != null && secondImageFile != null && thirdImageFile != null)
+        val isImageFilesValid = user?.team == 0 || (firstImageFile != null && secondImageFile != null && thirdImageFile != null)
 
         // Return true jika semua validasi terpenuhi
         return isRequiredValid && isImageFilesValid
@@ -302,40 +301,16 @@ class PemasanganGPSActivity : AppCompatActivity() {
         koorY: String,
         koorZ: String,
         nomorMeter: String,
-        nomorSegel: String,
+        nomorSegel: String
     ) {
-
-        val customerRef =
+        val customerRef = dataCustomer?.firebaseKey?.let {
             databaseReference.child("listPemasangan")
-                .child(firebaseKey.toString())
-
-        val updatedValues = mapOf(
-            "jenisPekerjaan" to jenisPekerjaan,
-            "pw" to pw.toInt(),
-            "nomorKL" to nomorKL,
-            "name" to name,
-            "address" to address,
-            "rt" to rt,
-            "rw" to rw,
-            "kelurahan" to kelurahan,
-            "kecamatan" to kecamatan,
-            "xkoordinat" to koorX,
-            "ykoordinat" to koorY,
-            "zkoordinat" to koorZ,
-            "nomorMeter" to nomorMeter,
-            "nomorSegel" to nomorSegel,
-        )
-
-        customerRef.updateChildren(updatedValues)
-            .addOnCompleteListener { task ->
-                handleSaveCompletionOrFailure(task)
-            }
-
-        if (user.team != 0) {
-
+                .child(it)
+        }
+        if (user?.team != 0) {
             // Bagian untuk tim petugas lapangan
-
             val storageReference = FirebaseStorage.getInstance().reference
+
             val dokumentasi3Ref =
                 storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi3_konstruksi.jpg")
             val dokumentasi4Ref =
@@ -343,54 +318,78 @@ class PemasanganGPSActivity : AppCompatActivity() {
             val dokumentasi5Ref =
                 storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi5_perspektif.jpg")
 
+            showToast(this@PemasanganGPSActivity, R.string.compressing_image)
 
-            lifecycleScope.launch {
-                showToast(this@PemasanganGPSActivity, R.string.compressing_image)
-                val firstImageFile = firstImageFile?.reduceFileImageInBackground()
-                val secondImageFile = secondImageFile?.reduceFileImageInBackground()
-                val thirdImageFile = thirdImageFile?.reduceFileImageInBackground()
+            CoroutineScope(Dispatchers.IO).launch {
+                val firstImageDeferred = async { firstImageFile?.reduceFileImageInBackground() }
+                val secondImageDeferred = async { secondImageFile?.reduceFileImageInBackground() }
+                val thirdImageDeferred = async { thirdImageFile?.reduceFileImageInBackground() }
 
-                // Upload image 3
-                dokumentasi3Ref.putFile(Uri.fromFile(firstImageFile)).addOnSuccessListener {
-                    dokumentasi3Ref.downloadUrl.addOnSuccessListener { uri1 ->
-                        val dokumentasi3 = uri1.toString()
+                val dokumentasi3 = uploadImageAndGetUrl(dokumentasi3Ref, firstImageDeferred.await())
+                val dokumentasi4 = uploadImageAndGetUrl(dokumentasi4Ref, secondImageDeferred.await())
+                val dokumentasi5 = uploadImageAndGetUrl(dokumentasi5Ref, thirdImageDeferred.await())
 
-                        // Upload image 4
-                        dokumentasi4Ref.putFile(Uri.fromFile(secondImageFile))
-                            .addOnSuccessListener {
-                                dokumentasi4Ref.downloadUrl.addOnSuccessListener { uri2 ->
-                                    val dokumentasi4 = uri2.toString()
 
-                                    // Upload image 5
-                                    dokumentasi5Ref.putFile(Uri.fromFile(thirdImageFile))
-                                        .addOnSuccessListener {
-                                            dokumentasi5Ref.downloadUrl.addOnSuccessListener { uri3 ->
-                                                val dokumentasi5 = uri3.toString()
-
-                                                // Update data pelanggan yang sudah ada
-                                                val updatedValues = mapOf(
-                                                    "dokumentasi3" to dokumentasi3,
-                                                    "dokumentasi4" to dokumentasi4,
-                                                    "dokumentasi5" to dokumentasi5,
-                                                    "data" to 3
-                                                )
-
-                                                customerRef.updateChildren(updatedValues)
-                                                    .addOnCompleteListener { task ->
-                                                        handleSaveCompletionOrFailure(task)
-                                                    }
-                                            }
-                                        }
-                                }
-                            }
+                if (customerRef != null) {
+                    val data = mapOf(
+                        "updateInstallDate" to currentDate,
+                        "petugas" to user?.username,
+                        "jenisPekerjaan" to jenisPekerjaan,
+                        "pw" to pw.toInt(),
+                        "nomorKL" to nomorKL,
+                        "name" to name,
+                        "address" to address,
+                        "rt" to rt,
+                        "rw" to rw,
+                        "kelurahan" to kelurahan,
+                        "kecamatan" to kecamatan,
+                        "xkoordinat" to koorX,
+                        "ykoordinat" to koorY,
+                        "zkoordinat" to koorZ,
+                        "nomorMeter" to nomorMeter,
+                        "nomorSegel" to nomorSegel,
+                        "dokumentasi3" to dokumentasi3,
+                        "dokumentasi4" to dokumentasi4,
+                        "dokumentasi5" to dokumentasi5,
+                        "data" to 3
+                    )
+                    customerRef.updateChildren(data).addOnCompleteListener { task ->
+                        handleSaveCompletionOrFailure(task)
                     }
                 }
+
+            }
+
+        }  else {
+            //Bagian untuk admin
+
+            // Update data pelanggan yang sudah ada
+            val updatedValues = mapOf(
+                "jenisPekerjaan" to jenisPekerjaan,
+                "pw" to pw.toInt(),
+                "nomorKL" to nomorKL,
+                "name" to name,
+                "address" to address,
+                "rt" to rt,
+                "rw" to rw,
+                "kelurahan" to kelurahan,
+                "kecamatan" to kecamatan,
+                "xkoordinat" to koorX,
+                "ykoordinat" to koorY,
+                "zkoordinat" to koorZ,
+                "nomorMeter" to nomorMeter,
+                "nomorSegel" to nomorSegel
+            )
+
+            // Memperbarui data pelanggan yang sudah ada di database
+            customerRef?.updateChildren(updatedValues)?.addOnCompleteListener { task ->
+                handleSaveCompletionOrFailure(task)
             }
         }
     }
 
-    private fun handleSaveCompletionOrFailure(task: Task<Void>) {
 
+    private fun handleSaveCompletionOrFailure(task: Task<Void>) {
         // Menampilkan atau menyembunyikan loading, menampilkan pesan sukses atau gagal, dan menyelesaikan aktivitas
         showLoading(true, binding.progressBar, binding.btnSimpan, binding.btnHapus)
         if (task.isSuccessful) {
@@ -402,78 +401,94 @@ class PemasanganGPSActivity : AppCompatActivity() {
         finish()
     }
 
-    fun isDataChange(data: SambunganData, jenisPekerjaan: String, pw: String, nomorKL: String, name: String, address: String, rt: String, rw: String, kelurahan: String, kecamatan: String, x: String, y: String, z: String, nomorMeter: String, nomorSegel: String): Boolean {
-
-        // Membandingkan setiap data apakah ada perubahan atau tidak
-        return jenisPekerjaan != data.jenisPekerjaan ||
-                pw != data.pw.toString() ||
-                nomorKL != data.nomorKL ||
-                name != data.name ||
-                address != data.address ||
-                rt != data.rt ||
-                rw != data.rw ||
-                kelurahan != data.kelurahan ||
-                kecamatan != data.kecamatan ||
-                x != data.xkoordinat ||
-                y != data.ykoordinat ||
-                z != data.zkoordinat ||
-                nomorMeter != data.nomorMeter ||
-                nomorSegel != data.nomorSegel
+    private fun monitorDataChanges() {
+        binding.apply {
+            edtVerifikasiPemasangan.addTextChangedListener(textWatcher)
+            edtPw.addTextChangedListener(textWatcher)
+            edtNomorKl.addTextChangedListener(textWatcher)
+            edtNamaPelanggan.addTextChangedListener(textWatcher)
+            edtAlamatPelanggan.addTextChangedListener(textWatcher)
+            edtRt.addTextChangedListener(textWatcher)
+            edtRw.addTextChangedListener(textWatcher)
+            edtKelurahan.addTextChangedListener(textWatcher)
+            edtKecamatan.addTextChangedListener(textWatcher)
+            edtX.addTextChangedListener(textWatcher)
+            edtY.addTextChangedListener(textWatcher)
+            edtZ.addTextChangedListener(textWatcher)
+            edtNomorMeter.addTextChangedListener(textWatcher)
+            edtNomorSegel.addTextChangedListener(textWatcher)
+        }
     }
 
-    private fun showDataChangeDialog() {
-
-        //Menampilkan dialog konfirmasi jika terjadi perubahan data pada formulir
-        AlertDialog.Builder(this).apply {
-            setTitle("Data Berubah!")
-            setMessage("Apakah yakin ingin mengubah data?")
-            setPositiveButton("Ubah") { _, _ ->
-
-                // Menyimpan data baru dan mengarahkan pengguna ke halaman utama
-                saveData()
-                navigatePage(this@PemasanganGPSActivity, MainActivity::class.java)
+    private fun updateButtonText() {
+        binding.btnSimpan.apply {
+            text = if (isDataChanged.value == true) {
+                getString(R.string.simpan)
+            } else {
+                getString(R.string.finish)
             }
-            setNegativeButton(R.string.cancel, null)
-        }.create().show()
+        }
     }
 
-    private fun loadDataFromFirebase(firebaseKey: String) {
-
-        // Mengambil referensi data dari Firebase menggunakan kunci yang diberikan
-        val customerRef = databaseReference.child("listPemasangan").child(firebaseKey)
-
-        // Mendaftar event listener untuk sekali pembacaan data
-        customerRef.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-
-                // Memeriksa apakah data tersedia
-                if (snapshot.exists()) {
-
-                    // Mengambil data pelanggan dari snapshot
-                    val dataCustomer = snapshot.getValue(SambunganData::class.java)
-
-                    // Menampilkan data pelanggan tergantung pada tim pengguna
-                    if (dataCustomer != null) {
-                        val setRole = user.team == 0
-                        setCustomerData(dataCustomer, setRole)
-
-                        if (dataCustomer.data != 1) {
-                            displayData(dataCustomer, setRole)
-                        }
-                    }
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-
-                // Menampilkan pesan kesalahan jika mengakses data gagal
-                showToast(
-                    this@PemasanganGPSActivity,
-                    "${R.string.failed_access_data}: ${error.message}".toInt()
-                )
-            }
-        })
+    private fun isDifferent(newData: String, oldData: String): Boolean {
+        // Fungsi ini membandingkan dua string dan mengembalikan true jika berbeda, false jika sama.
+        return newData != oldData
     }
+
+    private fun isDataChanged(): Boolean {
+        // Di sini, Anda perlu membandingkan data yang ada dengan data yang sebelumnya.
+        // Jika ada perubahan, kembalikan true, jika tidak, kembalikan false.
+        return isDifferent(binding.edtVerifikasiPemasangan.text.toString(), dataCustomer?.jenisPekerjaan.toString()) ||
+                isDifferent(binding.edtPw.text.toString(), dataCustomer?.pw.toString()) ||
+                isDifferent(binding.edtNomorKl.text.toString(), dataCustomer?.nomorKL.toString()) ||
+                isDifferent(binding.edtNamaPelanggan.text.toString(), dataCustomer?.name.toString()) ||
+                isDifferent(binding.edtAlamatPelanggan.text.toString(), dataCustomer?.address.toString()) ||
+                isDifferent(binding.edtRt.text.toString(), dataCustomer?.rt.toString()) ||
+                isDifferent(binding.edtRw.text.toString(), dataCustomer?.rw.toString()) ||
+                isDifferent(binding.edtKelurahan.text.toString(), dataCustomer?.kelurahan.toString()) ||
+                isDifferent(binding.edtKecamatan.text.toString(), dataCustomer?.kecamatan.toString()) ||
+                isDifferent(binding.edtX.text.toString(), dataCustomer?.xkoordinat.toString()) ||
+                isDifferent(binding.edtY.text.toString(), dataCustomer?.ykoordinat.toString()) ||
+                isDifferent(binding.edtZ.text.toString(), dataCustomer?.zkoordinat.toString()) ||
+                isDifferent(binding.edtNomorMeter.text.toString(), dataCustomer?.nomorMeter.toString()) ||
+                isDifferent(binding.edtNomorSegel.text.toString(), dataCustomer?.nomorSegel.toString())
+    }
+
+
+    private val textWatcher = object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            // Not used
+        }
+
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            isDataChanged.value = isDataChanged()
+            Log.d("GPS", "onTextChanged: ${isDataChanged.value}")
+            updateButtonText()
+        }
+
+        override fun afterTextChanged(s: Editable?) {
+            // Not used
+        }
+    }
+
+//    fun isDataChange(data: SambunganData, jenisPekerjaan: String, pw: String, nomorKL: String, name: String, address: String, rt: String, rw: String, kelurahan: String, kecamatan: String, x: String, y: String, z: String, nomorMeter: String, nomorSegel: String): Boolean {
+//
+//        // Membandingkan setiap data apakah ada perubahan atau tidak
+//        return jenisPekerjaan != data.jenisPekerjaan ||
+//                pw != data.pw.toString() ||
+//                nomorKL != data.nomorKL ||
+//                name != data.name ||
+//                address != data.address ||
+//                rt != data.rt ||
+//                rw != data.rw ||
+//                kelurahan != data.kelurahan ||
+//                kecamatan != data.kecamatan ||
+//                x != data.xkoordinat ||
+//                y != data.ykoordinat ||
+//                z != data.zkoordinat ||
+//                nomorMeter != data.nomorMeter ||
+//                nomorSegel != data.nomorSegel
+//    }
 
     private fun setCustomerData(dataCustomer: SambunganData, status: Boolean) {
 
@@ -558,7 +573,7 @@ class PemasanganGPSActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("SetTextI18n")
+    @SuppressLint("SetTextI18n", "UseCompatLoadingForDrawables")
     private fun setAnotherCustomerData(dataCustomer: SambunganData, status: Boolean) {
         binding.apply {
             edtNomorKl.setText(dataCustomer.nomorKL).apply {
@@ -570,7 +585,7 @@ class PemasanganGPSActivity : AppCompatActivity() {
 
             updatedby.apply {
                 text =
-                    "Update by " + dataCustomer.petugas + " at " + dataCustomer.updateVerifDate.toString()
+                    "Update by " + dataCustomer.petugas + " at " + milisToDateTime(dataCustomer.updateInstallDate)
                 isEnabled = status
                 isFocusable = status
                 visibility = android.view.View.VISIBLE
@@ -666,36 +681,17 @@ class PemasanganGPSActivity : AppCompatActivity() {
     }
 
     private fun displayData(dataCustomer: SambunganData, status: Boolean) {
-        setCustomerData(dataCustomer, status)
-
+        setAnotherCustomerData(dataCustomer, status)
         // Mengganti teks tombol Simpan untuk melanjutkan ke halaman berikutnya
         binding.btnSimpan.apply {
-            if (isDataChange(
-                    dataCustomer,
-                    binding.edtVerifikasiPemasangan.text.toString(),
-                    binding.edtPw.text.toString(),
-                    binding.edtNomorKl.text.toString(),
-                    binding.edtNamaPelanggan.text.toString(),
-                    binding.edtAlamatPelanggan.text.toString(),
-                    binding.edtRt.text.toString(),
-                    binding.edtRw.text.toString(),
-                    binding.edtKelurahan.text.toString(),
-                    binding.edtKecamatan.text.toString(),
-                    binding.edtX.text.toString(),
-                    binding.edtY.text.toString(),
-                    binding.edtZ.text.toString(),
-                    binding.edtNomorMeter.text.toString(),
-                    binding.edtNomorSegel.text.toString(),
-                )
-            ) {
-                text = getString(R.string.simpan)
-                showDataChangeDialog()
-                setCustomerData(dataCustomer, status)
-                return@apply
-            }
+            isDataChanged.value = false
+            updateButtonText()
 
-            text = getString(R.string.finish)
             setOnClickListener {
+                if (isDataChanged.value == true) {
+                    showDataChangeDialog(this@PemasanganGPSActivity, ::saveData)
+                    return@setOnClickListener
+                }
                 navigatePage(this@PemasanganGPSActivity, MainActivity::class.java, true)
                 finish()
             }
@@ -730,70 +726,72 @@ class PemasanganGPSActivity : AppCompatActivity() {
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == RESULT_OK) {
-
-
             // Menyimpan foto yang diambil ke file yang sesuai
             val myFile = File(currentPhotoPath)
             myFile.let { file ->
-                if (imageNumber == 1) {
-                    firstImageFile = file
-                    binding.itemImage1.text =
-                        System.currentTimeMillis().toString() + "_konstruksi.jpg"
+                when (imageNumber) {
+                    1 -> {
+                        firstImageFile = file
+                        binding.itemImage1.text =
+                            System.currentTimeMillis().toString() + "_konstruksi.jpg"
 
-                    // Menampilkan foto pertama di ImageView menggunakan Glide
-                    Glide.with(this@PemasanganGPSActivity)
-                        .load(firstImageFile)
-                        .into(binding.imageView1)
+                        // Menampilkan foto pertama di ImageView menggunakan Glide
+                        Glide.with(this@PemasanganGPSActivity)
+                            .load(firstImageFile)
+                            .into(binding.imageView1)
 
-                    // Menambahkan listener untuk melihat foto pertama dalam tampilan layar penuh
-                    binding.imageView1.setOnClickListener {
-                        supportFragmentManager.beginTransaction()
-                            .add(
-                                FullScreenImageDialogFragment(firstImageFile.toString()),
-                                "FullScreenImageDialogFragment"
-                            )
-                            .addToBackStack(null)
-                            .commit()
+                        // Menambahkan listener untuk melihat foto pertama dalam tampilan layar penuh
+                        binding.imageView1.setOnClickListener {
+                            supportFragmentManager.beginTransaction()
+                                .add(
+                                    FullScreenImageDialogFragment(firstImageFile.toString()),
+                                    "FullScreenImageDialogFragment"
+                                )
+                                .addToBackStack(null)
+                                .commit()
+                        }
                     }
-                } else if (imageNumber == 2) {
-                    secondImageFile = file
-                    binding.itemImage2.text =
-                        System.currentTimeMillis().toString() + "_meter.jpg"
+                    2 -> {
+                        secondImageFile = file
+                        binding.itemImage2.text =
+                            System.currentTimeMillis().toString() + "_meter.jpg"
 
-                    // Menampilkan foto kedua di ImageView menggunakan Glide
-                    Glide.with(this@PemasanganGPSActivity)
-                        .load(secondImageFile)
-                        .into(binding.imageView2)
+                        // Menampilkan foto kedua di ImageView menggunakan Glide
+                        Glide.with(this@PemasanganGPSActivity)
+                            .load(secondImageFile)
+                            .into(binding.imageView2)
 
-                    // Menambahkan listener untuk melihat foto kedua dalam tampilan layar penuh
-                    binding.imageView2.setOnClickListener {
-                        supportFragmentManager.beginTransaction()
-                            .add(
-                                FullScreenImageDialogFragment(secondImageFile.toString()),
-                                "FullScreenImageDialogFragment"
-                            )
-                            .addToBackStack(null)
-                            .commit()
+                        // Menambahkan listener untuk melihat foto kedua dalam tampilan layar penuh
+                        binding.imageView2.setOnClickListener {
+                            supportFragmentManager.beginTransaction()
+                                .add(
+                                    FullScreenImageDialogFragment(secondImageFile.toString()),
+                                    "FullScreenImageDialogFragment"
+                                )
+                                .addToBackStack(null)
+                                .commit()
+                        }
                     }
-                } else if (imageNumber == 3) {
-                    thirdImageFile = file
-                    binding.itemImage3.text =
-                        System.currentTimeMillis().toString() + "_perspektif.jpg"
+                    3 -> {
+                        thirdImageFile = file
+                        binding.itemImage3.text =
+                            System.currentTimeMillis().toString() + "_perspektif.jpg"
 
-                    // Menampilkan foto ketiga di ImageView menggunakan Glide
-                    Glide.with(this@PemasanganGPSActivity)
-                        .load(thirdImageFile)
-                        .into(binding.imageView3)
+                        // Menampilkan foto ketiga di ImageView menggunakan Glide
+                        Glide.with(this@PemasanganGPSActivity)
+                            .load(thirdImageFile)
+                            .into(binding.imageView3)
 
-                    // Menambahkan listener untuk melihat foto ketiga dalam tampilan layar penuh
-                    binding.imageView3.setOnClickListener {
-                        supportFragmentManager.beginTransaction()
-                            .add(
-                                FullScreenImageDialogFragment(thirdImageFile.toString()),
-                                "FullScreenImageDialogFragment"
-                            )
-                            .addToBackStack(null)
-                            .commit()
+                        // Menambahkan listener untuk melihat foto ketiga dalam tampilan layar penuh
+                        binding.imageView3.setOnClickListener {
+                            supportFragmentManager.beginTransaction()
+                                .add(
+                                    FullScreenImageDialogFragment(thirdImageFile.toString()),
+                                    "FullScreenImageDialogFragment"
+                                )
+                                .addToBackStack(null)
+                                .commit()
+                        }
                     }
                 }
             }
@@ -830,7 +828,7 @@ class PemasanganGPSActivity : AppCompatActivity() {
         }
 
     companion object {
-        const val EXTRA_FIREBASE_KEY = "firebase_key"
+        const val EXTRA_USER_DATA = "user_data"
         const val EXTRA_CUSTOMER_DATA = "customer_data"
     }
 }

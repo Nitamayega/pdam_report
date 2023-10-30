@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.pdam.report.data.SambunganData
+import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ReportItemRowBinding
 import com.pdam.report.ui.officer.PemasanganKelayakanActivity
 import com.pdam.report.ui.officer.PemutusanActivity
@@ -13,6 +14,7 @@ import com.pdam.report.ui.officer.PemutusanActivity
 class MainAdapter(
     private val customerList: ArrayList<SambunganData>,
     private val fragmentType: Int,
+    private val userData: UserData
 ) :
     RecyclerView.Adapter<MainAdapter.CustomerViewHolder>() {
 
@@ -35,7 +37,8 @@ class MainAdapter(
                 }
             )
 
-            intent.putExtra(PemasanganKelayakanActivity.EXTRA_FIREBASE_KEY, customer.firebaseKey)
+            intent.putExtra(PemasanganKelayakanActivity.EXTRA_CUSTOMER_DATA, customer)
+            intent.putExtra(PemasanganKelayakanActivity.EXTRA_USER_DATA, userData)
             holder.itemView.context.startActivity(intent)
         }
     }

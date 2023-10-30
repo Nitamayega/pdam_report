@@ -21,6 +21,7 @@ data class PresenceData(
     val photoUrl: String = "",
 ) : Parcelable
 
+@Parcelize
 data class SambunganData(
     val firebaseKey: String = "",
     val currentDate: Long = 0,
@@ -54,7 +55,7 @@ data class SambunganData(
     val dokumentasi4: String = "",
     val dokumentasi5: String = "",
     val data: Int = 0,
-)
+) : Parcelable
 
 data class PemutusanData(
     val firebaseKey: String = "",

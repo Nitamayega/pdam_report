@@ -7,13 +7,13 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.MenuItem
+import android.view.View.VISIBLE
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
-import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -23,17 +23,20 @@ import com.google.firebase.storage.FirebaseStorage
 import com.pdam.report.MainActivity
 import com.pdam.report.R
 import com.pdam.report.data.PemutusanData
+import com.pdam.report.data.SambunganData
 import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ActivityPemutusanBinding
 import com.pdam.report.utils.FullScreenImageDialogFragment
-import com.pdam.report.utils.UserManager
 import com.pdam.report.utils.createCustomTempFile
+import com.pdam.report.utils.milisToDateTime
 import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.parsingNameImage
 import com.pdam.report.utils.reduceFileImageInBackground
 import com.pdam.report.utils.showDeleteConfirmationDialog
 import com.pdam.report.utils.showLoading
 import com.pdam.report.utils.showToast
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -43,16 +46,14 @@ class PemutusanActivity : AppCompatActivity() {
 
     private val databaseReference = FirebaseDatabase.getInstance().reference
 
-    private val firebaseKey by lazy { intent.getStringExtra(PemutusanActivity.EXTRA_FIREBASE_KEY) }
-    private val customerData by lazy {
-        intent.getIntExtra(
-            PemutusanActivity.EXTRA_CUSTOMER_DATA,
-            0
-        )
+    // Intent-related
+    private val dataCustomer by lazy {
+        intent.getParcelableExtra("customer_data") as? SambunganData
     }
 
-    private val userManager by lazy { UserManager() }
-    private lateinit var user: UserData
+    private val user by lazy {
+        intent.getParcelableExtra("user_data") as? UserData
+    }
 
     private var imageFile: File? = null
 
@@ -67,9 +68,11 @@ class PemutusanActivity : AppCompatActivity() {
 
         setupDropdownField()
         setupButtons()
-        setUser()
-        firebaseKey?.let { loadDataFromFirebase(it) }
-        Log.d("firebaseKeyOnAddFirst", firebaseKey.toString())
+//        setUser()
+        dataCustomer?.let {
+            loadDataFromFirebase(it.firebaseKey)
+            Log.d("PemutusanActivity", "onCreate: ${it.firebaseKey}")
+        }
     }
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
@@ -79,11 +82,11 @@ class PemutusanActivity : AppCompatActivity() {
         }
     }
 
-    private fun setUser() {
-        userManager.fetchUserAndSetupData {
-            user = userManager.getUser()
-        }
-    }
+//    private fun setUser() {
+//        userManager.fetchUserAndSetupData {
+//            user = userManager.getUser()
+//        }
+//    }
 
     private fun setupDropdownField() {
         // Populate a dropdown field with data from resources
@@ -98,7 +101,7 @@ class PemutusanActivity : AppCompatActivity() {
         binding.btnSimpan.setOnClickListener { saveData() }
 
         binding.btnHapus.setOnClickListener {
-            if (firebaseKey == null) {
+            if (dataCustomer?.firebaseKey == null) {
                 clearData()
             } else {
                 deleteData()
@@ -192,8 +195,8 @@ class PemutusanActivity : AppCompatActivity() {
         val dokumentasi1Ref =
             storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi1_dokumen.jpg")
 
-        lifecycleScope.launch {
-            showToast(this@PemutusanActivity, R.string.compressing_image)
+        showToast(this@PemutusanActivity, R.string.compressing_image)
+        CoroutineScope(Dispatchers.IO).launch {
             val imageFile = imageFile?.reduceFileImageInBackground()
 
             // Upload image 1
@@ -240,24 +243,26 @@ class PemutusanActivity : AppCompatActivity() {
 
 
         if (newCustomerId != null) {
-            val data = PemutusanData(
-                firebaseKey = newCustomerId,
-                currentDate = currentDate,
-                petugas = user.username,
-                jenisPekerjaan = jenisPekerjaan,
-                pw = pw.toInt(),
-                nomorKL = nomorKL,
-                name = name,
-                address = address,
-                rt = rt,
-                rw = rw,
-                kelurahan = kelurahan,
-                kecamatan = kecamatan,
-                nomorMeter = nomorMeter,
-                keterangan = keterangan,
-                dokumentasi = dokumentasi,
-                dailyTeam = user.dailyTeam
-            )
+            val data = user?.let {
+                PemutusanData(
+                    firebaseKey = newCustomerId,
+                    currentDate = currentDate,
+                    petugas = it.username,
+                    jenisPekerjaan = jenisPekerjaan,
+                    pw = pw.toInt(),
+                    nomorKL = nomorKL,
+                    name = name,
+                    address = address,
+                    rt = rt,
+                    rw = rw,
+                    kelurahan = kelurahan,
+                    kecamatan = kecamatan,
+                    nomorMeter = nomorMeter,
+                    keterangan = keterangan,
+                    dokumentasi = dokumentasi,
+                    dailyTeam = it.dailyTeam
+                )
+            }
 
             newCustomerRef.setValue(data).addOnCompleteListener { task ->
                 showLoading(true, binding.progressBar, binding.btnSimpan, binding.btnHapus)
@@ -302,7 +307,7 @@ class PemutusanActivity : AppCompatActivity() {
 
     private fun deleteData() {
         val listCustomerRef = databaseReference.child("listPemutusan")
-        val customerRef = firebaseKey?.let { listCustomerRef.child(it) }
+        val customerRef = dataCustomer?.firebaseKey?.let { listCustomerRef.child(it) }
 
         customerRef?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -387,6 +392,7 @@ class PemutusanActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private fun displayCustomerData(dataCustomer: PemutusanData) {
         binding.apply {
             edtPemasanganSambungan.setText(dataCustomer.jenisPekerjaan).apply {
@@ -396,12 +402,12 @@ class PemutusanActivity : AppCompatActivity() {
                 }
             }
 
-            addedby.apply {
+            updatedby.apply {
                 text =
-                    "Added by " + dataCustomer.petugas + " at " + dataCustomer.currentDate.toString()
+                    "Added by " + dataCustomer.petugas + " at " + milisToDateTime(dataCustomer.currentDate)
                 isEnabled = false
                 isFocusable = false
-                visibility = android.view.View.VISIBLE
+                visibility = VISIBLE
             }
 
             dropdownPw.setText(dataCustomer.pw.toString()).apply {

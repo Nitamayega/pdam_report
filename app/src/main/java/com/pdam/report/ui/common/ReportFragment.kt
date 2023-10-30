@@ -16,17 +16,15 @@ import com.pdam.report.data.UserData
 import com.pdam.report.databinding.FragmentReportBinding
 import com.pdam.report.utils.setRecyclerViewVisibility
 import com.pdam.report.utils.showLoading
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 class ReportFragment : Fragment(R.layout.fragment_report) {
     private var _binding: FragmentReportBinding? = null
-    private val adapterPemasangan by lazy { MainAdapter(ArrayList(), 0) }
-    private val adapterPemutusan by lazy { MainAdapter(ArrayList(), 1) }
-    private lateinit var user: UserData
+    private val args by lazy { requireArguments() }
+    private val user by lazy { args.getParcelable<UserData>("user")!! }
+    private val adapterPemasangan by lazy { MainAdapter(ArrayList(), 0, user) }
+    private val adapterPemutusan by lazy { MainAdapter(ArrayList(), 1, user) }
     private val binding get() = _binding!!
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -37,8 +35,6 @@ class ReportFragment : Fragment(R.layout.fragment_report) {
     override fun onStart() {
         super.onStart()
         lifecycleScope.launch {
-            val args = requireArguments()
-            user = args.getParcelable("user")!!
             if (args.getInt(ARG_SECTION_NUMBER) == 1) {
                 setContentPemasangan(user)
                 binding.swipeRefreshLayout.setOnRefreshListener {
