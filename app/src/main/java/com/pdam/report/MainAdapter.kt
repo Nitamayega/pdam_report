@@ -28,18 +28,16 @@ class MainAdapter(
         val customer = customerList[position]
         holder.bind(customer)
         holder.itemView.setOnClickListener {
-            val intent = Intent(
-                holder.itemView.context,
-                if (fragmentType == 0) {
-                    PemasanganKelayakanActivity::class.java
-                } else {
-                    PemutusanActivity::class.java
-                }
-            )
-
-            intent.putExtra(PemasanganKelayakanActivity.EXTRA_CUSTOMER_DATA, customer)
-            intent.putExtra(PemasanganKelayakanActivity.EXTRA_USER_DATA, userData)
-            holder.itemView.context.startActivity(intent)
+            if (fragmentType == 0) {
+                val intent = Intent(holder.itemView.context, PemasanganKelayakanActivity::class.java)
+                intent.putExtra(PemasanganKelayakanActivity.EXTRA_CUSTOMER_DATA, customer)
+                intent.putExtra(PemasanganKelayakanActivity.EXTRA_USER_DATA, userData)
+                holder.itemView.context.startActivity(intent)
+            } else {
+                val intent = Intent(holder.itemView.context, PemutusanActivity::class.java)
+                intent.putExtra(PemutusanActivity.EXTRA_FIREBASE_KEY, customer.firebaseKey)
+                holder.itemView.context.startActivity(intent)
+            }
         }
     }
 

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.UserManager
 import android.provider.MediaStore
 import android.util.Log
 import android.view.MenuItem
@@ -26,19 +27,11 @@ import com.pdam.report.data.PemutusanData
 import com.pdam.report.data.SambunganData
 import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ActivityPemutusanBinding
-import com.pdam.report.utils.FullScreenImageDialogFragment
-import com.pdam.report.utils.createCustomTempFile
-import com.pdam.report.utils.milisToDateTime
-import com.pdam.report.utils.navigatePage
-import com.pdam.report.utils.parsingNameImage
-import com.pdam.report.utils.reduceFileImageInBackground
-import com.pdam.report.utils.showDeleteConfirmationDialog
-import com.pdam.report.utils.showLoading
-import com.pdam.report.utils.showToast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
+import com.pdam.report.utils.*
 
 class PemutusanActivity : AppCompatActivity() {
 
@@ -47,13 +40,12 @@ class PemutusanActivity : AppCompatActivity() {
     private val databaseReference = FirebaseDatabase.getInstance().reference
 
     // Intent-related
-    private val dataCustomer by lazy {
-        intent.getParcelableExtra("customer_data") as? SambunganData
+    private val firebaseKey by lazy {
+        intent.getStringExtra("firebase_key")
     }
 
-    private val user by lazy {
-        intent.getParcelableExtra("user_data") as? UserData
-    }
+    private val userManager by lazy { UserManager() }
+    private var user: UserData? = null
 
     private var imageFile: File? = null
 
@@ -68,11 +60,8 @@ class PemutusanActivity : AppCompatActivity() {
 
         setupDropdownField()
         setupButtons()
-//        setUser()
-        dataCustomer?.let {
-            loadDataFromFirebase(it.firebaseKey)
-            Log.d("PemutusanActivity", "onCreate: ${it.firebaseKey}")
-        }
+        setUser()
+        firebaseKey?.let { loadDataFromFirebase(it) }
     }
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
@@ -82,11 +71,11 @@ class PemutusanActivity : AppCompatActivity() {
         }
     }
 
-//    private fun setUser() {
-//        userManager.fetchUserAndSetupData {
-//            user = userManager.getUser()
-//        }
-//    }
+    private fun setUser() {
+        userManager.fetchUserAndSetupData {
+            user = userManager.getUser()
+        }
+    }
 
     private fun setupDropdownField() {
         // Populate a dropdown field with data from resources
@@ -101,7 +90,7 @@ class PemutusanActivity : AppCompatActivity() {
         binding.btnSimpan.setOnClickListener { saveData() }
 
         binding.btnHapus.setOnClickListener {
-            if (dataCustomer?.firebaseKey == null) {
+            if (firebaseKey == null) {
                 clearData()
             } else {
                 deleteData()
@@ -243,26 +232,44 @@ class PemutusanActivity : AppCompatActivity() {
 
 
         if (newCustomerId != null) {
-            val data = user?.let {
-                PemutusanData(
-                    firebaseKey = newCustomerId,
-                    currentDate = currentDate,
-                    petugas = it.username,
-                    jenisPekerjaan = jenisPekerjaan,
-                    pw = pw.toInt(),
-                    nomorKL = nomorKL,
-                    name = name,
-                    address = address,
-                    rt = rt,
-                    rw = rw,
-                    kelurahan = kelurahan,
-                    kecamatan = kecamatan,
-                    nomorMeter = nomorMeter,
-                    keterangan = keterangan,
-                    dokumentasi = dokumentasi,
-                    dailyTeam = it.dailyTeam
-                )
-            }
+            val data = mapOf(
+                "firebaseKey" to newCustomerId,
+                "currentDate" to currentDate,
+                "petugas" to user?.username,
+                "dailyTeam" to user?.dailyTeam,
+                "jenisPekerjaan" to jenisPekerjaan,
+                "pw" to pw.toInt(),
+                "nomorKL" to nomorKL,
+                "name" to name,
+                "address" to address,
+                "rt" to rt,
+                "rw" to rw,
+                "kelurahan" to kelurahan,
+                "kecamatan" to kecamatan,
+                "nomorMeter" to nomorMeter,
+                "keterangan" to keterangan,
+                "dokumentasi" to dokumentasi
+            )
+//            val data = user?.let {
+//                PemutusanData(
+//                    firebaseKey = newCustomerId,
+//                    currentDate = currentDate,
+//                    petugas = it.username,
+//                    jenisPekerjaan = jenisPekerjaan,
+//                    pw = pw.toInt(),
+//                    nomorKL = nomorKL,
+//                    name = name,
+//                    address = address,
+//                    rt = rt,
+//                    rw = rw,
+//                    kelurahan = kelurahan,
+//                    kecamatan = kecamatan,
+//                    nomorMeter = nomorMeter,
+//                    keterangan = keterangan,
+//                    dokumentasi = dokumentasi,
+//                    dailyTeam = it.dailyTeam
+//                )
+//            }
 
             newCustomerRef.setValue(data).addOnCompleteListener { task ->
                 showLoading(true, binding.progressBar, binding.btnSimpan, binding.btnHapus)
@@ -307,7 +314,7 @@ class PemutusanActivity : AppCompatActivity() {
 
     private fun deleteData() {
         val listCustomerRef = databaseReference.child("listPemutusan")
-        val customerRef = dataCustomer?.firebaseKey?.let { listCustomerRef.child(it) }
+        val customerRef = firebaseKey?.let { listCustomerRef.child(it) }
 
         customerRef?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -521,6 +528,5 @@ class PemutusanActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_FIREBASE_KEY = "firebase_key"
-        const val EXTRA_CUSTOMER_DATA = "customer_data"
     }
 }
