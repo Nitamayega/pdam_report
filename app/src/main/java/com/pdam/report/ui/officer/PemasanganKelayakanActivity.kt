@@ -121,6 +121,10 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        onBackPressedCallback.remove()
+    }
     private fun setUser() {
         if (dataCustomer != null) {
             if (user?.team == 0) {
