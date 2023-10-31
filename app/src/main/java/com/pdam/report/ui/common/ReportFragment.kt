@@ -1,6 +1,7 @@
 package com.pdam.report.ui.common
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -16,9 +17,9 @@ import com.pdam.report.data.UserData
 import com.pdam.report.databinding.FragmentReportBinding
 import com.pdam.report.utils.setRecyclerViewVisibility
 import com.pdam.report.utils.showLoading
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
+@Suppress("DEPRECATION")
 class ReportFragment : Fragment(R.layout.fragment_report) {
     private var _binding: FragmentReportBinding? = null
     private val args by lazy { requireArguments() }
@@ -30,6 +31,7 @@ class ReportFragment : Fragment(R.layout.fragment_report) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentReportBinding.bind(view)
+        Log.d("ReportFragment", "onViewCreated: $user")
     }
 
     override fun onStart() {
@@ -54,8 +56,6 @@ class ReportFragment : Fragment(R.layout.fragment_report) {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        // stop coroutine
-        lifecycleScope.coroutineContext.cancel()
     }
 
     private fun setContentPemutusan(user: UserData) {

@@ -169,6 +169,7 @@
     <string name="compressing_image">Foto sedang diproses…</string>
     <string name="compressing_image_success">Foto telah berhasil diproses. Silakan tunggu proses unggah.</string>
     <string name="compressing_image_failed">Memproses foto gagal</string>
+    <string name="unavailable_network">Koneksi internet tidak tersedia</string>
 
 
 </resources>

@@ -32,6 +32,7 @@ import com.pdam.report.utils.UserManager
 import com.pdam.report.utils.getInitialDate
 import com.pdam.report.utils.getNetworkTime
 import com.pdam.report.utils.milisToDate
+import com.pdam.report.utils.milisToDateTime
 import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.showDialogDenied
 import com.pdam.report.utils.showToast
@@ -40,6 +41,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -73,10 +75,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         })
 
         index.observe(this) {
-            Log.d("MainActivity", "onCreate: $it")
             if (it == 0) {
                 binding.fabAdd.setOnClickListener {
-                    navigatePage(this, PemasanganKelayakanActivity::class.java)
+                    intent = Intent(this, PemasanganKelayakanActivity::class.java)
+                    intent.putExtra(PemasanganKelayakanActivity.EXTRA_USER_DATA, user)
+                    startActivity(intent)
                 }
             } else if (it == 1) {
                 binding.fabAdd.setOnClickListener {
@@ -182,38 +185,51 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
                 R.id.nav_presence -> {
                     GlobalScope.launch(Dispatchers.Default) {
-                        val initialDate = runBlocking { getInitialDate() }
-                        val currentDate = runBlocking { getNetworkTime() }
-                        val referenceDate = SimpleDateFormat("dd-MM-yyyy").parse(initialDate.toString())?.time
-                        var daysDifference = ((currentDate - referenceDate!!) / (1000L * 60 * 60 * 24) % 5).toInt()
+                        val initialDate = async { getInitialDate() }
+                        val currentDate = async { getNetworkTime() }
+
+                        // Tunggu hingga initialDate dan currentDate tersedia.
+                        val initialDateValue = initialDate.await()
+                        val currentDateValue = currentDate.await()
+                        val lastPresence = milisToDate(user.lastPresence)
+
+                        val referenceDate = SimpleDateFormat("dd-MM-yyyy").parse(initialDateValue!!)?.time
+                        var daysDifference = ((currentDateValue - referenceDate!!) / (1000L * 60 * 60 * 24) % 5).toInt()
                         if (daysDifference == 0) { daysDifference = 5 }
 
                         // convert current time to int with format 24 hours
                         val calendar = Calendar.getInstance()
-                        calendar.timeInMillis = currentDate
+                        calendar.timeInMillis = currentDateValue
                         val currentTime = calendar.get(Calendar.HOUR_OF_DAY)
 
-                        Log.d("MainActivity", "setupNavigationMenu: $initialDate $currentDate $referenceDate $daysDifference $currentTime")
+                        Log.d("MainActivity", "setupNavigationMenu Network:${milisToDateTime(currentDateValue)}, Local:${milisToDateTime(System.currentTimeMillis())}")
 
-                        if (user.lastPresence == milisToDate(currentDate)) {
-                            withContext(Dispatchers.Main) {
-                                showToast(this@MainActivity, R.string.presence_already_done)
-                            }
-                            return@launch
-                        } else {
-                            val moveIntent = when {
-                                user.team == 0 -> Intent(this@MainActivity, AdminPresenceActivity::class.java)
-                                user.team == daysDifference && currentTime in 19..23 -> Intent(this@MainActivity, OfficerPresenceActivity::class.java)
-                                else -> {
-                                    withContext(Dispatchers.Main) {
-                                        showToast(this@MainActivity, R.string.presence_denied)
+                        if (currentDateValue.toInt() != 0) {
+                            if (lastPresence == milisToDate(currentDateValue)) {
+                                withContext(Dispatchers.Main) {
+                                    showToast(this@MainActivity, R.string.presence_already_done)
+                                }
+                                return@launch
+                            } else {
+                                val moveIntent = when {
+                                    user.team == 0 -> Intent(this@MainActivity, AdminPresenceActivity::class.java)
+    //                                user.team == daysDifference && currentTime in 19..23 -> Intent(this@MainActivity, OfficerPresenceActivity::class.java)
+                                    else -> {
+                                        withContext(Dispatchers.Main) {
+    //                                        showToast(this@MainActivity, R.string.presence_denied)
+                                            navigatePage(this@MainActivity, OfficerPresenceActivity::class.java)
+                                        }
+                                        return@launch
                                     }
-                                    return@launch
+                                }
+
+                                withContext(Dispatchers.Main) {
+                                    startActivity(moveIntent)
                                 }
                             }
-
+                        } else {
                             withContext(Dispatchers.Main) {
-                                startActivity(moveIntent)
+                                showToast(this@MainActivity, R.string.unavailable_network)
                             }
                         }
                     }

@@ -11,6 +11,7 @@ import android.widget.ArrayAdapter
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.tasks.Task
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -21,12 +22,15 @@ import com.pdam.report.R
 import com.pdam.report.data.SambunganData
 import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ActivityPemasanganSambunganBinding
+import com.pdam.report.utils.getNetworkTime
 import com.pdam.report.utils.milisToDateTime
 import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.showDataChangeDialog
 import com.pdam.report.utils.showDeleteConfirmationDialog
 import com.pdam.report.utils.showLoading
 import com.pdam.report.utils.showToast
+import kotlinx.coroutines.launch
+import kotlin.properties.Delegates
 
 class PemasanganSambunganActivity : AppCompatActivity() {
 
@@ -43,6 +47,8 @@ class PemasanganSambunganActivity : AppCompatActivity() {
         )
     }
 
+    private var currentTime by Delegates.notNull<Long>()
+
     // View Binding
     private val binding by lazy { ActivityPemasanganSambunganBinding.inflate(layoutInflater) }
 
@@ -54,21 +60,24 @@ class PemasanganSambunganActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Mengatur tampilan dan tombol back
-        setContentView(binding.root)
-        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+        lifecycleScope.launch {
+            currentTime = getNetworkTime()
+            // Mengatur tampilan dan tombol back
+            setContentView(binding.root)
+            onBackPressedDispatcher.addCallback(this@PemasanganSambunganActivity, onBackPressedCallback)
 
-        // Mengatur style action bar
-        supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true)
-            setBackgroundDrawable(resources.getDrawable(R.color.tropical_blue))
+            // Mengatur style action bar
+            supportActionBar?.apply {
+                setDisplayHomeAsUpEnabled(true)
+                setBackgroundDrawable(resources.getDrawable(R.color.tropical_blue))
+            }
+
+            // Persiapan dropdown, tombol, dan tampilan
+            setupDropdownField()
+            monitorDataChanges()
+            setupButtons()
+            setUser()
         }
-
-        // Persiapan dropdown, tombol, dan tampilan
-        setupDropdownField()
-        monitorDataChanges()
-        setupButtons()
-        setUser()
     }
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
@@ -206,9 +215,6 @@ class PemasanganSambunganActivity : AppCompatActivity() {
     }
 
     private fun saveData() {
-
-        // Mendapatkan data dari bidang input
-        val currentDate = System.currentTimeMillis()
         val jenisPekerjaan = binding.edtPemasanganSambungan.text.toString()
         val pw = binding.edtPw.text.toString()
         val nomorKL = binding.edtNomorKl.text.toString()
@@ -248,7 +254,7 @@ class PemasanganSambunganActivity : AppCompatActivity() {
 
             // Menyimpan data pelanggan
             saveCustomerData(
-                currentDate,
+                currentTime,
                 jenisPekerjaan,
                 pw,
                 nomorKL,

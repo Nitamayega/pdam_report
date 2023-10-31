@@ -43,6 +43,8 @@ import com.pdam.report.databinding.ActivityOfficerPresenceBinding
 import com.pdam.report.utils.PermissionHelper
 import com.pdam.report.utils.createCustomTempFile
 import com.pdam.report.utils.getCurrentTimeStamp
+import com.pdam.report.utils.getNetworkTime
+import com.pdam.report.utils.milisToDate
 import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.reduceFileImageInBackground
 import com.pdam.report.utils.showLoading
@@ -234,10 +236,6 @@ class OfficerPresenceActivity : AppCompatActivity() {
                                             R.string.compressing_image
                                         )
                                         getFile = getFile?.reduceFileImageInBackground()
-                                        showToast(
-                                            this@OfficerPresenceActivity,
-                                            R.string.compressing_image_success
-                                        )
                                     } catch (e: Exception) {
                                         showToast(
                                             this@OfficerPresenceActivity,
@@ -250,8 +248,9 @@ class OfficerPresenceActivity : AppCompatActivity() {
 
                                     if (!isUploading) {
                                         // Menentukan referensi untuk penyimpanan gambar
+                                        val currentTime = getNetworkTime()
                                         val photoRef =
-                                            storageReference.child("images/presence/${System.currentTimeMillis()}.jpg")
+                                            storageReference.child("images/presence/${currentTime}_${userData.username}.jpg")
                                         // Mengunggah gambar ke Firebase Storage
                                         photoRef.putFile(Uri.fromFile(getFile))
                                             .addOnSuccessListener { uploadTask ->
@@ -265,7 +264,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
 
                                                     // Membuat objek data presensi
                                                     val data = PresenceData(
-                                                        System.currentTimeMillis(),
+                                                        currentTime,
                                                         username,
                                                         latLng?.latitude ?: 0.0,
                                                         latLng?.longitude ?: 0.0,
@@ -280,7 +279,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
                                                                 databaseReference.child("users")
                                                                     .child(uid)
                                                                     .child("lastPresence")
-                                                                    .setValue(getCurrentTimeStamp())
+                                                                    .setValue(currentTime)
                                                                 showToast(
                                                                     this@OfficerPresenceActivity,
                                                                     R.string.upload_success

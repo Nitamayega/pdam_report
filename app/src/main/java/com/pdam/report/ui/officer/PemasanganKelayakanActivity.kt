@@ -15,6 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.google.android.gms.tasks.Task
 import com.google.firebase.database.DataSnapshot
@@ -29,6 +30,7 @@ import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ActivityPemasanganKelayakanBinding
 import com.pdam.report.utils.FullScreenImageDialogFragment
 import com.pdam.report.utils.createCustomTempFile
+import com.pdam.report.utils.getNetworkTime
 import com.pdam.report.utils.milisToDateTime
 import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.parsingNameImage
@@ -39,8 +41,10 @@ import com.pdam.report.utils.showLoading
 import com.pdam.report.utils.showToast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.io.File
+import kotlin.properties.Delegates
 
 @Suppress("DEPRECATION")
 class PemasanganKelayakanActivity : AppCompatActivity() {
@@ -57,6 +61,8 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
         intent.getParcelableExtra("user_data") as? UserData
     }
 
+    private var currentTime by Delegates.notNull<Long>()
+
     // Image Handling
     private var imageNumber: Int = 0
     private var firstImageFile: File? = null
@@ -72,21 +78,28 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        Log.d("PemasanganKelayakan", "onCreate: $user")
+
         // Mengatur tampilan dan tombol back
         setContentView(binding.root)
-        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
-
+        onBackPressedDispatcher.addCallback(
+            this@PemasanganKelayakanActivity,
+            onBackPressedCallback
+        )
         // Mengatur style action bar
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setBackgroundDrawable(resources.getDrawable(R.color.tropical_blue))
         }
-
-        // Persiapan dropdown, tombol, dan data pengguna
-        setupDropdownField()
-        monitorDataChanges()
-        setupButtons()
-        setUser()
+        lifecycleScope.launch {
+            currentTime = getNetworkTime()
+            Log.d("PemasanganKelayakan", "onCreate: $currentTime")
+            // Persiapan dropdown, tombol, dan data pengguna
+            setupDropdownField()
+            monitorDataChanges()
+            setupButtons()
+            setUser()
+        }
     }
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
@@ -240,60 +253,63 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
     }
 
     private fun saveData() {
+        try {
+            val jenisPekerjaan = binding.dropdownJenisPekerjaan.text.toString()
+            val pw = binding.dropdownPw.text.toString()
+            val nomorRegistrasi = binding.edtNomorRegistrasi.text.toString()
+            val name = binding.edtNamaPelanggan.text.toString()
+            val address = binding.edtAlamatPelanggan.text.toString()
+            val rt = binding.edtRt.text.toString()
+            val rw = binding.edtRw.text.toString()
+            val kelurahan = binding.edtKelurahan.text.toString()
+            val kecamatan = binding.edtKecamatan.text.toString()
+            val keterangan = binding.dropdownKeterangan.text.toString()
 
-        // Mendapatkan data dari bidang input
-        val currentDate = System.currentTimeMillis()
-        val jenisPekerjaan = binding.dropdownJenisPekerjaan.text.toString()
-        val pw = binding.dropdownPw.text.toString()
-        val nomorRegistrasi = binding.edtNomorRegistrasi.text.toString()
-        val name = binding.edtNamaPelanggan.text.toString()
-        val address = binding.edtAlamatPelanggan.text.toString()
-        val rt = binding.edtRt.text.toString()
-        val rw = binding.edtRw.text.toString()
-        val kelurahan = binding.edtKelurahan.text.toString()
-        val kecamatan = binding.edtKecamatan.text.toString()
-        val keterangan = binding.dropdownKeterangan.text.toString()
+            // Validasi input sebelum menyimpan
+            if (isInputValid(
+                    jenisPekerjaan,
+                    pw,
+                    nomorRegistrasi,
+                    name,
+                    address,
+                    rt,
+                    rw,
+                    kelurahan,
+                    kecamatan,
+                    keterangan
+                )
+            ) {
+                showLoading(true, binding.progressBar, binding.btnSimpan, binding.btnHapus)
 
-        // Validasi input sebelum menyimpan
-        if (isInputValid(
-                jenisPekerjaan,
-                pw,
-                nomorRegistrasi,
-                name,
-                address,
-                rt,
-                rw,
-                kelurahan,
-                kecamatan,
-                keterangan
-            )
-        ) {
-            showLoading(true, binding.progressBar, binding.btnSimpan, binding.btnHapus)
 
-            // Menyimpan data pelanggan
-            saveCustomerData(
-                currentDate,
-                jenisPekerjaan,
-                pw,
-                nomorRegistrasi,
-                name,
-                address,
-                rt,
-                rw,
-                kelurahan,
-                kecamatan,
-                keterangan
-            )
-        } else {
+                // Menyimpan data pelanggan
+                saveCustomerData(
+                    jenisPekerjaan,
+                    pw,
+                    nomorRegistrasi,
+                    name,
+                    address,
+                    rt,
+                    rw,
+                    kelurahan,
+                    kecamatan,
+                    keterangan
+                )
 
-            // Menampilkan pesan jika ada data yang belum diisi
-            showLoading(false, binding.progressBar, binding.btnSimpan, binding.btnHapus)
-            showToast(this, R.string.fill_all_dataImage)
+            } else {
+                // Menampilkan pesan jika ada data yang belum diisi
+                showLoading(false, binding.progressBar, binding.btnSimpan, binding.btnHapus)
+                showToast(this@PemasanganKelayakanActivity, R.string.fill_all_data)
+
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
+
     }
 
+
     private fun saveCustomerData(
-        currentDate: Long,
         jenisPekerjaan: String,
         pw: String,
         nomorRegistrasi: String,
@@ -310,15 +326,18 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
             // Bagian untuk tim petugas lapangan
             val storageReference = FirebaseStorage.getInstance().reference
             val dokumentasi1Ref =
-                storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi1_dokumen.jpg")
+                storageReference.child("dokumentasi/${currentTime}_dokumentasi1_dokumen.jpg")
             val dokumentasi2Ref =
-                storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi2_kondisi.jpg")
+                storageReference.child("dokumentasi/${currentTime}_dokumentasi2_kondisi.jpg")
 
 
             showToast(this@PemasanganKelayakanActivity, R.string.compressing_image)
             CoroutineScope(Dispatchers.IO).launch {
-                val firstImageFile = firstImageFile?.reduceFileImageInBackground()
-                val secondImageFile = secondImageFile?.reduceFileImageInBackground()
+                val _firstImageFile = async { firstImageFile?.reduceFileImageInBackground() }
+                val _secondImageFile = async { secondImageFile?.reduceFileImageInBackground() }
+
+                val firstImageFile = _firstImageFile.await()
+                val secondImageFile = _secondImageFile.await()
 
                 // Upload image 1
                 dokumentasi1Ref.putFile(Uri.fromFile(firstImageFile)).addOnSuccessListener {
@@ -338,7 +357,7 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
                                     if (newCustomerId != null) {
                                         val data = mapOf(
                                             "firebaseKey" to newCustomerId,
-                                            "currentDate" to currentDate,
+                                            "currentDate" to currentTime,
                                             "petugas" to user?.username,
                                             "dailyTeam" to user?.dailyTeam,
                                             "jenisPekerjaan" to jenisPekerjaan,
@@ -700,7 +719,7 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
                 if (imageNumber == 1) {
                     firstImageFile = file
                     binding.itemImage1.text =
-                        System.currentTimeMillis().toString() + "_dokumen.jpg"
+                        currentTime.toString() + "_dokumen.jpg"
 
                     // Menampilkan foto pertama di ImageView menggunakan Glide
                     Glide.with(this@PemasanganKelayakanActivity)
@@ -721,7 +740,7 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
                 } else if (imageNumber == 2) {
                     secondImageFile = file
                     binding.itemImage2.text =
-                        System.currentTimeMillis().toString() + "_kondisi.jpg"
+                        currentTime.toString() + "_kondisi.jpg"
 
                     // Menampilkan foto kedua di ImageView menggunakan Glide
                     Glide.with(this@PemasanganKelayakanActivity)

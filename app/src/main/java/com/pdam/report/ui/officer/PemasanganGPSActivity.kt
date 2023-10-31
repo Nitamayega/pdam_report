@@ -15,6 +15,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.google.android.gms.tasks.Task
 import com.google.firebase.database.DataSnapshot
@@ -33,6 +34,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.io.File
+import kotlin.properties.Delegates
 
 class PemasanganGPSActivity : AppCompatActivity() {
 
@@ -44,6 +46,8 @@ class PemasanganGPSActivity : AppCompatActivity() {
     private val dataCustomer by lazy {
         intent.getParcelableExtra<SambunganData>(PemasanganSambunganActivity.EXTRA_CUSTOMER_DATA)
     }
+
+    private var currentTime by Delegates.notNull<Long>()
 
     // Image Handling
     private var imageNumber: Int = 0
@@ -61,10 +65,9 @@ class PemasanganGPSActivity : AppCompatActivity() {
     @SuppressLint("UseCompatLoadingForDrawables")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         // Mengatur tampilan dan tombol back
         setContentView(binding.root)
-        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+        onBackPressedDispatcher.addCallback(this@PemasanganGPSActivity, onBackPressedCallback)
 
         // Mengatur style action bar
         supportActionBar?.apply {
@@ -72,11 +75,13 @@ class PemasanganGPSActivity : AppCompatActivity() {
             setBackgroundDrawable(resources.getDrawable(R.color.tropical_blue))
         }
 
-        // Persiapan tombol dan data pengguna
-        monitorDataChanges()
-        setupButtons()
-        setUser()
-
+        lifecycleScope.launch {
+            currentTime = getNetworkTime()
+            // Persiapan tombol dan data pengguna
+            monitorDataChanges()
+            setupButtons()
+            setUser()
+        }
     }
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
@@ -224,7 +229,6 @@ class PemasanganGPSActivity : AppCompatActivity() {
     private fun saveData() {
 
         // Mendapatkan data dari bidang input
-        val currentDate = System.currentTimeMillis()
         val jenisPekerjaan = binding.edtVerifikasiPemasangan.text.toString()
         val pw = binding.edtPw.text.toString()
         val nomorKL = binding.edtNomorKl.text.toString()
@@ -262,7 +266,7 @@ class PemasanganGPSActivity : AppCompatActivity() {
 
             // Menyimpan data pelanggan
             saveCustomerData(
-                currentDate,
+                currentTime,
                 jenisPekerjaan,
                 pw,
                 nomorKL,
@@ -312,11 +316,11 @@ class PemasanganGPSActivity : AppCompatActivity() {
             val storageReference = FirebaseStorage.getInstance().reference
 
             val dokumentasi3Ref =
-                storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi3_konstruksi.jpg")
+                storageReference.child("dokumentasi/${currentTime}_dokumentasi3_konstruksi.jpg")
             val dokumentasi4Ref =
-                storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi4_meter.jpg")
+                storageReference.child("dokumentasi/${currentTime}_dokumentasi4_meter.jpg")
             val dokumentasi5Ref =
-                storageReference.child("dokumentasi/${System.currentTimeMillis()}_dokumentasi5_perspektif.jpg")
+                storageReference.child("dokumentasi/${currentTime}_dokumentasi5_perspektif.jpg")
 
             showToast(this@PemasanganGPSActivity, R.string.compressing_image)
 
@@ -470,25 +474,6 @@ class PemasanganGPSActivity : AppCompatActivity() {
             // Not used
         }
     }
-
-//    fun isDataChange(data: SambunganData, jenisPekerjaan: String, pw: String, nomorKL: String, name: String, address: String, rt: String, rw: String, kelurahan: String, kecamatan: String, x: String, y: String, z: String, nomorMeter: String, nomorSegel: String): Boolean {
-//
-//        // Membandingkan setiap data apakah ada perubahan atau tidak
-//        return jenisPekerjaan != data.jenisPekerjaan ||
-//                pw != data.pw.toString() ||
-//                nomorKL != data.nomorKL ||
-//                name != data.name ||
-//                address != data.address ||
-//                rt != data.rt ||
-//                rw != data.rw ||
-//                kelurahan != data.kelurahan ||
-//                kecamatan != data.kecamatan ||
-//                x != data.xkoordinat ||
-//                y != data.ykoordinat ||
-//                z != data.zkoordinat ||
-//                nomorMeter != data.nomorMeter ||
-//                nomorSegel != data.nomorSegel
-//    }
 
     private fun setCustomerData(dataCustomer: SambunganData, status: Boolean) {
 
@@ -733,7 +718,7 @@ class PemasanganGPSActivity : AppCompatActivity() {
                     1 -> {
                         firstImageFile = file
                         binding.itemImage1.text =
-                            System.currentTimeMillis().toString() + "_konstruksi.jpg"
+                            currentTime.toString() + "_konstruksi.jpg"
 
                         // Menampilkan foto pertama di ImageView menggunakan Glide
                         Glide.with(this@PemasanganGPSActivity)
@@ -754,7 +739,7 @@ class PemasanganGPSActivity : AppCompatActivity() {
                     2 -> {
                         secondImageFile = file
                         binding.itemImage2.text =
-                            System.currentTimeMillis().toString() + "_meter.jpg"
+                            currentTime.toString() + "_meter.jpg"
 
                         // Menampilkan foto kedua di ImageView menggunakan Glide
                         Glide.with(this@PemasanganGPSActivity)
@@ -775,7 +760,7 @@ class PemasanganGPSActivity : AppCompatActivity() {
                     3 -> {
                         thirdImageFile = file
                         binding.itemImage3.text =
-                            System.currentTimeMillis().toString() + "_perspektif.jpg"
+                            currentTime.toString() + "_perspektif.jpg"
 
                         // Menampilkan foto ketiga di ImageView menggunakan Glide
                         Glide.with(this@PemasanganGPSActivity)
@@ -808,6 +793,7 @@ class PemasanganGPSActivity : AppCompatActivity() {
         launcherIntentGallery.launch(intent)
     }
 
+    @SuppressLint("SetTextI18n")
     private val launcherIntentGallery = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -822,7 +808,10 @@ class PemasanganGPSActivity : AppCompatActivity() {
                 thirdImageFile = myFile
 
                 // Menetapkan teks pada itemImage3 yang menunjukkan gambar yang dipilih
-                binding.itemImage3.text = System.currentTimeMillis().toString() + "_perspektif.jpg"
+                binding.itemImage3.text = currentTime.toString() + "_perspektif.jpg"
+                Glide.with(this@PemasanganGPSActivity)
+                    .load(thirdImageFile)
+                    .into(binding.imageView3)
                 }
             }
         }

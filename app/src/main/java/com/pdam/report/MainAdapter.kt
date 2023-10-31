@@ -1,6 +1,7 @@
 package com.pdam.report
 
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -32,6 +33,7 @@ class MainAdapter(
                 val intent = Intent(holder.itemView.context, PemasanganKelayakanActivity::class.java)
                 intent.putExtra(PemasanganKelayakanActivity.EXTRA_CUSTOMER_DATA, customer)
                 intent.putExtra(PemasanganKelayakanActivity.EXTRA_USER_DATA, userData)
+                Log.d("MainAdapter", "onBindViewHolder: $userData")
                 holder.itemView.context.startActivity(intent)
             } else {
                 val intent = Intent(holder.itemView.context, PemutusanActivity::class.java)
