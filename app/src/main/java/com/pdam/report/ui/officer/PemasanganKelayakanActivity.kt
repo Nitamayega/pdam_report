@@ -639,8 +639,6 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
 
     private fun displayData(dataCustomer: SambunganData, status: Boolean) {
         setCustomerData(dataCustomer, status)
-        Log.d("Kelayakan", dataCustomer.toString())
-        Log.d("Kelayakan", "user: $user")
 
         // Set Navigation ketika data tidak layak
         if (dataCustomer.keterangan1 == "Tidak layak") {

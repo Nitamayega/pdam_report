@@ -10,6 +10,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.pdam.report.MainActivity
+import com.pdam.report.R
 import com.pdam.report.data.PresenceData
 import com.pdam.report.databinding.ActivityAdminPresenceBinding
 import com.pdam.report.utils.navigatePage
@@ -32,7 +33,12 @@ class AdminPresenceActivity : AppCompatActivity() {
         setContentView(binding.root)
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        // Mengatur style action bar
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            setBackgroundDrawable(resources.getDrawable(R.color.tropical_blue))
+        }
+
         setupRecyclerView()
         setContent()
 
