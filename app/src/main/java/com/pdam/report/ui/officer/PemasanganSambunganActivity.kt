@@ -32,6 +32,7 @@ import com.pdam.report.utils.showToast
 import kotlinx.coroutines.launch
 import kotlin.properties.Delegates
 
+@Suppress("DEPRECATION")
 class PemasanganSambunganActivity : AppCompatActivity() {
 
     // Firebase Database
@@ -60,17 +61,17 @@ class PemasanganSambunganActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Mengatur tampilan dan tombol back
+        setContentView(binding.root)
+        onBackPressedDispatcher.addCallback(this@PemasanganSambunganActivity, onBackPressedCallback)
+
+        // Mengatur style action bar
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            setBackgroundDrawable(resources.getDrawable(R.color.tropical_blue))
+        }
         lifecycleScope.launch {
             currentTime = getNetworkTime()
-            // Mengatur tampilan dan tombol back
-            setContentView(binding.root)
-            onBackPressedDispatcher.addCallback(this@PemasanganSambunganActivity, onBackPressedCallback)
-
-            // Mengatur style action bar
-            supportActionBar?.apply {
-                setDisplayHomeAsUpEnabled(true)
-                setBackgroundDrawable(resources.getDrawable(R.color.tropical_blue))
-            }
 
             // Persiapan dropdown, tombol, dan tampilan
             setupDropdownField()
@@ -634,15 +635,16 @@ class PemasanganSambunganActivity : AppCompatActivity() {
             Log.d("SELESAI", "displayData: ${isDataChanged.value}")
             binding.btnSimpan.apply {
                 isDataChanged.value = false
+                if (status) {
+                    setupDropdownField()
+                }
                 updateButtonText()
 
                 setOnClickListener {
                     // Cek role dari pengguna
                     // Bila admin, tampilkan dropdown dan dialog konfirmasi bila data berubah (admin = status -> true)
                     // Bila petugas lapangan, langsung lanjut ke halaman berikutnya
-                    if (status) {
-                        setupDropdownField()
-                    }
+
                     Log.d("INI SAMBUNGAN", "displayData: ${isDataChanged.value}")
                     if (isDataChanged.value == true) {
                         showDataChangeDialog(this@PemasanganSambunganActivity, ::saveData)

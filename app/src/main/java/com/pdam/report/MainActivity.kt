@@ -43,11 +43,11 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
 
+@Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
@@ -202,8 +202,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                         calendar.timeInMillis = currentDateValue
                         val currentTime = calendar.get(Calendar.HOUR_OF_DAY)
 
-                        Log.d("MainActivity", "setupNavigationMenu Network:${milisToDateTime(currentDateValue)}, Local:${milisToDateTime(System.currentTimeMillis())}")
-
                         if (currentDateValue.toInt() != 0) {
                             if (lastPresence == milisToDate(currentDateValue)) {
                                 withContext(Dispatchers.Main) {
@@ -213,11 +211,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                             } else {
                                 val moveIntent = when {
                                     user.team == 0 -> Intent(this@MainActivity, AdminPresenceActivity::class.java)
-    //                                user.team == daysDifference && currentTime in 19..23 -> Intent(this@MainActivity, OfficerPresenceActivity::class.java)
+                                    user.team == daysDifference && currentTime in 19..23 -> Intent(this@MainActivity, OfficerPresenceActivity::class.java)
                                     else -> {
                                         withContext(Dispatchers.Main) {
-    //                                        showToast(this@MainActivity, R.string.presence_denied)
-                                            navigatePage(this@MainActivity, OfficerPresenceActivity::class.java)
+                                            showToast(this@MainActivity, R.string.presence_denied)
                                         }
                                         return@launch
                                     }

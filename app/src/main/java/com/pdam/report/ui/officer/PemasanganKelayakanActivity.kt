@@ -91,6 +91,7 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
             setDisplayHomeAsUpEnabled(true)
             setBackgroundDrawable(resources.getDrawable(R.color.tropical_blue))
         }
+
         lifecycleScope.launch {
             currentTime = getNetworkTime()
             Log.d("PemasanganKelayakan", "onCreate: $currentTime")
@@ -100,6 +101,8 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
             setupButtons()
             setUser()
         }
+
+        binding.edJenisPekerjaan.isFocusable = false
     }
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
@@ -127,11 +130,8 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
     }
     private fun setUser() {
         if (dataCustomer != null) {
-            if (user?.team == 0) {
-                displayData(dataCustomer!!, true)
-            } else {
-                displayData(dataCustomer!!, false)
-            }
+            val status = user?.team == 0 && dataCustomer?.keterangan1 == "Layak"
+            displayData(dataCustomer!!, status)
         }
     }
 
@@ -330,9 +330,9 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
             // Bagian untuk tim petugas lapangan
             val storageReference = FirebaseStorage.getInstance().reference
             val dokumentasi1Ref =
-                storageReference.child("dokumentasi/${currentTime}_dokumentasi1_dokumen.jpg")
+                storageReference.child("dokumentasi/${currentTime}_dokumen.jpg")
             val dokumentasi2Ref =
-                storageReference.child("dokumentasi/${currentTime}_dokumentasi2_kondisi.jpg")
+                storageReference.child("dokumentasi/${currentTime}_kondisi.jpg")
 
 
             showToast(this@PemasanganKelayakanActivity, R.string.compressing_image)
@@ -655,15 +655,13 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
             // Apabila data layak
             binding.btnSimpan.apply {
                 isDataChanged.value = false
+                if (status) setupDropdownField()
                 updateButtonText()
 
                 setOnClickListener {
                     // Cek role dari pengguna
                     // Bila admin, tampilkan dropdown dan dialog konfirmasi bila data berubah (admin = status -> true)
                     // Bila petugas lapangan, langsung lanjut ke halaman berikutnya
-                    if (status) {
-                        setupDropdownField()
-                    }
                     if (isDataChanged.value == true) {
                         showDataChangeDialog(this@PemasanganKelayakanActivity, ::saveData)
                         return@setOnClickListener
