@@ -10,6 +10,7 @@ object PermissionHelper {
     const val REQUEST_CAMERA_PERMISSION = 10
     const val REQUEST_LOCATION_PERMISSION = 20
 
+    // Mengecek dan meminta izin akses kamera
     fun requestCameraPermission(activity: Activity) {
         if (!hasCameraPermission(activity)) {
             requestPermissions(
@@ -20,6 +21,7 @@ object PermissionHelper {
         }
     }
 
+    // Mengecek dan meminta izin akses lokasi
     fun requestLocationPermission(activity: Activity) {
         if (!hasLocationPermission(activity)) {
             requestPermissions(
@@ -33,6 +35,7 @@ object PermissionHelper {
         }
     }
 
+    // Memeriksa apakah izin akses kamera telah diberikan
     fun hasCameraPermission(activity: Activity): Boolean {
         return ContextCompat.checkSelfPermission(
             activity,
@@ -40,6 +43,7 @@ object PermissionHelper {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
+    // Memeriksa apakah izin akses lokasi telah diberikan
     fun hasLocationPermission(activity: Activity): Boolean {
         return (ContextCompat.checkSelfPermission(
             activity,
@@ -50,6 +54,7 @@ object PermissionHelper {
         ) == PackageManager.PERMISSION_GRANTED)
     }
 
+    // Memeriksa dan meminta izin yang diperlukan
     fun checkAndRequestPermissions(activity: Activity) {
         val cameraPermission = hasCameraPermission(activity)
         val locationPermission = hasLocationPermission(activity)
@@ -64,11 +69,11 @@ object PermissionHelper {
             }
 
             val requestCode = if (!cameraPermission && !locationPermission) {
-                30 // Atau nilai lain jika keduanya belum diizinkan
+                30 // Jika keduanya belum diizinkan
             } else if (!cameraPermission) {
-                10 // Izin kamera belum diizinkan
+                10 // Jika izin kamera belum diizinkan
             } else {
-                20 // Izin lokasi belum diizinkan
+                20 // Jika izin lokasi belum diizinkan
             }
 
             requestPermissions(activity, permissionsToRequest.toTypedArray(), requestCode)
@@ -77,6 +82,7 @@ object PermissionHelper {
         }
     }
 
+    // Menangani hasil permintaan izin
     fun handlePermissionResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -84,7 +90,7 @@ object PermissionHelper {
     ) {
         when (requestCode) {
             REQUEST_CAMERA_PERMISSION -> {
-                // Handle camera permission result
+                // Menangani hasil permintaan izin akses kamera
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Izin kamera diberikan
                     // Lakukan tindakan yang sesuai
@@ -93,8 +99,9 @@ object PermissionHelper {
                     // Lakukan tindakan yang sesuai, seperti menampilkan pesan kepada pengguna
                 }
             }
+
             REQUEST_LOCATION_PERMISSION -> {
-                // Handle location permission result
+                // Menangani hasil permintaan izin akses lokasi
                 if (grantResults.size == 2 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                     // Izin lokasi diberikan
                     // Lakukan tindakan yang sesuai
@@ -105,5 +112,4 @@ object PermissionHelper {
             }
         }
     }
-
 }

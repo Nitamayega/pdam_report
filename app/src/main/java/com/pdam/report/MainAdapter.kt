@@ -15,7 +15,7 @@ import com.pdam.report.ui.officer.PemutusanActivity
 class MainAdapter(
     private val customerList: ArrayList<SambunganData>,
     private val fragmentType: Int,
-    private val userData: UserData
+    private val userData: UserData,
 ) :
     RecyclerView.Adapter<MainAdapter.CustomerViewHolder>() {
 
@@ -30,7 +30,8 @@ class MainAdapter(
         holder.bind(customer)
         holder.itemView.setOnClickListener {
             if (fragmentType == 0) {
-                val intent = Intent(holder.itemView.context, PemasanganKelayakanActivity::class.java)
+                val intent =
+                    Intent(holder.itemView.context, PemasanganKelayakanActivity::class.java)
                 intent.putExtra(PemasanganKelayakanActivity.EXTRA_CUSTOMER_DATA, customer)
                 intent.putExtra(PemasanganKelayakanActivity.EXTRA_USER_DATA, userData)
                 Log.d("MainAdapter", "onBindViewHolder: $userData")

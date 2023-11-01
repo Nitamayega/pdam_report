@@ -24,6 +24,7 @@ import java.util.Locale
 private const val FILENAME_FORMAT = "dd-MM-yyyy"
 private const val MAXIMAL_SIZE = 1_000_000
 
+// Mendapatkan timestamp saat ini
 fun getCurrentTimeStamp(): String {
     return SimpleDateFormat(
         FILENAME_FORMAT,
@@ -31,14 +32,14 @@ fun getCurrentTimeStamp(): String {
     ).format(System.currentTimeMillis())
 }
 
-// Panggil fungsi ini untuk mendapatkan waktu NTP di latar belakang
+// Fungsi untuk mendapatkan waktu dari server NTP di background menggunakan coroutine
 fun getNetworkTimeInBackground(): Long {
     val timeServers = listOf(
         "0.id.pool.ntp.org",
         "1.id.pool.ntp.org",
         "2.id.pool.ntp.org",
         "3.id.pool.ntp.org"
-        )
+    )
 
     for (server in timeServers) {
         try {
@@ -55,15 +56,18 @@ fun getNetworkTimeInBackground(): Long {
     return 0 // Mengembalikan 0 jika semua server gagal
 }
 
+// Fungsi untuk mendapatkan waktu dari server NTP menggunakan coroutine
 suspend fun getNetworkTime(): Long = withContext(Dispatchers.Default) {
     return@withContext getNetworkTimeInBackground()
 }
 
+// Membuat file sementara di direktori Pictures
 fun createCustomTempFile(context: Context): File {
     val storageDir: File? = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
     return File.createTempFile(getCurrentTimeStamp(), ".jpg", storageDir)
 }
 
+// Mengubah Uri menjadi File
 fun uriToFile(selectedImg: Uri, context: Context): File {
     val contentResolver: ContentResolver = context.contentResolver
     val myFile = createCustomTempFile(context)
@@ -75,6 +79,7 @@ fun uriToFile(selectedImg: Uri, context: Context): File {
     return myFile
 }
 
+// Mengurangi ukuran file gambar menjadi ukuran yang ditentukan
 fun reduceFileImage(file: File): File {
     val bitmap = BitmapFactory.decodeFile(file.path)
     var compressQuality = 100
@@ -95,36 +100,36 @@ fun reduceFileImage(file: File): File {
     return file
 }
 
+// Fungsi yang menjalankan pengurangan ukuran file gambar di background menggunakan coroutine
 suspend fun File.reduceFileImageInBackground(): File = withContext(Dispatchers.Default) {
     return@withContext reduceFileImage(this@reduceFileImageInBackground)
 }
 
+// Parsing nama file gambar dari URL
 fun parsingNameImage(url: String): String {
     val startIndex = url.indexOf("%2F")
-    if (startIndex != -1) { // Pastikan "%2F" ditemukan dalam URL
-        val endIndex =
-            url.indexOf(".jpg") + 4 // Mencari posisi akhir ekstensi ".jpg" dan menambahkan 4 karakter untuk menyertakan ".jpg"
-        if (endIndex != -1) { // Pastikan ekstensi ".jpg" ditemukan dalam URL
-            return url.substring(
-                startIndex + 3,
-                endIndex
-            ) // Mengambil potongan string dari "%2F" hingga ekstensi ".jpg" (termasuk ".jpg")
+    if (startIndex != -1) {
+        val endIndex = url.indexOf(".jpg") + 4
+        if (endIndex != -1) {
+            return url.substring(startIndex + 3, endIndex)
         }
     }
     return ""
 }
 
-
+// Mengonversi timestamp ke tanggal
 fun milisToDate(milis: Long): String {
     val formatter = SimpleDateFormat(FILENAME_FORMAT, Locale.US)
     return formatter.format(milis)
 }
 
+// Mengonversi timestamp ke tanggal dan waktu
 fun milisToDateTime(milis: Long): String {
     val formatter = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.US)
     return formatter.format(milis)
 }
 
+// Mengarahkan ke pengaturan aplikasi
 fun intentSetting(context: Context) {
     val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
     val uri = Uri.fromParts("package", "com.pdam.report", null)
@@ -132,7 +137,7 @@ fun intentSetting(context: Context) {
     context.startActivity(intent)
 }
 
-// Fungsi untuk mengunggah file ke Firebase dan mengembalikan URL-nya
+// Fungsi untuk mengunggah file ke Firebase Storage dan mendapatkan URL-nya
 suspend fun uploadImageAndGetUrl(ref: StorageReference, file: File?): String? {
     return try {
         if (file != null) {

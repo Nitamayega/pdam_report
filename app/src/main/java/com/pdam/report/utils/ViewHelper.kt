@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.view.View
+import android.view.Window
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -12,6 +14,7 @@ import com.google.firebase.database.DatabaseReference
 import com.pdam.report.MainActivity
 import com.pdam.report.R
 
+// Menampilkan atau menyembunyikan tampilan loading
 fun showLoading(
     isLoading: Boolean,
     view: View,
@@ -23,6 +26,7 @@ fun showLoading(
     secondButton?.isEnabled = !isLoading
 }
 
+// Menetapkan keberadaan RecyclerView atau tampilan kosong berdasarkan kondisi
 fun setRecyclerViewVisibility(
     emptyView: View,
     recyclerView: RecyclerView,
@@ -32,17 +36,20 @@ fun setRecyclerViewVisibility(
     recyclerView.visibility = if (emptyViewVisible) View.GONE else View.VISIBLE
 }
 
+// Menampilkan pesan Toast
 fun showToast(context: Context, resId: Int) {
     val message = context.getString(resId)
     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 }
 
+// Menampilkan dialog konfirmasi penghapusan data
 fun showDeleteConfirmationDialog(customerRef: DatabaseReference, context: Context) {
     AlertDialog.Builder(context).apply {
         setTitle(R.string.delete_data)
         setMessage(R.string.delete_confirmation)
         setPositiveButton(R.string.delete) { _, _ ->
-            // Confirm and proceed with deletion
+
+            // Konfirmasi dan lanjutkan penghapusan
             customerRef.removeValue()
                 .addOnSuccessListener {
                     showToast(context, R.string.delete_success)
@@ -56,6 +63,7 @@ fun showDeleteConfirmationDialog(customerRef: DatabaseReference, context: Contex
     }.create().show()
 }
 
+// Menampilkan dialog ketika izin ditolak
 fun showDialogDenied(context: Context) {
     val dialog = AlertDialog.Builder(context)
     dialog.setTitle("Aplikasi perlu izin!")
@@ -72,6 +80,7 @@ fun showDialogDenied(context: Context) {
     dialog.show()
 }
 
+// Menavigasi ke halaman tujuan
 fun navigatePage(context: Context, destination: Class<*>, clearTask: Boolean = false) {
     val intent = Intent(context, destination)
     if (clearTask) {
@@ -80,7 +89,9 @@ fun navigatePage(context: Context, destination: Class<*>, clearTask: Boolean = f
     context.startActivity(intent)
 }
 
+// Menampilkan dialog perubahan data
 fun showDataChangeDialog(context: Context, saveData: () -> Unit) {
+
     //Menampilkan dialog konfirmasi jika terjadi perubahan data pada formulir
     AlertDialog.Builder(context).apply {
         setTitle("Data Berubah!")
@@ -95,3 +106,14 @@ fun showDataChangeDialog(context: Context, saveData: () -> Unit) {
     }.create().show()
 }
 
+// Menampilkan atau menyembunyikan lapisan penutup
+fun showBlockingLayer(window: Window, show: Boolean) {
+    if (show) {
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+        )
+    } else {
+        window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+    }
+}

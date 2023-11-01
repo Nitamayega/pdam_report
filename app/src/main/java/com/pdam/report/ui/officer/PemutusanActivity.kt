@@ -4,9 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.os.UserManager
 import android.provider.MediaStore
-import android.util.Log
 import android.view.MenuItem
 import android.view.View.VISIBLE
 import android.widget.ArrayAdapter
@@ -26,48 +24,63 @@ import com.google.firebase.storage.FirebaseStorage
 import com.pdam.report.MainActivity
 import com.pdam.report.R
 import com.pdam.report.data.PemutusanData
-import com.pdam.report.data.SambunganData
 import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ActivityPemutusanBinding
+import com.pdam.report.utils.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
-import com.pdam.report.utils.*
 import kotlin.properties.Delegates
 
 class PemutusanActivity : AppCompatActivity() {
 
+    // View Binding
     private val binding by lazy { ActivityPemutusanBinding.inflate(layoutInflater) }
 
+    // Firebase Database
     private val databaseReference = FirebaseDatabase.getInstance().reference
 
-    // Intent-related
+    // Waktu saat ini didapat dari server
+    private var currentTime by Delegates.notNull<Long>()
+
+    // Intent-related: Firebase key
     private val firebaseKey by lazy {
         intent.getStringExtra("firebase_key")
     }
 
-    private var currentTime by Delegates.notNull<Long>()
-
+    // User-related
     private val userManager by lazy { UserManager() }
     private var user: UserData? = null
 
+    // Image Handling
     private var imageFile: File? = null
 
     @SuppressLint("UseCompatLoadingForDrawables")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Mengatur tampilan dan tombol back
+        setContentView(binding.root)
+        onBackPressedDispatcher.addCallback(this@PemutusanActivity, onBackPressedCallback)
+
+        // Mengatur style action bar
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            setBackgroundDrawable(resources.getDrawable(R.color.tropical_blue))
+        }
+
+        // Mengambil data user
+        setUser()
+
         lifecycleScope.launch {
             currentTime = getNetworkTime()
-            setContentView(binding.root)
-            onBackPressedDispatcher.addCallback(this@PemutusanActivity, onBackPressedCallback)
 
-            supportActionBar?.setDisplayHomeAsUpEnabled(true)
-            supportActionBar?.setBackgroundDrawable(resources.getDrawable(R.color.tropical_blue))
-
+            // Mengatur dropdown field dan tombol
             setupDropdownField()
             setupButtons()
-            setUser()
+
+            // Mengambil data dari Firebase
             firebaseKey?.let { loadDataFromFirebase(it) }
         }
     }
@@ -79,9 +92,39 @@ class PemutusanActivity : AppCompatActivity() {
         }
     }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+        // Menangani tindakan saat item di ActionBar diklik (tombol back di ActionBar)
+        if (item.itemId == android.R.id.home) {
+            navigatePage(this, MainActivity::class.java, true)
+            finish()
+            return true
+        }
+
+        return super.onOptionsItemSelected(item)
+    }
+
     private fun setUser() {
         userManager.fetchUserAndSetupData {
             user = userManager.getUser()
+        }
+    }
+
+    private fun setupButtons() {
+
+        // Menetapkan tindakan yang diambil saat item gambar diklik
+        binding.itemImage1.setOnClickListener { startTakePhoto() }
+
+        // Menetapkan tindakan yang dilakukan saat tombol "Simpan" diklik
+        binding.btnSimpan.setOnClickListener { saveCustomerData() }
+
+        // Menetapkan tindakan yang dilakukan saat tombol "Hapus" diklik
+        binding.btnHapus.setOnClickListener {
+            if (firebaseKey == null) {
+                clearData()
+            } else {
+                deleteData()
+            }
         }
     }
 
@@ -92,21 +135,83 @@ class PemutusanActivity : AppCompatActivity() {
         dropdownField1.setAdapter(ArrayAdapter(this, R.layout.dropdown_item, items1))
     }
 
-    private fun setupButtons() {
-        binding.itemImage1.setOnClickListener { startTakePhoto() }
+    private fun clearData() {
 
-        binding.btnSimpan.setOnClickListener { saveData() }
+        // Membersihkan semua isian pada field input
+        binding.apply {
+            edtPemasanganSambungan.text.clear()
+            dropdownPw.text.clear()
+            edtNomorKl.text.clear()
+            edtNamaPelanggan.text.clear()
+            edtAlamatPelanggan.text.clear()
+            edtRt.text.clear()
+            edtRw.text.clear()
+            edtKelurahan.text.clear()
+            edtKecamatan.text.clear()
+            edtNomorMeter.text.clear()
+            edtKeterangan.text.clear()
 
-        binding.btnHapus.setOnClickListener {
-            if (firebaseKey == null) {
-                clearData()
-            } else {
-                deleteData()
-            }
+            // Mereset teks pada itemImage1 menjadi default
+            itemImage1.text = getString(R.string.take_photo)
+            imageFile = null
         }
     }
 
-    private fun saveData() {
+    private fun deleteData() {
+
+        // Mendapatkan referensi ke lokasi data yang akan dihapus
+        val listCustomerRef = databaseReference.child("listPemutusan")
+        val customerRef = firebaseKey?.let { listCustomerRef.child(it) }
+
+        // Mendengarkan perubahan data pada lokasi yang akan dihapus
+        customerRef?.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+
+                    // Jika data ditemukan, tampilkan dialog konfirmasi untuk menghapus
+                    showDeleteConfirmationDialog(customerRef, this@PemutusanActivity)
+                } else {
+                    showToast(this@PemutusanActivity, R.string.data_not_found)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+
+                // Jika terjadi kesalahan saat mengakses data, tampilkan pesan kesalahan
+                showToast(
+                    this@PemutusanActivity,
+                    "${R.string.failed_access_data}: ${error.message}".toInt()
+                )
+            }
+        })
+    }
+
+    private fun isInputValid(
+        jenisPekerjaan: String,
+        pw: String,
+        nomorKL: String,
+        name: String,
+        address: String,
+        rt: String,
+        rw: String,
+        kelurahan: String,
+        kecamatan: String,
+        nomorMeter: String,
+        keterangan: String,
+    ): Boolean {
+
+        // Memeriksa apakah semua input yang diperlukan tidak kosong
+        val isRequiredValid =
+            jenisPekerjaan.isNotEmpty() && pw.isNotEmpty() && nomorKL.isNotEmpty() && name.isNotEmpty() && address.isNotEmpty() && rt.isNotEmpty() && rw.isNotEmpty() && kelurahan.isNotEmpty() && kecamatan.isNotEmpty() && nomorMeter.isNotEmpty() && keterangan.isNotEmpty()
+
+        // Memeriksa validitas file gambar jika pengguna adalah petugas lapangan
+        val isImageFilesValid = user?.team == 0 || imageFile != null
+
+        // Return true jika semua validasi terpenuhi
+        return isRequiredValid && isImageFilesValid
+    }
+
+    private fun saveCustomerData() {
         try {
             val jenisPekerjaan = binding.edtPemasanganSambungan.text.toString()
             val pw = binding.dropdownPw.text.toString()
@@ -135,9 +240,12 @@ class PemutusanActivity : AppCompatActivity() {
                     keterangan
                 )
             ) {
+
+                // Menampilkan loading indicator dan memblokir layar agar tidak dapat diklik
                 showLoading(true, binding.progressBar, binding.btnSimpan, binding.btnHapus)
-                saveCustomerData(
-                    currentTime,
+                showBlockingLayer(window, true)
+
+                setValueCustomerData(
                     jenisPekerjaan,
                     pw,
                     nomorKL,
@@ -151,43 +259,20 @@ class PemutusanActivity : AppCompatActivity() {
                     keterangan
                 )
             } else {
+
+                // Menampilkan pesan jika ada data yang belum diisi
                 showLoading(false, binding.progressBar, binding.btnSimpan, binding.btnHapus)
                 showToast(this@PemutusanActivity, R.string.fill_all_data)
             }
         } catch (e: Exception) {
+
+            // Menangani pengecualian jika terjadi kesalahan
             e.printStackTrace()
         }
 
     }
 
-
-    private fun isInputValid(
-        jenisPekerjaan: String,
-        pw: String,
-        nomorKL: String,
-        name: String,
-        address: String,
-        rt: String,
-        rw: String,
-        kelurahan: String,
-        kecamatan: String,
-        nomorMeter: String,
-        keterangan: String,
-    ): Boolean {
-
-        // Memeriksa apakah semua input yang diperlukan tidak kosong
-        val isRequiredValid =
-            jenisPekerjaan.isNotEmpty() && pw.isNotEmpty() && nomorKL.isNotEmpty() && name.isNotEmpty() && address.isNotEmpty() && rt.isNotEmpty() && rw.isNotEmpty() && kelurahan.isNotEmpty() && kecamatan.isNotEmpty() && nomorMeter.isNotEmpty() && keterangan.isNotEmpty()
-
-        // Memeriksa validitas file gambar jika pengguna adalah petugas lapangan
-        val isImageFilesValid = user?.team == 0 || imageFile != null
-
-        // Return true jika semua validasi terpenuhi
-        return isRequiredValid && isImageFilesValid
-    }
-
-    private fun saveCustomerData(
-        currentDate: Long,
+    private fun setValueCustomerData(
         jenisPekerjaan: String,
         pw: String,
         nomorKL: String,
@@ -203,7 +288,7 @@ class PemutusanActivity : AppCompatActivity() {
         if (user?.team != 0) {
             val storageReference = FirebaseStorage.getInstance().reference
             val dokumentasi1Ref =
-                storageReference.child("dokumentasi/${currentDate}_dokumen.jpg")
+                storageReference.child("dokumentasi/${currentTime}_dokumen.jpg")
 
             showToast(this@PemutusanActivity, R.string.compressing_image)
             CoroutineScope(Dispatchers.IO).launch {
@@ -219,7 +304,7 @@ class PemutusanActivity : AppCompatActivity() {
                         if (newCustomerId != null) {
                             val data = mapOf(
                                 "firebaseKey" to newCustomerId,
-                                "currentDate" to currentDate,
+                                "currentDate" to currentTime,
                                 "petugas" to user?.username,
                                 "dailyTeam" to user?.dailyTeam,
                                 "jenisPekerjaan" to jenisPekerjaan,
@@ -269,15 +354,62 @@ class PemutusanActivity : AppCompatActivity() {
     }
 
     private fun handleSaveCompletionOrFailure(task: Task<Void>) {
+
         // Menampilkan atau menyembunyikan loading, menampilkan pesan sukses atau gagal, dan menyelesaikan aktivitas
         showLoading(true, binding.progressBar, binding.btnSimpan, binding.btnHapus)
+
         if (task.isSuccessful) {
             showToast(this, R.string.save_success)
         } else {
             showToast(this, R.string.save_failed)
         }
+
         showLoading(false, binding.progressBar, binding.btnSimpan, binding.btnHapus)
+        showBlockingLayer(window, false)
         finish()
+    }
+
+
+    private fun isDataChanged(data: PemutusanData): Boolean {
+
+        // Bandingkan data yang ada dengan data yang sebelumnya.
+        // Jika ada perubahan, kembalikan true; jika tidak, kembalikan false.
+
+        val newData = listOf(
+            binding.edtPemasanganSambungan.text.toString(),
+            binding.dropdownPw.text.toString(),
+            binding.edtNomorKl.text.toString(),
+            binding.edtNamaPelanggan.text.toString(),
+            binding.edtAlamatPelanggan.text.toString(),
+            binding.edtRt.text.toString(),
+            binding.edtRw.text.toString(),
+            binding.edtKelurahan.text.toString(),
+            binding.edtKecamatan.text.toString(),
+            binding.edtNomorMeter.text.toString(),
+            binding.edtKeterangan.text.toString()
+        )
+
+        val oldData = listOf(
+            data.jenisPekerjaan,
+            data.pw.toString(),
+            data.nomorKL,
+            data.name,
+            data.address,
+            data.rt,
+            data.rw,
+            data.kelurahan,
+            data.kecamatan,
+            data.nomorMeter,
+            data.keterangan
+        )
+
+        return newData.zip(oldData).any { (new, old) -> isDifferent(new, old) }
+    }
+
+    private fun isDifferent(newData: String, oldData: String): Boolean {
+
+        // Fungsi ini membandingkan dua string dan mengembalikan true jika berbeda, false jika sama.
+        return newData != oldData
     }
 
     private fun loadDataFromFirebase(firebaseKey: String) {
@@ -304,93 +436,6 @@ class PemutusanActivity : AppCompatActivity() {
                 )
             }
         })
-    }
-
-    private fun deleteData() {
-        val listCustomerRef = databaseReference.child("listPemutusan")
-        val customerRef = firebaseKey?.let { listCustomerRef.child(it) }
-
-        customerRef?.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.exists()) {
-                    // Show a confirmation dialog for delete
-                    showDeleteConfirmationDialog(customerRef, this@PemutusanActivity)
-                } else {
-                    showToast(this@PemutusanActivity, R.string.data_not_found)
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                showToast(
-                    this@PemutusanActivity,
-                    "${R.string.failed_access_data}: ${error.message}".toInt()
-                )
-            }
-        })
-    }
-
-    private fun clearData() {
-        // Clear all input fields
-        binding.apply {
-            edtPemasanganSambungan.text.clear()
-            dropdownPw.text.clear()
-            edtNomorKl.text.clear()
-            edtNamaPelanggan.text.clear()
-            edtAlamatPelanggan.text.clear()
-            edtRt.text.clear()
-            edtRw.text.clear()
-            edtKelurahan.text.clear()
-            edtKecamatan.text.clear()
-            edtNomorMeter.text.clear()
-            edtKeterangan.text.clear()
-            itemImage1.text = getString(R.string.take_photo)
-            imageFile = null
-        }
-    }
-
-    private lateinit var currentPhotoPath: String
-    private fun startTakePhoto() {
-        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        intent.resolveActivity(packageManager)
-
-        createCustomTempFile(application).also { file ->
-            val photoURI: Uri = FileProvider.getUriForFile(
-                this@PemutusanActivity,
-                "com.pdam.report",
-                file
-            )
-            currentPhotoPath = file.absolutePath
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
-            launcherIntentCamera.launch(intent)
-        }
-    }
-
-    @SuppressLint("SetTextI18n")
-    private val launcherIntentCamera = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == RESULT_OK) {
-            // After successfully capturing an image, assign it to the appropriate file
-            val myFile = File(currentPhotoPath)
-            myFile.let { file ->
-                imageFile = file
-                binding.itemImage1.text = currentTime.toString() + "_dokumentasi.jpg"
-
-                Glide.with(this@PemutusanActivity)
-                    .load(imageFile)
-                    .into(binding.imageView1)
-
-                binding.imageView1.setOnClickListener {
-                    supportFragmentManager.beginTransaction()
-                        .add(
-                            FullScreenImageDialogFragment(imageFile.toString()),
-                            "FullScreenImageDialogFragment"
-                        )
-                        .addToBackStack(null)
-                        .commit()
-                }
-            }
-        }
     }
 
     @SuppressLint("SetTextI18n", "UseCompatLoadingForDrawables")
@@ -521,22 +566,13 @@ class PemutusanActivity : AppCompatActivity() {
                 if (status) {
                     setupDropdownField()
                 }
-                if (isDataChange(
-                        dataCustomer,
-                        binding.edtPemasanganSambungan.text.toString(),
-                        binding.dropdownPw.text.toString(),
-                        binding.edtNomorKl.text.toString(),
-                        binding.edtNamaPelanggan.text.toString(),
-                        binding.edtAlamatPelanggan.text.toString(),
-                        binding.edtRt.text.toString(),
-                        binding.edtRw.text.toString(),
-                        binding.edtKelurahan.text.toString(),
-                        binding.edtKecamatan.text.toString(),
-                        binding.edtKeterangan.text.toString()
-                    )
-                ) {
+
+                if (isDataChanged(dataCustomer)) {
                     text = getString(R.string.simpan)
-                    showDataChangeDialog(this@PemutusanActivity, ::saveData)
+                    showDataChangeDialog(
+                        this@PemutusanActivity,
+                        this@PemutusanActivity::saveCustomerData
+                    )
                     return@setOnClickListener
                 }
                 text = getString(R.string.finish)
@@ -546,39 +582,49 @@ class PemutusanActivity : AppCompatActivity() {
         }
     }
 
-    private fun isDataChange(
-        data: PemutusanData,
-        jenisPekerjaan: String,
-        pw: String,
-        nomorKL: String,
-        name: String,
-        address: String,
-        rt: String,
-        rw: String,
-        kelurahan: String,
-        kecamatan: String,
-        keterangan: String
-    ): Boolean {
-        // Membandingkan setiap data apakah ada perubahan atau tidak
-        return jenisPekerjaan != data.jenisPekerjaan ||
-                pw != data.pw.toString() ||
-                nomorKL != data.nomorKL ||
-                name != data.name ||
-                address != data.address ||
-                rt != data.rt ||
-                rw != data.rw ||
-                kelurahan != data.kelurahan ||
-                kecamatan != data.kecamatan ||
-                keterangan != data.keterangan
+    private lateinit var currentPhotoPath: String
+    private fun startTakePhoto() {
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        intent.resolveActivity(packageManager)
+
+        createCustomTempFile(application).also { file ->
+            val photoURI: Uri = FileProvider.getUriForFile(
+                this@PemutusanActivity,
+                "com.pdam.report",
+                file
+            )
+            currentPhotoPath = file.absolutePath
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+            launcherIntentCamera.launch(intent)
+        }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == android.R.id.home) {
-            navigatePage(this, MainActivity::class.java, true)
-            finish()
-            return true
+    @SuppressLint("SetTextI18n")
+    private val launcherIntentCamera = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            // After successfully capturing an image, assign it to the appropriate file
+            val myFile = File(currentPhotoPath)
+            myFile.let { file ->
+                imageFile = file
+                binding.itemImage1.text = currentTime.toString() + "_dokumentasi.jpg"
+
+                Glide.with(this@PemutusanActivity)
+                    .load(imageFile)
+                    .into(binding.imageView1)
+
+                binding.imageView1.setOnClickListener {
+                    supportFragmentManager.beginTransaction()
+                        .add(
+                            FullScreenImageDialogFragment(imageFile.toString()),
+                            "FullScreenImageDialogFragment"
+                        )
+                        .addToBackStack(null)
+                        .commit()
+                }
+            }
         }
-        return super.onOptionsItemSelected(item)
     }
 
     companion object {

@@ -99,7 +99,7 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:hint="@string/nomor_registrasi"
-                android:inputType="text"
+                android:inputType="text|textCapCharacters"
                 tools:ignore="SpeakableTextPresentCheck" />
         </com.google.android.material.textfield.TextInputLayout>
 

@@ -10,8 +10,11 @@ import com.pdam.report.databinding.FragmentFullScreenImageDialogBinding
 
 class FullScreenImageDialogFragment(private val imageUrl: String) : DialogFragment() {
 
+    // View Binding
     private var _binding: FragmentFullScreenImageDialogBinding? = null
     private val binding get() = _binding!!
+
+    // Membuat tampilan dialog dan memasang tata letak
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -21,26 +24,29 @@ class FullScreenImageDialogFragment(private val imageUrl: String) : DialogFragme
         return binding.root
     }
 
+    // Konfigurasi tampilan setelah pembuatan tampilan dialog
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Menutup dialog saat tombol diklik
         binding.btnBack.setOnClickListener {
             dismiss()
         }
 
-        // Load and display the image using Glide
+        // Memuat dan menampilkan gambar menggunakan Glide
         Glide.with(this).load(imageUrl).into(binding.fullScreenImageView)
 
-        // Make the dialog full-screen
+        // Mengatur dialog menjadi layar penuh
         dialog?.window?.setLayout(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
 
-        // Close the dialog when tapping outside
+        // Menutup dialog ketika mengetuk di luar dialog
         dialog?.setCanceledOnTouchOutside(true)
     }
 
+    // Membersihkan binding saat tampilan dialog dihancurkan
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

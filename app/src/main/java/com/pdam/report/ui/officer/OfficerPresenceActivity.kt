@@ -42,9 +42,7 @@ import com.pdam.report.data.UserData
 import com.pdam.report.databinding.ActivityOfficerPresenceBinding
 import com.pdam.report.utils.PermissionHelper
 import com.pdam.report.utils.createCustomTempFile
-import com.pdam.report.utils.getCurrentTimeStamp
 import com.pdam.report.utils.getNetworkTime
-import com.pdam.report.utils.milisToDate
 import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.reduceFileImageInBackground
 import com.pdam.report.utils.showLoading
@@ -56,33 +54,43 @@ import java.io.File
 @Suppress("DEPRECATION")
 class OfficerPresenceActivity : AppCompatActivity() {
 
+    // Variabel untuk menyimpan file gambar yang diambil dari kamera
     private var getFile: File? = null
+
+    // Variabel untuk menyimpan referensi Firebase Storage dan Database
     private val storageReference = FirebaseStorage.getInstance().reference
     private val databaseReference = FirebaseDatabase.getInstance().reference
 
+    // Variabel untuk menyimpan referensi FusedLocationProviderClient
     private val fuse: FusedLocationProviderClient by lazy {
         LocationServices.getFusedLocationProviderClient(
             this
         )
     }
 
+    // Variabel untuk menyimpan lokasi perangkat
     private var latLng: LatLng? = null
     private lateinit var locationRequest: LocationRequest
+
+    // Variabel untuk menyimpan referensi LocationManager
     private val locationManager: LocationManager? by lazy {
         getSystemService(Context.LOCATION_SERVICE) as? LocationManager
     }
 
+    // Variabel untuk menyimpan referensi FirebaseAuth
     private val auth by lazy { FirebaseAuth.getInstance() }
     private val currentUser = auth.currentUser
 
     private var isToastShown = false
     private var isUploading = false // State variable to track if the upload is in progress
 
+    // Variabel untuk menyimpan referensi binding
     private val binding: ActivityOfficerPresenceBinding by lazy {
         ActivityOfficerPresenceBinding.inflate(
             layoutInflater
         )
     }
+
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             navigatePage(this@OfficerPresenceActivity, MainActivity::class.java)
@@ -382,7 +390,8 @@ class OfficerPresenceActivity : AppCompatActivity() {
                     fuse.requestLocationUpdates(locationRequest, locationCallback, mainLooper)
                 } else {
                     // Menggunakan LocationManager untuk Android di bawah 12
-                    val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+                    val locationManager =
+                        getSystemService(Context.LOCATION_SERVICE) as LocationManager
                     locationManager.requestLocationUpdates(
                         LocationManager.GPS_PROVIDER, // Gunakan provider yang sesuai
                         5000L, // Minimum waktu antara pembaruan lokasi (ms)
@@ -457,9 +466,6 @@ class OfficerPresenceActivity : AppCompatActivity() {
         // stop coroutine
         lifecycleScope.coroutineContext.cancel()
     }
-
-
-
 
     // Menangani hasil permintaan izin
     override fun onRequestPermissionsResult(

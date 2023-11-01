@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -32,7 +31,6 @@ import com.pdam.report.utils.UserManager
 import com.pdam.report.utils.getInitialDate
 import com.pdam.report.utils.getNetworkTime
 import com.pdam.report.utils.milisToDate
-import com.pdam.report.utils.milisToDateTime
 import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.showDialogDenied
 import com.pdam.report.utils.showToast
@@ -128,7 +126,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         checkAndRequestPermissions(this)
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         PermissionHelper.handlePermissionResult(requestCode, permissions, grantResults)
         when (requestCode) {
@@ -143,6 +145,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                 }
                 // Izin kamera dan lokasi diizinkan, lanjutkan dengan tindakan yang diinginkan
             }
+
             PermissionHelper.REQUEST_CAMERA_PERMISSION -> {
                 // Handle camera permission result
                 for (i in permissions.indices) {
@@ -154,6 +157,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                 }
                 // Izin kamera diizinkan, lanjutkan dengan tindakan yang diinginkan
             }
+
             PermissionHelper.REQUEST_LOCATION_PERMISSION -> {
                 // Handle location permission result
                 for (i in permissions.indices) {
@@ -193,9 +197,13 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                         val currentDateValue = currentDate.await()
                         val lastPresence = milisToDate(user.lastPresence)
 
-                        val referenceDate = SimpleDateFormat("dd-MM-yyyy").parse(initialDateValue!!)?.time
-                        var daysDifference = ((currentDateValue - referenceDate!!) / (1000L * 60 * 60 * 24) % 5).toInt()
-                        if (daysDifference == 0) { daysDifference = 5 }
+                        val referenceDate =
+                            SimpleDateFormat("dd-MM-yyyy").parse(initialDateValue!!)?.time
+                        var daysDifference =
+                            ((currentDateValue - referenceDate!!) / (1000L * 60 * 60 * 24) % 5).toInt()
+                        if (daysDifference == 0) {
+                            daysDifference = 5
+                        }
 
                         // convert current time to int with format 24 hours
                         val calendar = Calendar.getInstance()
@@ -210,8 +218,16 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                                 return@launch
                             } else {
                                 val moveIntent = when {
-                                    user.team == 0 -> Intent(this@MainActivity, AdminPresenceActivity::class.java)
-                                    user.team == daysDifference && currentTime in 19..23 -> Intent(this@MainActivity, OfficerPresenceActivity::class.java)
+                                    user.team == 0 -> Intent(
+                                        this@MainActivity,
+                                        AdminPresenceActivity::class.java
+                                    )
+
+                                    user.team == daysDifference && currentTime in 19..23 -> Intent(
+                                        this@MainActivity,
+                                        OfficerPresenceActivity::class.java
+                                    )
+
                                     else -> {
                                         withContext(Dispatchers.Main) {
                                             showToast(this@MainActivity, R.string.presence_denied)
@@ -232,7 +248,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                     }
                     return@setNavigationItemSelectedListener false
                 }
-
 
 
                 R.id.nav_logout -> {

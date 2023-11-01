@@ -50,8 +50,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ems="10"
-                    android:hint= "@string/pemutusan_sementara"
-                    android:inputType="textPersonName"
+                    android:enabled="false"
+                    android:inputType="none"
+                    android:text="@string/pemutusan_sementara"
                     tools:ignore="SpeakableTextPresentCheck" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -96,7 +97,7 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:hint="@string/nomor_k_l"
-                android:inputType="text"
+                android:inputType="text|textCapCharacters"
                 tools:ignore="SpeakableTextPresentCheck" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -118,7 +119,7 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:hint="@string/nama_pelanggan"
-                android:inputType="textPersonName"
+                android:inputType="textPersonName|textCapWords"
                 tools:ignore="SpeakableTextPresentCheck" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -149,7 +150,7 @@
                     android:layout_height="wrap_content"
                     android:ems="10"
                     android:hint="@string/alamat_pelanggan"
-                    android:inputType="textMultiLine"
+                    android:inputType="textMultiLine|textCapWords"
                     tools:ignore="SpeakableTextPresentCheck" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -228,7 +229,7 @@
                     android:layout_height="wrap_content"
                     android:ems="10"
                     android:hint="@string/kelurahan"
-                    android:inputType="textMultiLine"
+                    android:inputType="textMultiLine|textCapWords"
                     tools:ignore="SpeakableTextPresentCheck" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -249,7 +250,7 @@
                     android:layout_height="wrap_content"
                     android:ems="10"
                     android:hint="@string/kecamatan"
-                    android:inputType="textMultiLine"
+                    android:inputType="textMultiLine|textCapWords"
                     tools:ignore="SpeakableTextPresentCheck" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>

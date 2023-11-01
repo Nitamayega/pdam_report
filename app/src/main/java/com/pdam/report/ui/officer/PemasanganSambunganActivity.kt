@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.MenuItem
 import android.widget.ArrayAdapter
 import androidx.activity.OnBackPressedCallback
@@ -25,6 +24,7 @@ import com.pdam.report.databinding.ActivityPemasanganSambunganBinding
 import com.pdam.report.utils.getNetworkTime
 import com.pdam.report.utils.milisToDateTime
 import com.pdam.report.utils.navigatePage
+import com.pdam.report.utils.showBlockingLayer
 import com.pdam.report.utils.showDataChangeDialog
 import com.pdam.report.utils.showDeleteConfirmationDialog
 import com.pdam.report.utils.showLoading
@@ -35,27 +35,31 @@ import kotlin.properties.Delegates
 @Suppress("DEPRECATION")
 class PemasanganSambunganActivity : AppCompatActivity() {
 
+    // View Binding
+    private val binding by lazy { ActivityPemasanganSambunganBinding.inflate(layoutInflater) }
+
     // Firebase Database
     private val databaseReference = FirebaseDatabase.getInstance().reference
 
-    // User Management
-    private val user by lazy { intent.getParcelableExtra<UserData>(PemasanganKelayakanActivity.EXTRA_USER_DATA) }
+    // Waktu saat ini didapat dari server
+    private var currentTime by Delegates.notNull<Long>()
 
-    // Intent-related
+    // Intent-related: Data customer
     private val dataCustomer by lazy {
         intent.getParcelableExtra<SambunganData>(
             PemasanganKelayakanActivity.EXTRA_CUSTOMER_DATA
         )
     }
 
-    private var currentTime by Delegates.notNull<Long>()
-
-    // View Binding
-    private val binding by lazy { ActivityPemasanganSambunganBinding.inflate(layoutInflater) }
+    // Intent-related: User (petugas dan/atau admin)
+    private val user by lazy {
+        intent.getParcelableExtra<UserData>(
+            PemasanganKelayakanActivity.EXTRA_USER_DATA
+        )
+    }
 
     // Memantau perubahan di semua field yang relevan
     private val isDataChanged = MutableLiveData<Boolean>()
-
 
     @SuppressLint("UseCompatLoadingForDrawables")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,6 +74,8 @@ class PemasanganSambunganActivity : AppCompatActivity() {
             setDisplayHomeAsUpEnabled(true)
             setBackgroundDrawable(resources.getDrawable(R.color.tropical_blue))
         }
+
+        // Melakukan operasi asynchronous untuk mendapatkan waktu saat ini dari server
         lifecycleScope.launch {
             currentTime = getNetworkTime()
 
@@ -77,7 +83,9 @@ class PemasanganSambunganActivity : AppCompatActivity() {
             setupDropdownField()
             monitorDataChanges()
             setupButtons()
-            setUser()
+
+            // Menampilkan data pelanggan
+            displayCustomerData()
         }
     }
 
@@ -94,30 +102,35 @@ class PemasanganSambunganActivity : AppCompatActivity() {
         }
     }
 
-    private fun setUser() {
+    @Suppress("DEPRECATION")
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+        // Menangani tindakan saat item di ActionBar diklik (tombol back di ActionBar)
+        if (item.itemId == android.R.id.home) {
+            onBackPressed()
+            return true
+        }
+
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun displayCustomerData() {
         if (dataCustomer != null) {
+
+            // Memeriksa apakah pengguna adalah petugas dan status data pelanggan "Layak"
             val setRole = user?.team == 0
             setCustomerData(dataCustomer!!, setRole)
+
             if (dataCustomer?.data != 1) {
                 displayData(dataCustomer!!, setRole)
             }
         }
     }
 
-    @Suppress("DEPRECATION")
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Menangani tindakan saat item di ActionBar diklik (tombol back di ActionBar)
-        if (item.itemId == android.R.id.home) {
-            onBackPressed()
-            return true
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
     private fun setupButtons() {
 
         // Menetapkan tindakan yang dilakukan saat tombol "Simpan" diklik
-        binding.btnSimpan.setOnClickListener { saveData() }
+        binding.btnSimpan.setOnClickListener { saveCustomerData() }
 
         // Menetapkan tindakan yang dilakukan saat tombol "Hapus" diklik
         binding.btnHapus.setOnClickListener {
@@ -193,6 +206,41 @@ class PemasanganSambunganActivity : AppCompatActivity() {
         })
     }
 
+    private val textWatcher = object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            // Not used
+        }
+
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            isDataChanged.value = isDataChanged()
+            updateButtonText()
+        }
+
+        override fun afterTextChanged(s: Editable?) {
+            // Not used
+        }
+    }
+
+    private fun monitorDataChanges() {
+        binding.apply {
+            edtPemasanganSambungan.addTextChangedListener(textWatcher)
+            edtPw.addTextChangedListener(textWatcher)
+            edtNomorKl.addTextChangedListener(textWatcher)
+            edtNamaPelanggan.addTextChangedListener(textWatcher)
+            edtAlamatPelanggan.addTextChangedListener(textWatcher)
+            edtRt.addTextChangedListener(textWatcher)
+            edtRw.addTextChangedListener(textWatcher)
+            edtKelurahan.addTextChangedListener(textWatcher)
+            edtKecamatan.addTextChangedListener(textWatcher)
+            dropdownMerk.addTextChangedListener(textWatcher)
+            dropdownDiameter.addTextChangedListener(textWatcher)
+            edtStand.addTextChangedListener(textWatcher)
+            edtNomorMeter.addTextChangedListener(textWatcher)
+            edtNomorSegel.addTextChangedListener(textWatcher)
+            edtKeterangan.addTextChangedListener(textWatcher)
+        }
+    }
+
     private fun isInputValid(
         jenisPekerjaan: String,
         pw: String,
@@ -215,7 +263,7 @@ class PemasanganSambunganActivity : AppCompatActivity() {
         return jenisPekerjaan.isNotEmpty() && pw.isNotEmpty() && nomorKL.isNotEmpty() && name.isNotEmpty() && address.isNotEmpty() && rt.isNotEmpty() && rw.isNotEmpty() && kelurahan.isNotEmpty() && kecamatan.isNotEmpty() && merk.isNotEmpty() && diameter.isNotEmpty() && stand.isNotEmpty() && nomorMeter.isNotEmpty() && nomorSegel.isNotEmpty() && keterangan.isNotEmpty()
     }
 
-    private fun saveData() {
+    private fun saveCustomerData() {
         val jenisPekerjaan = binding.edtPemasanganSambungan.text.toString()
         val pw = binding.edtPw.text.toString()
         val nomorKL = binding.edtNomorKl.text.toString()
@@ -251,11 +299,13 @@ class PemasanganSambunganActivity : AppCompatActivity() {
                 keterangan
             )
         ) {
+
+            // Menampilkan loading indicator dan memblokir layar agar tidak dapat diklik
             showLoading(true, binding.progressBar, binding.btnSimpan, binding.btnHapus)
+            showBlockingLayer(window, true)
 
             // Menyimpan data pelanggan
-            saveCustomerData(
-                currentTime,
+            setValueCustomerData(
                 jenisPekerjaan,
                 pw,
                 nomorKL,
@@ -280,8 +330,7 @@ class PemasanganSambunganActivity : AppCompatActivity() {
         }
     }
 
-    private fun saveCustomerData(
-        currentDate: Long,
+    private fun setValueCustomerData(
         jenisPekerjaan: String,
         pw: String,
         nomorKL: String,
@@ -305,7 +354,7 @@ class PemasanganSambunganActivity : AppCompatActivity() {
 
         // Update data pelanggan yang sudah ada
         val updatedValues = mapOf(
-            "updateInstallDate" to currentDate,
+            "updateInstallDate" to currentTime,
             "petugas" to user?.username,
             "jenisPekerjaan" to jenisPekerjaan,
             "pw" to pw.toInt(),
@@ -332,154 +381,70 @@ class PemasanganSambunganActivity : AppCompatActivity() {
     }
 
     private fun handleSaveCompletionOrFailure(task: Task<Void>) {
+
         // Menampilkan atau menyembunyikan loading, menampilkan pesan sukses atau gagal, dan menyelesaikan aktivitas
         showLoading(true, binding.progressBar, binding.btnSimpan, binding.btnHapus)
+
         if (task.isSuccessful) {
             showToast(this, R.string.save_success)
         } else {
             showToast(this, R.string.save_failed)
         }
+
         showLoading(false, binding.progressBar, binding.btnSimpan, binding.btnHapus)
+        showBlockingLayer(window, false)
         finish()
     }
 
-    private fun monitorDataChanges() {
-        binding.apply {
-            edtPemasanganSambungan.addTextChangedListener(textWatcher)
-            edtPw.addTextChangedListener(textWatcher)
-            edtNomorKl.addTextChangedListener(textWatcher)
-            edtNamaPelanggan.addTextChangedListener(textWatcher)
-            edtAlamatPelanggan.addTextChangedListener(textWatcher)
-            edtRt.addTextChangedListener(textWatcher)
-            edtRw.addTextChangedListener(textWatcher)
-            edtKelurahan.addTextChangedListener(textWatcher)
-            edtKecamatan.addTextChangedListener(textWatcher)
-            dropdownMerk.addTextChangedListener(textWatcher)
-            dropdownDiameter.addTextChangedListener(textWatcher)
-            edtStand.addTextChangedListener(textWatcher)
-            edtNomorMeter.addTextChangedListener(textWatcher)
-            edtNomorSegel.addTextChangedListener(textWatcher)
-            edtKeterangan.addTextChangedListener(textWatcher)
-        }
-    }
+    private fun isDataChanged(): Boolean {
 
-    private fun updateButtonText() {
-        binding.btnSimpan.apply {
-            text = if (isDataChanged.value == true) {
-                getString(R.string.simpan)
-            } else {
-                getString(R.string.next)
-            }
-        }
+        // Bandingkan data yang ada dengan data yang sebelumnya.
+        // Jika ada perubahan, kembalikan true; jika tidak, kembalikan false.
+
+        val newData = listOf(
+            binding.edtPemasanganSambungan.text.toString(),
+            binding.edtPw.text.toString(),
+            binding.edtNomorKl.text.toString(),
+            binding.edtNamaPelanggan.text.toString(),
+            binding.edtAlamatPelanggan.text.toString(),
+            binding.edtRt.text.toString(),
+            binding.edtRw.text.toString(),
+            binding.edtKelurahan.text.toString(),
+            binding.edtKecamatan.text.toString(),
+            binding.dropdownMerk.text.toString(),
+            binding.dropdownDiameter.text.toString(),
+            binding.edtStand.text.toString(),
+            binding.edtNomorMeter.text.toString(),
+            binding.edtNomorSegel.text.toString(),
+            binding.edtKeterangan.text.toString()
+        )
+
+        val oldData = listOf(
+            dataCustomer?.jenisPekerjaan.toString(),
+            dataCustomer?.pw.toString(),
+            dataCustomer?.nomorKL.toString(),
+            dataCustomer?.name.toString(),
+            dataCustomer?.address.toString(),
+            dataCustomer?.rt.toString(),
+            dataCustomer?.rw.toString(),
+            dataCustomer?.kelurahan.toString(),
+            dataCustomer?.kecamatan.toString(),
+            dataCustomer?.merkMeter.toString(),
+            dataCustomer?.diameterMeter.toString(),
+            dataCustomer?.standMeter.toString(),
+            dataCustomer?.nomorMeter.toString(),
+            dataCustomer?.nomorSegel.toString(),
+            dataCustomer?.keterangan2.toString()
+        )
+
+        return newData.zip(oldData).any { (new, old) -> isDifferent(new, old) }
     }
 
     private fun isDifferent(newData: String, oldData: String): Boolean {
+
         // Fungsi ini membandingkan dua string dan mengembalikan true jika berbeda, false jika sama.
         return newData != oldData
     }
-
-    private fun isDataChanged(): Boolean {
-        // Di sini, Anda perlu membandingkan data yang ada dengan data yang sebelumnya.
-        // Jika ada perubahan, kembalikan true, jika tidak, kembalikan false.
-        return isDifferent(
-            binding.edtPemasanganSambungan.text.toString(),
-            dataCustomer?.jenisPekerjaan.toString()
-        ) ||
-                isDifferent(
-                    binding.edtPw.text.toString(),
-                    dataCustomer?.pw.toString()
-                ) ||
-                isDifferent(
-                    binding.edtNomorKl.text.toString(),
-                    dataCustomer?.nomorKL.toString()
-                ) ||
-                isDifferent(
-                    binding.edtNamaPelanggan.text.toString(),
-                    dataCustomer?.name.toString()
-                ) ||
-                isDifferent(
-                    binding.edtAlamatPelanggan.text.toString(),
-                    dataCustomer?.address.toString()
-                ) ||
-                isDifferent(
-                    binding.edtRt.text.toString(),
-                    dataCustomer?.rt.toString()
-                ) ||
-                isDifferent(
-                    binding.edtRw.text.toString(),
-                    dataCustomer?.rw.toString()
-                ) ||
-                isDifferent(
-                    binding.edtKelurahan.text.toString(),
-                    dataCustomer?.kelurahan.toString()
-                ) ||
-                isDifferent(
-                    binding.edtKecamatan.text.toString(),
-                    dataCustomer?.kecamatan.toString()
-                ) ||
-                isDifferent(
-                    binding.dropdownMerk.text.toString(),
-                    dataCustomer?.merkMeter.toString()
-                ) ||
-                isDifferent(
-                    binding.dropdownDiameter.text.toString(),
-                    dataCustomer?.diameterMeter.toString()
-                ) ||
-                isDifferent(
-                    binding.edtStand.text.toString(),
-                    dataCustomer?.standMeter.toString()
-                ) ||
-                isDifferent(
-                    binding.edtNomorMeter.text.toString(),
-                    dataCustomer?.nomorMeter.toString()
-                ) ||
-                isDifferent(
-                    binding.edtNomorSegel.text.toString(),
-                    dataCustomer?.nomorSegel.toString()
-                ) ||
-                isDifferent(
-                    binding.edtKeterangan.text.toString(),
-                    dataCustomer?.keterangan2.toString()
-                )
-    }
-
-
-    private val textWatcher = object : TextWatcher {
-        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            // Not used
-        }
-
-        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            isDataChanged.value = isDataChanged()
-            Log.d("Sambungan", "onTextChanged: ${isDataChanged.value}")
-            updateButtonText()
-        }
-
-        override fun afterTextChanged(s: Editable?) {
-            // Not used
-        }
-    }
-
-
-//    fun isDataChange(data: SambunganData, jenisPekerjaan: String, pw: String, nomorKL: String, name: String, address: String, rt: String, rw: String, kelurahan: String, kecamatan: String, merk: String, diameter: String, stand: String, nomorMeter: String, nomorSegel: String, keterangan: String): Boolean {
-//
-//        // Membandingkan setiap data apakah ada perubahan atau tidak
-//        return jenisPekerjaan != data.jenisPekerjaan ||
-//                pw != data.pw.toString() ||
-//                nomorKL != data.nomorKL ||
-//                name != data.name ||
-//                address != data.address ||
-//                rt != data.rt ||
-//                rw != data.rw ||
-//                kelurahan != data.kelurahan ||
-//                kecamatan != data.kecamatan ||
-//                merk != data.merkMeter ||
-//                diameter != data.diameterMeter ||
-//                stand != data.standMeter ||
-//                nomorMeter != data.nomorMeter ||
-//                nomorSegel != data.nomorSegel ||
-//                keterangan != data.keterangan1
-//    }
 
     private fun setCustomerData(dataCustomer: SambunganData, status: Boolean) {
 
@@ -614,10 +579,18 @@ class PemasanganSambunganActivity : AppCompatActivity() {
         }
     }
 
+    private fun updateButtonText() {
+        binding.btnSimpan.apply {
+            text = if (isDataChanged.value == true) {
+                getString(R.string.simpan)
+            } else {
+                getString(R.string.next)
+            }
+        }
+    }
+
     private fun displayData(dataCustomer: SambunganData, status: Boolean) {
-        Log.d("Sambungan", "displayData: $dataCustomer")
         setAnotherCustomerData(dataCustomer, status)
-        // Mengganti teks tombol Simpan untuk melanjutkan ke halaman berikutnya
 
         if (dataCustomer.jenisPekerjaan == "Pemasangan kembali") {
             binding.btnSimpan.apply {
@@ -632,7 +605,6 @@ class PemasanganSambunganActivity : AppCompatActivity() {
                 }
             }
         } else {
-            Log.d("SELESAI", "displayData: ${isDataChanged.value}")
             binding.btnSimpan.apply {
                 isDataChanged.value = false
                 if (status) {
@@ -645,9 +617,11 @@ class PemasanganSambunganActivity : AppCompatActivity() {
                     // Bila admin, tampilkan dropdown dan dialog konfirmasi bila data berubah (admin = status -> true)
                     // Bila petugas lapangan, langsung lanjut ke halaman berikutnya
 
-                    Log.d("INI SAMBUNGAN", "displayData: ${isDataChanged.value}")
                     if (isDataChanged.value == true) {
-                        showDataChangeDialog(this@PemasanganSambunganActivity, ::saveData)
+                        showDataChangeDialog(
+                            this@PemasanganSambunganActivity,
+                            this@PemasanganSambunganActivity::saveCustomerData
+                        )
                         return@setOnClickListener
                     }
 
@@ -660,10 +634,12 @@ class PemasanganSambunganActivity : AppCompatActivity() {
                         PemasanganGPSActivity.EXTRA_USER_DATA,
                         user
                     )
+
                     intent.putExtra(
                         PemasanganGPSActivity.EXTRA_CUSTOMER_DATA,
                         dataCustomer
                     )
+
                     startActivity(intent)
                     finish()
                 }

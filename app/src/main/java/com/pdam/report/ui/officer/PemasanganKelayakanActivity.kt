@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.MenuItem
 import android.widget.ArrayAdapter
 import androidx.activity.OnBackPressedCallback
@@ -35,6 +34,7 @@ import com.pdam.report.utils.milisToDateTime
 import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.parsingNameImage
 import com.pdam.report.utils.reduceFileImageInBackground
+import com.pdam.report.utils.showBlockingLayer
 import com.pdam.report.utils.showDataChangeDialog
 import com.pdam.report.utils.showDeleteConfirmationDialog
 import com.pdam.report.utils.showLoading
@@ -49,27 +49,29 @@ import kotlin.properties.Delegates
 @Suppress("DEPRECATION")
 class PemasanganKelayakanActivity : AppCompatActivity() {
 
+    // View Binding
+    private val binding by lazy { ActivityPemasanganKelayakanBinding.inflate(layoutInflater) }
+
     // Firebase Database
     private val databaseReference = FirebaseDatabase.getInstance().reference
 
-    // Intent-related
+    // Waktu saat ini didapat dari server
+    private var currentTime by Delegates.notNull<Long>()
+
+    // Intent-related: Data customer
     private val dataCustomer by lazy {
         intent.getParcelableExtra("customer_data") as? SambunganData
     }
 
+    // Intent-related: User (petugas dan/atau admin)
     private val user by lazy {
         intent.getParcelableExtra("user_data") as? UserData
     }
-
-    private var currentTime by Delegates.notNull<Long>()
 
     // Image Handling
     private var imageNumber: Int = 0
     private var firstImageFile: File? = null
     private var secondImageFile: File? = null
-
-    // View Binding
-    private val binding by lazy { ActivityPemasanganKelayakanBinding.inflate(layoutInflater) }
 
     // Memantau perubahan di semua field yang relevan
     private val isDataChanged = MutableLiveData<Boolean>()
@@ -78,31 +80,38 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Log.d("PemasanganKelayakan", "onCreate: $user")
-
         // Mengatur tampilan dan tombol back
         setContentView(binding.root)
         onBackPressedDispatcher.addCallback(
             this@PemasanganKelayakanActivity,
             onBackPressedCallback
         )
+
         // Mengatur style action bar
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setBackgroundDrawable(resources.getDrawable(R.color.tropical_blue))
         }
 
+        // Melakukan operasi asynchronous untuk mendapatkan waktu saat ini dari server
         lifecycleScope.launch {
             currentTime = getNetworkTime()
-            Log.d("PemasanganKelayakan", "onCreate: $currentTime")
-            // Persiapan dropdown, tombol, dan data pengguna
+
+            // Persiapan dropdown, memantau perubahan data, dan tombol-tombol
             setupDropdownField()
             monitorDataChanges()
             setupButtons()
-            setUser()
-        }
 
-        binding.edJenisPekerjaan.isFocusable = false
+            // Menampilkan data pelanggan
+            displayCustomerData()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        // Menghapus callback yang terkait dengan aksi tombol back
+        onBackPressedCallback.remove()
     }
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
@@ -115,22 +124,24 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
         // Menangani tindakan saat item di ActionBar diklik (tombol back di ActionBar)
         if (item.itemId == android.R.id.home) {
             navigatePage(this, MainActivity::class.java, true)
             finish()
             return true
         }
+
         return super.onOptionsItemSelected(item)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        onBackPressedCallback.remove()
-    }
-    private fun setUser() {
+    private fun displayCustomerData() {
         if (dataCustomer != null) {
+
+            // Memeriksa apakah pengguna adalah petugas dan status data pelanggan "Layak"
             val status = user?.team == 0 && dataCustomer?.keterangan1 == "Layak"
+
+            // Menampilkan data pelanggan berdasarkan status penilaian
             displayData(dataCustomer!!, status)
         }
     }
@@ -142,7 +153,7 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
         binding.itemImage2.setOnClickListener { imageNumber = 2; startTakePhoto() }
 
         // Menetapkan tindakan yang dilakukan saat tombol "Simpan" diklik
-        binding.btnSimpan.setOnClickListener { saveData() }
+        binding.btnSimpan.setOnClickListener { saveCustomerData() }
 
         // Menetapkan tindakan yang dilakukan saat tombol "Hapus" diklik
         binding.btnHapus.setOnClickListener {
@@ -231,6 +242,34 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
         })
     }
 
+    private val textWatcher = object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            // Not used
+        }
+
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            isDataChanged.value = isDataChanged()
+            updateButtonText()
+        }
+
+        override fun afterTextChanged(s: Editable?) {
+            // Not used
+        }
+    }
+
+    private fun monitorDataChanges() {
+        binding.dropdownJenisPekerjaan.addTextChangedListener(textWatcher)
+        binding.dropdownPw.addTextChangedListener(textWatcher)
+        binding.edtNomorRegistrasi.addTextChangedListener(textWatcher)
+        binding.edtNamaPelanggan.addTextChangedListener(textWatcher)
+        binding.edtAlamatPelanggan.addTextChangedListener(textWatcher)
+        binding.edtRt.addTextChangedListener(textWatcher)
+        binding.edtRw.addTextChangedListener(textWatcher)
+        binding.edtKelurahan.addTextChangedListener(textWatcher)
+        binding.edtKecamatan.addTextChangedListener(textWatcher)
+        binding.dropdownKeterangan.addTextChangedListener(textWatcher)
+    }
+
     private fun isInputValid(
         jenisPekerjaan: String,
         pw: String,
@@ -256,8 +295,10 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
         return isRequiredValid && isImageFilesValid
     }
 
-    private fun saveData() {
+    private fun saveCustomerData() {
         try {
+
+            // Mendapatkan nilai dari field input
             val jenisPekerjaan = binding.dropdownJenisPekerjaan.text.toString()
             val pw = binding.dropdownPw.text.toString()
             val nomorRegistrasi = binding.edtNomorRegistrasi.text.toString()
@@ -283,11 +324,13 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
                     keterangan
                 )
             ) {
-                showLoading(true, binding.progressBar, binding.btnSimpan, binding.btnHapus)
 
+                // Menampilkan loading indicator dan memblokir layar agar tidak dapat diklik
+                showLoading(true, binding.progressBar, binding.btnSimpan, binding.btnHapus)
+                showBlockingLayer(window, true)
 
                 // Menyimpan data pelanggan
-                saveCustomerData(
+                setValueCustomerData(
                     jenisPekerjaan,
                     pw,
                     nomorRegistrasi,
@@ -301,19 +344,19 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
                 )
 
             } else {
+
                 // Menampilkan pesan jika ada data yang belum diisi
                 showLoading(false, binding.progressBar, binding.btnSimpan, binding.btnHapus)
                 showToast(this@PemasanganKelayakanActivity, R.string.fill_all_data)
-
             }
         } catch (e: Exception) {
+
+            // Menangani pengecualian jika terjadi kesalahan
             e.printStackTrace()
         }
-
     }
 
-
-    private fun saveCustomerData(
+    private fun setValueCustomerData(
         jenisPekerjaan: String,
         pw: String,
         nomorRegistrasi: String,
@@ -325,10 +368,14 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
         kecamatan: String,
         keterangan: String,
     ) {
+
+        // Bagian untuk tim petugas lapangan
         if (user?.team != 0) {
 
-            // Bagian untuk tim petugas lapangan
+            // Mendapatkan referensi Firebase Storage
             val storageReference = FirebaseStorage.getInstance().reference
+
+            // Mendapatkan referensi untuk file gambar dokumentasi
             val dokumentasi1Ref =
                 storageReference.child("dokumentasi/${currentTime}_dokumen.jpg")
             val dokumentasi2Ref =
@@ -336,6 +383,7 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
 
 
             showToast(this@PemasanganKelayakanActivity, R.string.compressing_image)
+
             CoroutineScope(Dispatchers.IO).launch {
                 val _firstImageFile = async { firstImageFile?.reduceFileImageInBackground() }
                 val _secondImageFile = async { secondImageFile?.reduceFileImageInBackground() }
@@ -354,11 +402,14 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
                                 dokumentasi2Ref.downloadUrl.addOnSuccessListener { uri2 ->
                                     val dokumentasi2 = uri2.toString()
 
+                                    // Membuat referensi baru di Firebase Database
                                     val newCustomerRef =
                                         databaseReference.child("listPemasangan").push()
                                     val newCustomerId = newCustomerRef.key
 
                                     if (newCustomerId != null) {
+
+                                        // Data untuk pelanggan baru
                                         val data = mapOf(
                                             "firebaseKey" to newCustomerId,
                                             "currentDate" to currentTime,
@@ -379,6 +430,7 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
                                             "data" to 1,
                                         )
 
+                                        // Menyimpan data pelanggan baru ke Firebase Database
                                         newCustomerRef.setValue(data)
                                             .addOnCompleteListener { task ->
                                                 handleSaveCompletionOrFailure(task)
@@ -389,13 +441,16 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
                     }
                 }
             }
-        } else {
+        }
 
-            // Bagian untuk admin
+        // Bagian untuk admin
+        else {
+
+            // Mendapatkan referensi data pelanggan yang sudah ada
             val customerRef =
                 databaseReference.child("listPemasangan").child(dataCustomer!!.firebaseKey)
 
-            // Update data pelanggan yang sudah ada
+            // Update data pelanggan yang sudah ada di database
             val updatedValues = mapOf(
                 "jenisPekerjaan" to jenisPekerjaan,
                 "pw" to pw.toInt(),
@@ -409,7 +464,7 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
                 "keterangan1" to keterangan,
             )
 
-            // Memperbarui data pelanggan yang sudah ada di database
+            // Memperbarui data pelanggan yang sudah ada di Firebase Database
             customerRef.updateChildren(updatedValues).addOnCompleteListener { task ->
                 handleSaveCompletionOrFailure(task)
             }
@@ -417,15 +472,59 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
     }
 
     private fun handleSaveCompletionOrFailure(task: Task<Void>) {
+
         // Menampilkan atau menyembunyikan loading, menampilkan pesan sukses atau gagal, dan menyelesaikan aktivitas
         showLoading(true, binding.progressBar, binding.btnSimpan, binding.btnHapus)
+
         if (task.isSuccessful) {
             showToast(this, R.string.save_success)
         } else {
             showToast(this, R.string.save_failed)
         }
+
         showLoading(false, binding.progressBar, binding.btnSimpan, binding.btnHapus)
+        showBlockingLayer(window, false)
         finish()
+    }
+
+    private fun isDataChanged(): Boolean {
+
+        // Bandingkan data yang ada dengan data yang sebelumnya.
+        // Jika ada perubahan, kembalikan true; jika tidak, kembalikan false.
+
+        val newData = listOf(
+            binding.dropdownJenisPekerjaan.text.toString(),
+            binding.dropdownPw.text.toString(),
+            binding.edtNomorRegistrasi.text.toString(),
+            binding.edtNamaPelanggan.text.toString(),
+            binding.edtAlamatPelanggan.text.toString(),
+            binding.edtRt.text.toString(),
+            binding.edtRw.text.toString(),
+            binding.edtKelurahan.text.toString(),
+            binding.edtKecamatan.text.toString(),
+            binding.dropdownKeterangan.text.toString()
+        )
+
+        val oldData = listOf(
+            dataCustomer?.jenisPekerjaan ?: "",
+            dataCustomer?.pw.toString(),
+            dataCustomer?.nomorRegistrasi ?: "",
+            dataCustomer?.name ?: "",
+            dataCustomer?.address ?: "",
+            dataCustomer?.rt ?: "",
+            dataCustomer?.rw ?: "",
+            dataCustomer?.kelurahan ?: "",
+            dataCustomer?.kecamatan ?: "",
+            dataCustomer?.keterangan1 ?: ""
+        )
+
+        return newData.zip(oldData).any { (new, old) -> isDifferent(new, old) }
+    }
+
+    private fun isDifferent(newData: String, oldData: String): Boolean {
+
+        // Fungsi ini membandingkan dua string dan mengembalikan true jika berbeda, false jika sama.
+        return newData != oldData
     }
 
     @SuppressLint("SetTextI18n", "UseCompatLoadingForDrawables")
@@ -564,69 +663,6 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
         }
     }
 
-    private fun monitorDataChanges() {
-        binding.dropdownJenisPekerjaan.addTextChangedListener(textWatcher)
-        binding.dropdownPw.addTextChangedListener(textWatcher)
-        binding.edtNomorRegistrasi.addTextChangedListener(textWatcher)
-        binding.edtNamaPelanggan.addTextChangedListener(textWatcher)
-        binding.edtAlamatPelanggan.addTextChangedListener(textWatcher)
-        binding.edtRt.addTextChangedListener(textWatcher)
-        binding.edtRw.addTextChangedListener(textWatcher)
-        binding.edtKelurahan.addTextChangedListener(textWatcher)
-        binding.edtKecamatan.addTextChangedListener(textWatcher)
-        binding.dropdownKeterangan.addTextChangedListener(textWatcher)
-    }
-
-    private val textWatcher = object : TextWatcher {
-        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            // Not used
-        }
-
-        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            isDataChanged.value = isDataChanged()
-            updateButtonText()
-        }
-
-        override fun afterTextChanged(s: Editable?) {
-            // Not used
-        }
-    }
-
-    private fun isDataChanged(): Boolean {
-        // Di sini, Anda perlu membandingkan data yang ada dengan data yang sebelumnya.
-        // Jika ada perubahan, kembalikan true, jika tidak, kembalikan false.
-        return isDifferent(
-            binding.dropdownJenisPekerjaan.text.toString(),
-            dataCustomer?.jenisPekerjaan ?: ""
-        ) ||
-                isDifferent(
-                    binding.dropdownPw.text.toString(),
-                    dataCustomer?.pw.toString()
-                ) ||
-                isDifferent(
-                    binding.edtNomorRegistrasi.text.toString(),
-                    dataCustomer?.nomorRegistrasi ?: ""
-                ) ||
-                isDifferent(binding.edtNamaPelanggan.text.toString(), dataCustomer?.name ?: "") ||
-                isDifferent(
-                    binding.edtAlamatPelanggan.text.toString(),
-                    dataCustomer?.address ?: ""
-                ) ||
-                isDifferent(binding.edtRt.text.toString(), dataCustomer?.rt ?: "") ||
-                isDifferent(binding.edtRw.text.toString(), dataCustomer?.rw ?: "") ||
-                isDifferent(binding.edtKelurahan.text.toString(), dataCustomer?.kelurahan ?: "") ||
-                isDifferent(binding.edtKecamatan.text.toString(), dataCustomer?.kecamatan ?: "") ||
-                isDifferent(
-                    binding.dropdownKeterangan.text.toString(),
-                    dataCustomer?.keterangan1 ?: ""
-                )
-    }
-
-    private fun isDifferent(newData: String, oldData: String): Boolean {
-        // Fungsi ini membandingkan dua string dan mengembalikan true jika berbeda, false jika sama.
-        return newData != oldData
-    }
-
     private fun updateButtonText() {
         binding.btnSimpan.apply {
             text = if (isDataChanged.value == true) {
@@ -650,6 +686,7 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
                 }
             }
         } else {
+
             // Apabila data layak
             binding.btnSimpan.apply {
                 isDataChanged.value = false
@@ -657,26 +694,31 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
                 updateButtonText()
 
                 setOnClickListener {
+
                     // Cek role dari pengguna
                     // Bila admin, tampilkan dropdown dan dialog konfirmasi bila data berubah (admin = status -> true)
                     // Bila petugas lapangan, langsung lanjut ke halaman berikutnya
                     if (isDataChanged.value == true) {
-                        showDataChangeDialog(this@PemasanganKelayakanActivity, ::saveData)
+                        showDataChangeDialog(this@PemasanganKelayakanActivity, ::saveCustomerData)
                         return@setOnClickListener
                     }
+
                     val intent = Intent(
                         this@PemasanganKelayakanActivity,
                         PemasanganSambunganActivity::class.java
                     )
+
                     // Mengirim kunci Firebase ke AddFirstDataActivity
                     intent.putExtra(
                         PemasanganSambunganActivity.EXTRA_USER_DATA,
                         user
                     )
+
                     intent.putExtra(
                         PemasanganSambunganActivity.EXTRA_CUSTOMER_DATA,
                         dataCustomer
                     )
+
                     startActivity(intent)
                     finish()
                 }
