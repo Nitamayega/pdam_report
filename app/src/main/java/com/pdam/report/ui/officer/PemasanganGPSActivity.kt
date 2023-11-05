@@ -370,11 +370,11 @@ class PemasanganGPSActivity : AppCompatActivity() {
             val storageReference = FirebaseStorage.getInstance().reference
 
             val dokumentasi3Ref =
-                storageReference.child("dokumentasi/${currentTime}_dokumentasi3_konstruksi.jpg")
+                storageReference.child("dokumentasi/${currentTime}_konstruksi.jpg")
             val dokumentasi4Ref =
-                storageReference.child("dokumentasi/${currentTime}_dokumentasi4_meter.jpg")
+                storageReference.child("dokumentasi/${currentTime}_meter.jpg")
             val dokumentasi5Ref =
-                storageReference.child("dokumentasi/${currentTime}_dokumentasi5_perspektif.jpg")
+                storageReference.child("dokumentasi/${currentTime}_perspektif.jpg")
 
             showToast(this@PemasanganGPSActivity, R.string.compressing_image)
 
@@ -641,7 +641,7 @@ class PemasanganGPSActivity : AppCompatActivity() {
                 setOnClickListener {
                     supportFragmentManager.beginTransaction()
                         .add(
-                            FullScreenImageDialogFragment(dataCustomer.dokumentasi1),
+                            FullScreenImageDialogFragment(dataCustomer.dokumentasi3),
                             "FullScreenImageDialogFragment"
                         )
                         .addToBackStack(null)
@@ -663,7 +663,7 @@ class PemasanganGPSActivity : AppCompatActivity() {
                 setOnClickListener {
                     supportFragmentManager.beginTransaction()
                         .add(
-                            FullScreenImageDialogFragment(dataCustomer.dokumentasi2),
+                            FullScreenImageDialogFragment(dataCustomer.dokumentasi4),
                             "FullScreenImageDialogFragment"
                         )
                         .addToBackStack(null)
@@ -685,7 +685,7 @@ class PemasanganGPSActivity : AppCompatActivity() {
                 setOnClickListener {
                     supportFragmentManager.beginTransaction()
                         .add(
-                            FullScreenImageDialogFragment(dataCustomer.dokumentasi3),
+                            FullScreenImageDialogFragment(dataCustomer.dokumentasi5),
                             "FullScreenImageDialogFragment"
                         )
                         .addToBackStack(null)

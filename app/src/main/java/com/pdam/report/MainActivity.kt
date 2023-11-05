@@ -13,6 +13,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import com.google.android.material.navigation.NavigationView
@@ -34,19 +35,14 @@ import com.pdam.report.utils.milisToDate
 import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.showDialogDenied
 import com.pdam.report.utils.showToast
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
 
 @Suppress("DEPRECATION")
-class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
+class MainActivity : AppCompatActivity() {
 
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
     private lateinit var toggle: ActionBarDrawerToggle
@@ -178,7 +174,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         toggle.syncState()
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("SimpleDateFormat")
     private fun setupNavigationMenu() {
         binding.navView.setNavigationItemSelectedListener { menuItem ->
@@ -188,30 +183,28 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                 }
 
                 R.id.nav_presence -> {
-                    GlobalScope.launch(Dispatchers.Default) {
-                        val initialDate = async { getInitialDate() }
-                        val currentDate = async { getNetworkTime() }
-
-                        // Tunggu hingga initialDate dan currentDate tersedia.
-                        val initialDateValue = initialDate.await()
-                        val currentDateValue = currentDate.await()
+                    // Menggunakan coroutine agar initialDate dan currentDate diproses terlebih dahulu.
+                    lifecycleScope.launch {
+                        val initialDate = getInitialDate()
+                        val currentDate = getNetworkTime()
                         val lastPresence = milisToDate(user.lastPresence)
 
+
                         val referenceDate =
-                            SimpleDateFormat("dd-MM-yyyy").parse(initialDateValue!!)?.time
+                            SimpleDateFormat("dd-MM-yyyy").parse(initialDate!!)?.time
                         var daysDifference =
-                            ((currentDateValue - referenceDate!!) / (1000L * 60 * 60 * 24) % 5).toInt()
+                            ((currentDate - referenceDate!!) / (1000L * 60 * 60 * 24) % 5).toInt()
                         if (daysDifference == 0) {
                             daysDifference = 5
                         }
 
                         // convert current time to int with format 24 hours
                         val calendar = Calendar.getInstance()
-                        calendar.timeInMillis = currentDateValue
+                        calendar.timeInMillis = currentDate
                         val currentTime = calendar.get(Calendar.HOUR_OF_DAY)
 
-                        if (currentDateValue.toInt() != 0) {
-                            if (lastPresence == milisToDate(currentDateValue)) {
+                        if (currentDate.toInt() != 0) {
+                            if (lastPresence == milisToDate(currentDate)) {
                                 withContext(Dispatchers.Main) {
                                     showToast(this@MainActivity, R.string.presence_already_done)
                                 }
