@@ -303,12 +303,12 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
-            android:id="@+id/dokumentasiDokumen"
+            android:id="@+id/dokumentasiSebelum"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
-            android:text="@string/dokumentasiDokumen"
+            android:text="@string/dokumentasiSebelumCabut"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="@+id/ed_keterangan"
             app:layout_constraintTop_toBottomOf="@+id/ed_keterangan" />
@@ -329,7 +329,7 @@
             android:textCursorDrawable="@null"
             app:layout_constraintEnd_toEndOf="@+id/ed_keterangan"
             app:layout_constraintStart_toStartOf="@+id/ed_keterangan"
-            app:layout_constraintTop_toBottomOf="@+id/dokumentasiDokumen" />
+            app:layout_constraintTop_toBottomOf="@+id/dokumentasiSebelum" />
 
         <ImageView
             android:id="@+id/image_view_1"
@@ -343,6 +343,46 @@
             app:layout_constraintTop_toTopOf="@id/item_image_1" />
 
         <TextView
+            android:id="@+id/dokumentasiSesudah"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/dokumentasiSesudahCabut"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@+id/ed_keterangan"
+            app:layout_constraintTop_toBottomOf="@+id/item_image_1" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/item_image_2"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/field"
+            android:clickable="true"
+            android:drawablePadding="5dp"
+            android:focusable="true"
+            android:gravity="center"
+            android:padding="5dp"
+            android:paddingStart="50dp"
+            android:text="@string/take_photo"
+            android:textCursorDrawable="@null"
+            app:layout_constraintEnd_toEndOf="@+id/ed_keterangan"
+            app:layout_constraintStart_toStartOf="@+id/ed_keterangan"
+            app:layout_constraintTop_toBottomOf="@+id/dokumentasiSesudah" />
+
+        <ImageView
+            android:id="@+id/image_view_2"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="8dp"
+            android:paddingVertical="8dp"
+            android:src="@drawable/preview_upload_photo"
+            app:layout_constraintBottom_toBottomOf="@id/item_image_2"
+            app:layout_constraintStart_toStartOf="@id/item_image_2"
+            app:layout_constraintTop_toTopOf="@id/item_image_2" />
+
+        <TextView
             android:id="@+id/updatedby"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -350,8 +390,8 @@
             android:gravity="end"
             android:text="Added By Kepala Suku"
             android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="@+id/item_image_1"
-            app:layout_constraintTop_toBottomOf="@+id/item_image_1"
+            app:layout_constraintEnd_toEndOf="@+id/item_image_2"
+            app:layout_constraintTop_toBottomOf="@+id/item_image_2"
             tools:visibility="visible" />
 
         <com.google.android.material.button.MaterialButton

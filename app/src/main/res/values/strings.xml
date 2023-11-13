@@ -58,6 +58,8 @@
     <string name="dokumentasiKonstruksi">Dokumentasi Konstruksi</string>
     <string name="dokumentasiMeter">Dokumentasi Nomor dan Segel Meter</string>
     <string name="dokumentasiPerspektif">Dokumentasi Perspektif Wilayah</string>
+    <string name="dokumentasiSebelumCabut">Dokumentasi Sebelum Cabut</string>
+    <string name="dokumentasiSesudahCabut">Dokumentasi Sesudah Cabut</string>
 
     <string name="meter">Meter</string>
     <string name="merk">Merk</string>

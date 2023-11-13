@@ -251,7 +251,7 @@ class OfficerPresenceActivity : AppCompatActivity() {
                                         // Menentukan referensi untuk penyimpanan gambar
                                         val currentTime = getNetworkTime()
                                         val photoRef =
-                                            storageReference.child("images/presence/${currentTime}_${userData.username}.jpg")
+                                            storageReference.child("presence/${currentTime}_${userData.username}.jpg")
                                         // Mengunggah gambar ke Firebase Storage
                                         photoRef.putFile(Uri.fromFile(getFile))
                                             .addOnSuccessListener { uploadTask ->

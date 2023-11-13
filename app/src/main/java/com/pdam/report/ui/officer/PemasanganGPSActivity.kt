@@ -370,11 +370,11 @@ class PemasanganGPSActivity : AppCompatActivity() {
             val storageReference = FirebaseStorage.getInstance().reference
 
             val dokumentasi3Ref =
-                storageReference.child("dokumentasi/${currentTime}_konstruksi.jpg")
+                storageReference.child("dokumentasi/${currentTime}_konstruksi_${user?.username}.jpg")
             val dokumentasi4Ref =
-                storageReference.child("dokumentasi/${currentTime}_meter.jpg")
+                storageReference.child("dokumentasi/${currentTime}_meter_${user?.username}.jpg")
             val dokumentasi5Ref =
-                storageReference.child("dokumentasi/${currentTime}_perspektif.jpg")
+                storageReference.child("dokumentasi/${currentTime}_perspektif_${user?.username}.jpg")
 
             showToast(this@PemasanganGPSActivity, R.string.compressing_image)
 

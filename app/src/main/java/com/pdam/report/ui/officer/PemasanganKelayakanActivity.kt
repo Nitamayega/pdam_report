@@ -377,9 +377,9 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
 
             // Mendapatkan referensi untuk file gambar dokumentasi
             val dokumentasi1Ref =
-                storageReference.child("dokumentasi/${currentTime}_dokumen.jpg")
+                storageReference.child("dokumentasi/${currentTime}_dokumen_${user?.username}.jpg")
             val dokumentasi2Ref =
-                storageReference.child("dokumentasi/${currentTime}_kondisi.jpg")
+                storageReference.child("dokumentasi/${currentTime}_kondisi_${user?.username}.jpg")
 
 
             showToast(this@PemasanganKelayakanActivity, R.string.compressing_image)

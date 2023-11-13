@@ -74,5 +74,6 @@ data class PemutusanData(
     val kecamatan: String = "",
     val nomorMeter: String = "",
     val keterangan: String = "",
-    val dokumentasi: String = "",
+    val dokumentasi1 : String = "",
+    val dokumentasi2 : String = "",
 )

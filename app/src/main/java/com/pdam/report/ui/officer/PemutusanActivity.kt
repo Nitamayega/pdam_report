@@ -29,6 +29,7 @@ import com.pdam.report.databinding.ActivityPemutusanBinding
 import com.pdam.report.utils.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.properties.Delegates
@@ -54,7 +55,9 @@ class PemutusanActivity : AppCompatActivity() {
     private var user: UserData? = null
 
     // Image Handling
-    private var imageFile: File? = null
+    private var imageNumber: Int = 0
+    private var firstImageFile: File? = null
+    private var secondImageFile: File? = null
 
     @SuppressLint("UseCompatLoadingForDrawables")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -113,7 +116,8 @@ class PemutusanActivity : AppCompatActivity() {
     private fun setupButtons() {
 
         // Menetapkan tindakan yang diambil saat item gambar diklik
-        binding.itemImage1.setOnClickListener { startTakePhoto() }
+        binding.itemImage1.setOnClickListener { imageNumber = 1; startTakePhoto() }
+        binding.itemImage2.setOnClickListener { imageNumber = 2; startTakePhoto() }
 
         // Menetapkan tindakan yang dilakukan saat tombol "Simpan" diklik
         binding.btnSimpan.setOnClickListener { saveCustomerData() }
@@ -153,7 +157,10 @@ class PemutusanActivity : AppCompatActivity() {
 
             // Mereset teks pada itemImage1 menjadi default
             itemImage1.text = getString(R.string.take_photo)
-            imageFile = null
+            firstImageFile = null
+            itemImage2.text = getString(R.string.take_photo)
+            secondImageFile = null
+
         }
     }
 
@@ -205,7 +212,7 @@ class PemutusanActivity : AppCompatActivity() {
             jenisPekerjaan.isNotEmpty() && pw.isNotEmpty() && nomorKL.isNotEmpty() && name.isNotEmpty() && address.isNotEmpty() && rt.isNotEmpty() && rw.isNotEmpty() && kelurahan.isNotEmpty() && kecamatan.isNotEmpty() && nomorMeter.isNotEmpty() && keterangan.isNotEmpty()
 
         // Memeriksa validitas file gambar jika pengguna adalah petugas lapangan
-        val isImageFilesValid = user?.team == 0 || imageFile != null
+        val isImageFilesValid = user?.team == 0 || (firstImageFile != null && secondImageFile != null)
 
         // Return true jika semua validasi terpenuhi
         return isRequiredValid && isImageFilesValid
@@ -288,43 +295,63 @@ class PemutusanActivity : AppCompatActivity() {
         if (user?.team != 0) {
             val storageReference = FirebaseStorage.getInstance().reference
             val dokumentasi1Ref =
-                storageReference.child("dokumentasi/${currentTime}_dokumen.jpg")
+                storageReference.child("dokumentasi/${currentTime}_sebelumcabut_${user?.username}.jpg")
+            val dokumentasi2Ref =
+                storageReference.child("dokumentasi/${currentTime}_setelahcabut_${user?.username}.jpg")
 
             showToast(this@PemutusanActivity, R.string.compressing_image)
+
             CoroutineScope(Dispatchers.IO).launch {
-                val imageFile = imageFile?.reduceFileImageInBackground()
+                val _firstImageFile = async { firstImageFile?.reduceFileImageInBackground() }
+                val _secondImageFile = async { secondImageFile?.reduceFileImageInBackground() }
+
+                val firstImageFile = _firstImageFile.await()
+                val secondImageFile = _secondImageFile.await()
 
                 // Upload image 1
-                dokumentasi1Ref.putFile(Uri.fromFile(imageFile)).addOnSuccessListener {
+                dokumentasi1Ref.putFile(Uri.fromFile(firstImageFile)).addOnSuccessListener {
                     dokumentasi1Ref.downloadUrl.addOnSuccessListener { uri1 ->
                         val dokumentasi1 = uri1.toString()
-                        val newCustomerRef = databaseReference.child("listPemutusan").push()
-                        val newCustomerId = newCustomerRef.key
 
-                        if (newCustomerId != null) {
-                            val data = mapOf(
-                                "firebaseKey" to newCustomerId,
-                                "currentDate" to currentTime,
-                                "petugas" to user?.username,
-                                "dailyTeam" to user?.dailyTeam,
-                                "jenisPekerjaan" to jenisPekerjaan,
-                                "pw" to pw.toInt(),
-                                "nomorKL" to nomorKL,
-                                "name" to name,
-                                "address" to address,
-                                "rt" to rt,
-                                "rw" to rw,
-                                "kelurahan" to kelurahan,
-                                "kecamatan" to kecamatan,
-                                "nomorMeter" to nomorMeter,
-                                "keterangan" to keterangan,
-                                "dokumentasi" to dokumentasi1
-                            )
+                        // Upload image 2
+                        dokumentasi2Ref.putFile(Uri.fromFile(secondImageFile))
+                            .addOnSuccessListener {
+                                dokumentasi2Ref.downloadUrl.addOnSuccessListener { uri2 ->
+                                    val dokumentasi2 = uri2.toString()
 
-                            newCustomerRef.setValue(data).addOnCompleteListener { task ->
-                                handleSaveCompletionOrFailure(task)
+                                    // Membuat referensi baru di Firebase Database
+                                    val newCustomerRef =
+                                        databaseReference.child("listPemutusan").push()
+                                    val newCustomerId = newCustomerRef.key
+
+                                    if (newCustomerId != null) {
+                                        val data = mapOf(
+                                            "firebaseKey" to newCustomerId,
+                                            "currentDate" to currentTime,
+                                            "petugas" to user?.username,
+                                            "dailyTeam" to user?.dailyTeam,
+                                            "jenisPekerjaan" to jenisPekerjaan,
+                                            "pw" to pw.toInt(),
+                                            "nomorKL" to nomorKL,
+                                            "name" to name,
+                                            "address" to address,
+                                            "rt" to rt,
+                                            "rw" to rw,
+                                            "kelurahan" to kelurahan,
+                                            "kecamatan" to kecamatan,
+                                            "nomorMeter" to nomorMeter,
+                                            "keterangan" to keterangan,
+                                            "dokumentasi1" to dokumentasi1,
+                                            "dokumentasi2" to dokumentasi2
+                                        )
+
+                                        newCustomerRef.setValue(data)
+                                            .addOnCompleteListener { task ->
+                                                handleSaveCompletionOrFailure(task)
+                                            }
+                                    }
+                                }
                             }
-                        }
                     }
                 }
             }
@@ -536,12 +563,12 @@ class PemutusanActivity : AppCompatActivity() {
             }
 
             itemImage1.apply {
-                text = parsingNameImage(dataCustomer.dokumentasi)
+                text = parsingNameImage(dataCustomer.dokumentasi1)
                 background = resources.getDrawable(R.drawable.field_disable)
                 setOnClickListener {
                     supportFragmentManager.beginTransaction()
                         .add(
-                            FullScreenImageDialogFragment(dataCustomer.dokumentasi),
+                            FullScreenImageDialogFragment(dataCustomer.dokumentasi1),
                             "FullScreenImageDialogFragment"
                         )
                         .addToBackStack(null)
@@ -551,7 +578,29 @@ class PemutusanActivity : AppCompatActivity() {
 
             binding.imageView1.apply {
                 Glide.with(this@PemutusanActivity)
-                    .load(dataCustomer.dokumentasi)
+                    .load(dataCustomer.dokumentasi1)
+                    .placeholder(R.drawable.preview_upload_photo)
+                    .sizeMultiplier(0.3f)
+                    .into(this)
+            }
+
+            itemImage2.apply {
+                text = parsingNameImage(dataCustomer.dokumentasi2)
+                background = resources.getDrawable(R.drawable.field_disable)
+                setOnClickListener {
+                    supportFragmentManager.beginTransaction()
+                        .add(
+                            FullScreenImageDialogFragment(dataCustomer.dokumentasi2),
+                            "FullScreenImageDialogFragment"
+                        )
+                        .addToBackStack(null)
+                        .commit()
+                }
+            }
+
+            binding.imageView2.apply {
+                Glide.with(this@PemutusanActivity)
+                    .load(dataCustomer.dokumentasi2)
                     .placeholder(R.drawable.preview_upload_photo)
                     .sizeMultiplier(0.3f)
                     .into(this)
@@ -607,21 +656,47 @@ class PemutusanActivity : AppCompatActivity() {
             // After successfully capturing an image, assign it to the appropriate file
             val myFile = File(currentPhotoPath)
             myFile.let { file ->
-                imageFile = file
-                binding.itemImage1.text = currentTime.toString() + "_dokumentasi.jpg"
+                if (imageNumber == 1) {
+                    firstImageFile = file
+                    binding.itemImage1.text =
+                        currentTime.toString() + "_sebelum.jpg"
 
-                Glide.with(this@PemutusanActivity)
-                    .load(imageFile)
-                    .into(binding.imageView1)
+                    // Menampilkan foto pertama di ImageView menggunakan Glide
+                    Glide.with(this@PemutusanActivity)
+                        .load(firstImageFile)
+                        .into(binding.imageView1)
 
-                binding.imageView1.setOnClickListener {
-                    supportFragmentManager.beginTransaction()
-                        .add(
-                            FullScreenImageDialogFragment(imageFile.toString()),
-                            "FullScreenImageDialogFragment"
-                        )
-                        .addToBackStack(null)
-                        .commit()
+                    // Menambahkan listener untuk melihat foto pertama dalam tampilan layar penuh
+                    binding.imageView1.setOnClickListener {
+                        supportFragmentManager.beginTransaction()
+                            .add(
+                                FullScreenImageDialogFragment(firstImageFile.toString()),
+                                "FullScreenImageDialogFragment"
+                            )
+                            .addToBackStack(null)
+                            .commit()
+                    }
+
+                } else if (imageNumber == 2) {
+                    secondImageFile = file
+                    binding.itemImage2.text =
+                        currentTime.toString() + "_sesudah.jpg"
+
+                    // Menampilkan foto kedua di ImageView menggunakan Glide
+                    Glide.with(this@PemutusanActivity)
+                        .load(secondImageFile)
+                        .into(binding.imageView2)
+
+                    // Menambahkan listener untuk melihat foto kedua dalam tampilan layar penuh
+                    binding.imageView2.setOnClickListener {
+                        supportFragmentManager.beginTransaction()
+                            .add(
+                                FullScreenImageDialogFragment(secondImageFile.toString()),
+                                "FullScreenImageDialogFragment"
+                            )
+                            .addToBackStack(null)
+                            .commit()
+                    }
                 }
             }
         }
