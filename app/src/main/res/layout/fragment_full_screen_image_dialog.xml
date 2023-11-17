@@ -15,6 +15,15 @@
         android:scaleType="fitCenter" />
 
     <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:src="@drawable/ic_circle"
+        android:layout_gravity="top|start"
+        android:alpha="0.3"
+        android:layout_margin="13dp"
+        tools:ignore="ContentDescription" />
+    <ImageView
         android:id="@+id/btn_back"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -22,6 +31,7 @@
         android:layout_margin="16dp"
         android:background="@drawable/ic_back"
         tools:ignore="ContentDescription" />
+
 
 
 </FrameLayout>

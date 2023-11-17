@@ -11,6 +11,7 @@ import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
@@ -34,6 +35,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.properties.Delegates
 
+@Suppress("DEPRECATION")
 class PemutusanActivity : AppCompatActivity() {
 
     // View Binding
@@ -116,8 +118,49 @@ class PemutusanActivity : AppCompatActivity() {
     private fun setupButtons() {
 
         // Menetapkan tindakan yang diambil saat item gambar diklik
-        binding.itemImage1.setOnClickListener { imageNumber = 1; startTakePhoto() }
-        binding.itemImage2.setOnClickListener { imageNumber = 2; startTakePhoto() }
+        binding.itemImage1.setOnClickListener {
+            imageNumber = 1
+
+            // Menampilkan dialog untuk memilih sumber gambar
+            AlertDialog.Builder(this).apply {
+                setTitle("Pilih Sumber Gambar")
+                setItems(arrayOf("Kamera", "Galeri")) { dialog, which ->
+                    when (which) {
+                        0 -> {
+                            startTakePhoto()
+                        }
+
+                        1 -> {
+                            startGallery()
+                        }
+                    }
+                    dialog.dismiss()
+                }
+                setNegativeButton(R.string.cancel, null)
+            }.create().show()
+        }
+
+        binding.itemImage2.setOnClickListener {
+            imageNumber = 2
+
+            // Menampilkan dialog untuk memilih sumber gambar
+            AlertDialog.Builder(this).apply {
+                setTitle("Pilih Sumber Gambar")
+                setItems(arrayOf("Kamera", "Galeri")) { dialog, which ->
+                    when (which) {
+                        0 -> {
+                            startTakePhoto()
+                        }
+
+                        1 -> {
+                            startGallery()
+                        }
+                    }
+                    dialog.dismiss()
+                }
+                setNegativeButton(R.string.cancel, null)
+            }.create().show()
+        }
 
         // Menetapkan tindakan yang dilakukan saat tombol "Simpan" diklik
         binding.btnSimpan.setOnClickListener { saveCustomerData() }
@@ -558,7 +601,7 @@ class PemutusanActivity : AppCompatActivity() {
 
             binding.btnSimpan.text = getString(R.string.finish)
             binding.btnSimpan.setOnClickListener {
-                navigatePage(this@PemutusanActivity, MainActivity::class.java)
+                navigatePage(this@PemutusanActivity, MainActivity::class.java, true)
                 finish()
             }
 
@@ -688,6 +731,72 @@ class PemutusanActivity : AppCompatActivity() {
                         .into(binding.imageView2)
 
                     // Menambahkan listener untuk melihat foto kedua dalam tampilan layar penuh
+                    binding.imageView2.setOnClickListener {
+                        supportFragmentManager.beginTransaction()
+                            .add(
+                                FullScreenImageDialogFragment(secondImageFile.toString()),
+                                "FullScreenImageDialogFragment"
+                            )
+                            .addToBackStack(null)
+                            .commit()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun startGallery() {
+
+        // Membuat intent untuk mendapatkan gambar dari galeri
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        intent.type = "image/*"
+
+        // Memulai intent pemilihan galeri
+        launcherIntentGallery.launch(intent)
+    }
+
+    @SuppressLint("SetTextI18n")
+    private val launcherIntentGallery = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+
+            // Mendapatkan URI gambar yang dipilih
+            val selectedImg = result.data?.data as Uri
+            selectedImg.let { uri ->
+
+                // Mengonversi URI ke file dan menetapkannya ke thirdImageFile
+                val myFile = uriToFile(uri, this@PemutusanActivity)
+
+                if (imageNumber == 1) {
+                    firstImageFile = myFile
+
+                    // Menetapkan teks pada itemImage3 yang menunjukkan gambar yang dipilih
+                    binding.itemImage1.text = currentTime.toString() + "_sebelum.jpg"
+                    Glide.with(this@PemutusanActivity)
+                        .load(firstImageFile)
+                        .into(binding.imageView1)
+
+                    // Menambahkan listener untuk melihat foto ketiga dalam tampilan layar penuh
+                    binding.imageView1.setOnClickListener {
+                        supportFragmentManager.beginTransaction()
+                            .add(
+                                FullScreenImageDialogFragment(firstImageFile.toString()),
+                                "FullScreenImageDialogFragment"
+                            )
+                            .addToBackStack(null)
+                            .commit()
+                    }
+                } else {
+                    secondImageFile = myFile
+
+                    // Menetapkan teks pada itemImage3 yang menunjukkan gambar yang dipilih
+                    binding.itemImage2.text = currentTime.toString() + "_sesudah.jpg"
+                    Glide.with(this@PemutusanActivity)
+                        .load(secondImageFile)
+                        .into(binding.imageView2)
+
+                    // Menambahkan listener untuk melihat foto ketiga dalam tampilan layar penuh
                     binding.imageView2.setOnClickListener {
                         supportFragmentManager.beginTransaction()
                             .add(

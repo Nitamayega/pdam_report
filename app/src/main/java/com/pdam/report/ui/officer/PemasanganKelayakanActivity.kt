@@ -116,7 +116,6 @@ class PemasanganKelayakanActivity : AppCompatActivity() {
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-
             // Menangani tombol back: Navigasi ke MainActivity dan menyelesaikan Activity saat ini
             navigatePage(this@PemasanganKelayakanActivity, MainActivity::class.java, true)
             finish()

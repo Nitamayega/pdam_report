@@ -216,7 +216,7 @@ class MainActivity : AppCompatActivity() {
                                         AdminPresenceActivity::class.java
                                     )
 
-                                    user.team == daysDifference && currentTime in 19..23 -> Intent(
+                                    user.team == daysDifference && currentTime in 19..23 -> Intent( //jangan lupa ganti lagi
                                         this@MainActivity,
                                         OfficerPresenceActivity::class.java
                                     )

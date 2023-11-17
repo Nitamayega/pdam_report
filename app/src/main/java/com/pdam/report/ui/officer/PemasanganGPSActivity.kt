@@ -132,7 +132,7 @@ class PemasanganGPSActivity : AppCompatActivity() {
         binding.itemImage1.setOnClickListener { imageNumber = 1; startTakePhoto() }
         binding.itemImage2.setOnClickListener { imageNumber = 2; startTakePhoto() }
         binding.itemImage3.setOnClickListener {
-            imageNumber = 3;
+            imageNumber = 3
 
             // Menampilkan dialog untuk memilih sumber gambar
             AlertDialog.Builder(this).apply {
@@ -866,6 +866,17 @@ class PemasanganGPSActivity : AppCompatActivity() {
                 Glide.with(this@PemasanganGPSActivity)
                     .load(thirdImageFile)
                     .into(binding.imageView3)
+
+                // Menambahkan listener untuk melihat foto ketiga dalam tampilan layar penuh
+                binding.imageView3.setOnClickListener {
+                    supportFragmentManager.beginTransaction()
+                        .add(
+                            FullScreenImageDialogFragment(thirdImageFile.toString()),
+                            "FullScreenImageDialogFragment"
+                        )
+                        .addToBackStack(null)
+                        .commit()
+                }
             }
         }
     }

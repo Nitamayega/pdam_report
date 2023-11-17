@@ -26,6 +26,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.65"
             tools:visibility="visible" />
 
         <LinearLayout
@@ -432,6 +433,7 @@
             android:paddingStart="50dp"
             android:text="@string/take_photo"
             android:textCursorDrawable="@null"
+            android:textSize="12sp"
             app:layout_constraintEnd_toEndOf="@+id/ed_nomor_segel"
             app:layout_constraintStart_toStartOf="@+id/ed_nomor_segel"
             app:layout_constraintTop_toBottomOf="@+id/dokumentasiKonstruksi" />
@@ -472,6 +474,7 @@
             android:paddingStart="50dp"
             android:text="@string/take_photo"
             android:textCursorDrawable="@null"
+            android:textSize="12sp"
             app:layout_constraintEnd_toEndOf="@+id/ed_nomor_segel"
             app:layout_constraintStart_toStartOf="@+id/ed_nomor_segel"
             app:layout_constraintTop_toBottomOf="@+id/dokumentasiMeter" />
@@ -512,6 +515,7 @@
             android:paddingStart="50dp"
             android:text="@string/take_photo"
             android:textCursorDrawable="@null"
+            android:textSize="12sp"
             app:layout_constraintEnd_toEndOf="@+id/ed_nomor_segel"
             app:layout_constraintStart_toStartOf="@+id/ed_nomor_segel"
             app:layout_constraintTop_toBottomOf="@+id/dokumentasiPerspektif" />
