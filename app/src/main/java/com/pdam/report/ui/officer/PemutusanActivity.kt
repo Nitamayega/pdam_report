@@ -142,24 +142,7 @@ class PemutusanActivity : AppCompatActivity() {
 
         binding.itemImage2.setOnClickListener {
             imageNumber = 2
-
-            // Menampilkan dialog untuk memilih sumber gambar
-            AlertDialog.Builder(this).apply {
-                setTitle("Pilih Sumber Gambar")
-                setItems(arrayOf("Kamera", "Galeri")) { dialog, which ->
-                    when (which) {
-                        0 -> {
-                            startTakePhoto()
-                        }
-
-                        1 -> {
-                            startGallery()
-                        }
-                    }
-                    dialog.dismiss()
-                }
-                setNegativeButton(R.string.cancel, null)
-            }.create().show()
+            startTakePhoto()
         }
 
         // Menetapkan tindakan yang dilakukan saat tombol "Simpan" diklik
