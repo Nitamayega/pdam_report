@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">PDAM Report</string>
 
     <string name="permission_denied">Permission Denied</string>
@@ -129,10 +129,10 @@
     </string-array>
 
     <string-array name="type_of_diameter">
-        <item>1/2</item>
-        <item>3/4</item>
+        <item tools:ignore="TypographyFractions">1/2</item>
+        <item tools:ignore="TypographyFractions">3/4</item>
         <item>1</item>
-        <item>1 1/2</item>
+        <item tools:ignore="TypographyFractions">1 1/2</item>
         <item>2</item>
         <item>3</item>
         <item>4</item>
@@ -172,6 +172,8 @@
     <string name="compressing_image_success">Foto telah berhasil diproses. Silakan tunggu proses unggah.</string>
     <string name="compressing_image_failed">Memproses foto gagal</string>
     <string name="unavailable_network">Koneksi internet tidak tersedia</string>
+    <string name="daftar_presensi">Daftar Presensi</string>
+    <string name="detail_presensi">Detail Presensi</string>
 
 
 </resources>

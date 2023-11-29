@@ -40,7 +40,7 @@ class DetailPresenceActivity : AppCompatActivity(), MapListener {
     }
 
 
-    @SuppressLint("SetTextI18n")
+    @SuppressLint("SetTextI18n", "UseCompatLoadingForDrawables")
     @Suppress("DEPRECATION")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,8 +51,11 @@ class DetailPresenceActivity : AppCompatActivity(), MapListener {
         )
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setBackgroundDrawable(resources.getDrawable(R.color.tropical_blue))
+        supportActionBar?.apply {
+            title = getString(R.string.detail_presensi)
+            setDisplayHomeAsUpEnabled(true)
+            setBackgroundDrawable(resources.getDrawable(R.color.tropical_blue))
+        }
 
         // Mengambil data tambahan yang dikirim melalui Intent
         val presence = intent.getParcelableExtra<PresenceData>(EXTRA_DATA) as PresenceData

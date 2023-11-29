@@ -1,5 +1,6 @@
 package com.pdam.report.ui.admin
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.activity.OnBackPressedCallback
@@ -16,6 +17,7 @@ import com.pdam.report.databinding.ActivityAdminPresenceBinding
 import com.pdam.report.utils.navigatePage
 import com.pdam.report.utils.setRecyclerViewVisibility
 
+@Suppress("DEPRECATION")
 class AdminPresenceActivity : AppCompatActivity() {
     private val binding by lazy { ActivityAdminPresenceBinding.inflate(layoutInflater) }
     private val adapter by lazy { AdminPresenceAdapter(ArrayList(), this@AdminPresenceActivity) }
@@ -28,6 +30,7 @@ class AdminPresenceActivity : AppCompatActivity() {
     }
 
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -35,6 +38,7 @@ class AdminPresenceActivity : AppCompatActivity() {
 
         // Mengatur style action bar
         supportActionBar?.apply {
+            title = getString(R.string.daftar_presensi)
             setDisplayHomeAsUpEnabled(true)
             setBackgroundDrawable(resources.getDrawable(R.color.tropical_blue))
         }
