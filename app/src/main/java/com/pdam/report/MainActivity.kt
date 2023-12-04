@@ -33,6 +33,7 @@ import com.pdam.report.utils.getInitialDate
 import com.pdam.report.utils.getNetworkTime
 import com.pdam.report.utils.milisToDate
 import com.pdam.report.utils.navigatePage
+import com.pdam.report.utils.showBlockingLayer
 import com.pdam.report.utils.showDialogDenied
 import com.pdam.report.utils.showToast
 import kotlinx.coroutines.Dispatchers
@@ -183,65 +184,71 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 R.id.nav_presence -> {
+                    showBlockingLayer(window, true)
                     // Menggunakan coroutine agar initialDate dan currentDate diproses terlebih dahulu.
                     lifecycleScope.launch {
-                        val initialDate = getInitialDate()
-                        val currentDate = getNetworkTime()
-                        val lastPresence = milisToDate(user.lastPresence)
+                        try {
+                            val initialDate = getInitialDate()
+                            val currentDateMillis = getNetworkTime()
+                            val lastPresence = milisToDate(user.lastPresence)
 
+                            val referenceDate =
+                                SimpleDateFormat("dd-MM-yyyy").parse(initialDate!!)?.time
+                            var daysDifference =
+                                ((currentDateMillis - referenceDate!!) / (1000L * 60 * 60 * 24) % 5).toInt()
+                            if (daysDifference == 0) {
+                                daysDifference = 5
+                            }
 
-                        val referenceDate =
-                            SimpleDateFormat("dd-MM-yyyy").parse(initialDate!!)?.time
-                        var daysDifference =
-                            ((currentDate - referenceDate!!) / (1000L * 60 * 60 * 24) % 5).toInt()
-                        if (daysDifference == 0) {
-                            daysDifference = 5
-                        }
+                            // convert current time to int with format 24 hours
+                            val calendar = Calendar.getInstance()
+                            calendar.timeInMillis = currentDateMillis
+                            val currentTime = calendar.get(Calendar.HOUR_OF_DAY)
 
-                        // convert current time to int with format 24 hours
-                        val calendar = Calendar.getInstance()
-                        calendar.timeInMillis = currentDate
-                        val currentTime = calendar.get(Calendar.HOUR_OF_DAY)
+                            if (currentDateMillis.toInt() != 0) {
+                                if (lastPresence == milisToDate(currentDateMillis)) {
+                                    withContext(Dispatchers.Main) {
+                                        showToast(this@MainActivity, R.string.presence_already_done)
+                                        showBlockingLayer(window, false)
+                                    }
+                                } else {
+                                    val moveIntent = when {
+                                        user.team == 0 -> Intent(
+                                            this@MainActivity,
+                                            AdminPresenceActivity::class.java
+                                        )
 
-                        if (currentDate.toInt() != 0) {
-                            if (lastPresence == milisToDate(currentDate)) {
-                                withContext(Dispatchers.Main) {
-                                    showToast(this@MainActivity, R.string.presence_already_done)
-                                }
-                                return@launch
-                            } else {
-                                val moveIntent = when {
-                                    user.team == 0 -> Intent(
-                                        this@MainActivity,
-                                        AdminPresenceActivity::class.java
-                                    )
+                                        user.team == daysDifference && currentTime in 19..23 -> Intent(
+                                            this@MainActivity,
+                                            OfficerPresenceActivity::class.java
+                                        )
 
-                                    user.team == daysDifference && currentTime in 19..23 -> Intent( //jangan lupa ganti lagi
-                                        this@MainActivity,
-                                        OfficerPresenceActivity::class.java
-                                    )
-
-                                    else -> {
-                                        withContext(Dispatchers.Main) {
-                                            showToast(this@MainActivity, R.string.presence_denied)
+                                        else -> {
+                                            withContext(Dispatchers.Main) {
+                                                showToast(this@MainActivity, R.string.presence_denied)
+                                                showBlockingLayer(window, false)
+                                            }
+                                            return@launch
                                         }
-                                        return@launch
+                                    }
+
+                                    withContext(Dispatchers.Main) {
+                                        startActivity(moveIntent)
                                     }
                                 }
-
+                            } else {
                                 withContext(Dispatchers.Main) {
-                                    startActivity(moveIntent)
+                                    showToast(this@MainActivity, R.string.unavailable_network)
+                                    showBlockingLayer(window, false)
                                 }
                             }
-                        } else {
-                            withContext(Dispatchers.Main) {
-                                showToast(this@MainActivity, R.string.unavailable_network)
-                            }
+                        } catch (e: Exception) {
+                            // Tangani eksepsi di sini, misalnya, log atau tampilkan pesan kesalahan
+                            e.printStackTrace()
                         }
                     }
                     return@setNavigationItemSelectedListener false
                 }
-
 
                 R.id.nav_logout -> {
                     showToast(applicationContext, R.string.logged_out)
@@ -250,9 +257,10 @@ class MainActivity : AppCompatActivity() {
                     finish()
                 }
             }
-            false
+        false
         }
     }
+
 
     private fun setupNavigationHeader() {
         val navView: NavigationView = binding.navView
@@ -264,9 +272,11 @@ class MainActivity : AppCompatActivity() {
         val displayName = user.username
         uname.text = displayName
         role.text = resources.getStringArray(R.array.roles)[if (user.team == 0) 1 else 0]
+        val initialUrl = "https://ui-avatars.com/api/?name=$displayName&background=1C6996&color=fff"
+
 
         Glide.with(this@MainActivity)
-            .load("https://ui-avatars.com/api/?name=$displayName&background=1C6996&color=fff")
+            .load(initialUrl)
             .placeholder(R.drawable.logo1)
             .optionalFitCenter()
             .into(photo)
